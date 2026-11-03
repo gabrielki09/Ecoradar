@@ -1,206 +1,1017 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>EcoRadar — Descarte consciente</title>
-<style>
-:root{--g:#1f9d55;--gd:#0f3d2a;--bg:#f6f9f7;--c:#fff;--t:#1d2b24;--m:#5b6b63;--b:#dbe6df;--w:#b45309;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--g:#3ecf80;--gd:#d7f3e2;--bg:#0e1712;--c:#16221b;--t:#e6f0ea;--m:#9db1a6;--b:#26382d;--w:#f0b35a}}
-:root[data-theme=dark]{--g:#3ecf80;--gd:#d7f3e2;--bg:#0e1712;--c:#16221b;--t:#e6f0ea;--m:#9db1a6;--b:#26382d;--w:#f0b35a}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-h1,h2,h3{color:var(--gd);line-height:1.2;margin:0 0 .5rem}a{color:var(--g)}
-.w{max-width:1100px;margin:0 auto;padding:0 1rem}
-header{background:var(--c);border-bottom:1px solid var(--b);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
-.nav{display:flex;align-items:center;gap:1rem;padding:.7rem 0;flex-wrap:wrap}
-.logo{display:flex;align-items:center;gap:.5rem;font-weight:800;font-size:1.25rem;color:var(--gd);text-decoration:none}
-nav{display:flex;gap:.25rem;flex-wrap:wrap;flex:1}nav a{padding:.4rem .7rem;border-radius:8px;color:var(--t);text-decoration:none;font-size:.95rem}
-nav a:hover,nav a.on{background:var(--bg);color:var(--g)}
-.btn{display:inline-block;border:1px solid var(--g);background:var(--g);color:#fff;padding:.6rem 1.1rem;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s}
-.btn:hover{filter:brightness(.92);transform:translateY(-1px)}.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,.chip:focus-visible{outline:3px solid var(--g);outline-offset:2px}
-.btn.o{background:transparent;color:var(--g)}.btn.s{padding:.35rem .7rem;font-size:.9rem}.btn.d{border-color:#c0392b;color:#c0392b;background:transparent}
-.hero{padding:3.5rem 0 2.5rem;background:linear-gradient(180deg,var(--c),var(--bg))}.hero h1{font-size:clamp(2rem,5vw,3.2rem)}
-.hero p{max-width:620px;color:var(--m);font-size:1.1rem}.row{display:flex;gap:.6rem;flex-wrap:wrap;margin:1rem 0}
-section.s{padding:2rem 0}.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
-.card{background:var(--c);border:1px solid var(--b);border-radius:16px;padding:1.1rem;box-shadow:0 2px 8px rgba(15,61,42,.06)}
-.card h3{font-size:1.05rem}.m{color:var(--m);font-size:.92rem}
-.tag{display:inline-block;background:var(--bg);border:1px solid var(--b);border-radius:99px;padding:.1rem .6rem;font-size:.8rem;margin:.15rem .15rem 0 0}
-.demo{display:inline-block;background:#fef3c7;color:#78350f;border-radius:6px;padding:.1rem .5rem;font-size:.78rem;font-weight:700}
-.note{background:#fef3c7;color:#78350f;border-radius:10px;padding:.7rem 1rem;margin:1rem 0;font-size:.92rem}
-input,select,textarea{width:100%;padding:.6rem .7rem;border:1px solid var(--b);border-radius:10px;font:inherit;background:var(--c);color:var(--t)}
-label{display:block;font-weight:600;font-size:.92rem;margin:.8rem 0 .25rem}.err{color:#c0392b;font-size:.85rem;min-height:1em}
-.chip{border:1px solid var(--b);background:var(--c);color:var(--t);border-radius:99px;padding:.3rem .8rem;cursor:pointer;font:inherit;font-size:.9rem}
-.chip[aria-pressed=true]{background:var(--g);color:#fff;border-color:var(--g)}
-.form{max-width:560px;margin:0 auto}.two{display:grid;gap:0 1rem;grid-template-columns:1fr 1fr}@media(max-width:560px){.two{grid-template-columns:1fr}}
-.st{font-weight:700;font-size:.8rem;padding:.15rem .6rem;border-radius:99px;background:var(--bg);border:1px solid var(--b)}
-.st.Concluído{color:var(--g)}.st.Cancelado{color:#c0392b}.st.Pendente{color:var(--w)}
-.bar{display:flex;align-items:center;gap:.6rem;margin:.4rem 0;font-size:.9rem}.bar i{display:block;height:14px;border-radius:7px;background:var(--g)}.bar span:first-child{width:90px}
-.big{font-size:2rem;font-weight:800;color:var(--g)}table{width:100%;border-collapse:collapse;font-size:.92rem}td,th{padding:.45rem;border-bottom:1px solid var(--b);text-align:left}
-footer{background:#0f3d2a;color:#fff;padding:2rem 0;margin-top:2rem;font-size:.92rem;line-height:1.7}footer a{color:#52d273;text-decoration:none}footer a:hover{text-decoration:underline}
-#toast{position:fixed;bottom:calc(1rem + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--gd);color:var(--bg);padding:.7rem 1.2rem;border-radius:10px;display:none;z-index:9}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
-</style></head><body>
-<header><div class="w nav">
-<a class="logo" href="#/"><svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2a9 9 0 0 0-9 9c0 7 9 17 9 17s9-10 9-17a9 9 0 0 0-9-9z" fill="#1f9d55"/><path d="M12 14c0-4 3-6 8-6 0 5-2 8-6 8-1 0-2-.5-2-2zm2 3c1-3 3-5 5-6" stroke="#fff" stroke-width="1.5" fill="none"/></svg>EcoRadar</a>
-<nav id="nav" aria-label="Principal"></nav>
-<span id="auth"></span></div></header>
-<main id="app" class="w" tabindex="-1"></main>
-<footer><div class="w"><strong>EcoRadar</strong> — projeto acadêmico de Análise e Desenvolvimento de Sistemas, Senac Concórdia (SC).<br>
-<a href="#/pontos">Pontos de coleta</a> · <a href="#/agendar">Agendar</a> · <a href="#/guia">Guia de descarte</a> · <a href="#/impacto">Impacto</a><br>
-<span>Contato demonstrativo: contato@ecoradar.exemplo · Todos os dados exibidos são demonstrativos.</span></div></footer>
-<div id="toast" role="status"></div>
-<script>
-/* ===== Dados demonstrativos (substituir por API/banco) ===== */
-const CATS=["Lixo eletrônico","Pilhas e baterias","Óleo de cozinha usado","Vidro","Plástico","Papel e papelão","Metal","Outros recicláveis"];
-const PONTOS=[
-{id:1,nome:"Ponto Demo Centro",end:"Rua Exemplo, 100 — Centro",bairro:"Centro",cats:[0,1,5],hor:"Seg–Sex, 8h–18h",tel:"(49) 0000-0001"},
-{id:2,nome:"Ecoponto Demo Bairro Norte",end:"Av. Modelo, 250 — Norte",bairro:"Norte",cats:[2,3,4],hor:"Seg–Sáb, 9h–17h",tel:"(49) 0000-0002"},
-{id:3,nome:"Cooperativa Demo de Recicláveis",end:"Rua Fictícia, 45 — Industrial",bairro:"Industrial",cats:[4,5,6,7],hor:"Seg–Sex, 7h–16h",tel:"Não informado"},
-{id:4,nome:"Posto Demo de Pilhas",end:"Rua Teste, 12 — Centro",bairro:"Centro",cats:[1],hor:"Não informado",tel:"Não informado"}];
-const GUIA=[
-["Lixo eletrônico","Celulares, carregadores, teclados, placas.","Guarde inteiros, sem desmontar; apague seus dados antes.","Não quebre telas nem baterias.","Logística reversa (Lei 12.305/2010)."],
-["Pilhas e baterias","Pilhas comuns, baterias de celular e notebook.","Armazene em pote seco e fechado.","Evite calor; baterias estufadas exigem cuidado extra.","Resolução CONAMA 401/2008."],
-["Óleo de cozinha usado","Óleo de fritura já frio.","Filtre e guarde em garrafa PET bem fechada.","Nunca descarte na pia nem misture com água.","Consulte a prefeitura ou cooperativas locais."],
-["Vidro","Garrafas e potes.","Enxágue e embale cacos para proteger quem manuseia.","Não misture com espelhos, cerâmica ou lâmpadas.","Programas municipais de coleta seletiva."],
-["Plástico","Embalagens, garrafas, potes.","Esvazie e enxágue; mantenha secos.","Não misture com embalagens contaminadas por gordura.","Programas municipais de coleta seletiva."],
-["Papel e papelão","Caixas, jornais, revistas.","Mantenha seco e dobre as caixas.","Não recicle papel engordurado ou molhado.","Programas municipais de coleta seletiva."]];
-const IMPACTO_DEMO=[["Plástico",38],["Papel e papelão",52],["Vidro",21],["Metal",14],["Eletrônicos",9],["Pilhas",4]];
-const STATUS=["Pendente","Confirmado","Em rota","Concluído","Cancelado"];
-/* ===== Serviço de dados (localStorage; trocar por API) ===== */
-const db={get(k,d){try{return JSON.parse(localStorage.getItem("eco_"+k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem("eco_"+k,JSON.stringify(v))}catch(e){}}};
-const sess=()=>db.get("sess",null);
-const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const toast=m=>{const t=$("#toast");t.textContent=m;t.style.display="block";setTimeout(()=>t.style.display="none",3000)};
-const fd=d=>new Date(d+"T12:00").toLocaleDateString("pt-BR");
-const DEMOTAG='<span class="demo">DEMONSTRAÇÃO</span>';
-/* ===== API (backend real) ===== */
-const API="http://localhost:3333/api";
-let CATEGORIAS_API=[];
-const STATUS_LABELS={PENDENTE:"Pendente",CONFIRMADO:"Confirmado",EM_ROTA:"Em rota",CONCLUIDO:"Concluído",CANCELADO:"Cancelado"};
-const STATUS_ORDEM=["PENDENTE","CONFIRMADO","EM_ROTA","CONCLUIDO","CANCELADO"];
-async function api(path,opts={}){
-  const s=sess();const headers={"Content-Type":"application/json",...(opts.headers||{})};
-  if(s&&s.token)headers.Authorization="Bearer "+s.token;
-  let res;try{res=await fetch(API+path,{...opts,headers})}catch(e){throw new Error("Não foi possível conectar à API. Verifique se o backend está rodando em "+API)}
-  let data=null;try{data=await res.json()}catch(e){}
-  if(!res.ok){const msg=data&&data.erro?data.erro:"Erro na requisição.";throw new Error(msg)}
-  return data}
-const fdISO=d=>new Date(d).toLocaleDateString("pt-BR");
-/* ===== Páginas ===== */
-const pages={
-"/":()=>{const s=sess();return `<section class="hero"><h1>Descarte consciente, futuro sustentável.</h1>
-<p>O EcoRadar conecta pessoas a pontos de coleta e serviços de reciclagem em Concórdia-SC, com estrutura pensada para crescer para outras cidades.</p>
-<div class="row"><a class="btn" href="#/pontos">Encontrar ponto de coleta</a><a class="btn o" href="#/${s?'agendar':'login'}">Agendar coleta</a></div>
-<div class="row"><input id="hq" style="max-width:420px" placeholder="Busque por resíduo ou bairro" aria-label="Buscar"><button class="btn" id="hb">Buscar</button></div></section>
-<section class="s"><h2>Resíduos aceitos</h2><div class="grid">${CATS.map((c,i)=>`<a class="card" style="text-decoration:none;color:inherit" href="#/pontos?c=${i}"><h3>${c}</h3><span class="m">Ver pontos →</span></a>`).join("")}</div></section>
-<section class="s"><h2>Como funciona</h2><div class="grid">${["Busque o material ou o bairro","Escolha um ponto ou peça coleta em casa","Acompanhe o status da solicitação","Veja seu impacto e acumule pontos"].map((t,i)=>`<div class="card"><div class="big">${i+1}</div>${t}</div>`).join("")}</div></section>
-<section class="s"><h2>Prévia dos pontos ${DEMOTAG}</h2><div class="grid">${PONTOS.slice(0,3).map(pCard).join("")}</div><p class="m">O mapa interativo depende de serviço externo ainda não configurado; a lista é a alternativa funcional.</p></section>
-<section class="s"><h2>Indicadores ${DEMOTAG}</h2><div class="grid"><div class="card"><div class="big">138 kg</div>exemplo de resíduos</div><div class="card"><div class="big">4</div>pontos de exemplo</div><div class="card"><div class="big">6</div>categorias no guia</div></div></section>
-<section class="s"><div class="card"><h2>Aprenda a descartar certo</h2><p>Veja como preparar e armazenar cada material com segurança.</p><a class="btn o" href="#/guia">Abrir guia de descarte</a></div></section>
-${!s?`<section class="s"><div class="card"><h2>🔒 Funcionalidades de usuários logados</h2><p class="m">Ao criar uma conta, você poderá:</p><div style="margin:.8rem 0"><p class="m">✔ <b>Agendar coletas domiciliares</b> de resíduos</p><p class="m">✔ <b>Acompanhar</b> suas solicitações em tempo real</p><p class="m">✔ <b>Acessar seu painel pessoal</b> com histórico e impacto</p></div><a class="btn" href="#/cadastro" style="width:100%;text-align:center">Criar conta agora</a></div></section>`:``}`},
-"/pontos":()=>`<section class="s"><h2>Pontos de coleta</h2><div class="note">${DEMOTAG} Endereços fictícios, apenas para demonstração. Não são locais reais de coleta. Mapa interativo: requer API externa (não configurada).</div>
-<input id="q" placeholder="Pesquisar por nome, bairro ou endereço" aria-label="Pesquisar" value="${esc(P.q)}">
-<div class="row" id="chips">${CATS.map((c,i)=>`<button class="chip" data-i="${i}" aria-pressed="${P.f.has(i)}">${c}</button>`).join("")}<button class="btn o s" id="clr">Limpar filtros</button></div>
-<div id="list" class="grid"></div></section>`,
-"/cadastro":()=>`<section class="s"><div class="form card"><h2>Criar conta</h2><div class="note">Cadastro demonstrativo: nenhuma conta real é criada e senhas não são armazenadas. Requer backend para autenticação segura.</div>
-<label for="perfil">Perfil</label><select id="perfil"><option value="doador">Doador individual</option><option value="empresa">Empresa geradora de resíduos</option><option value="coletor">Coletor ou reciclador</option></select>
-<form id="cf" novalidate><div id="cfields"></div><br><button class="btn" type="submit">Cadastrar</button></form></div></section>`,
-"/login":()=>`<section class="s"><div class="form card"><h2>Entrar</h2><div class="note">Login demonstrativo: sem validação de credenciais. Escolha um perfil para explorar os painéis, agendar coletas e acompanhar suas solicitações.</div>
-<form id="lf" novalidate><label for="le">E-mail</label><input id="le" type="email"><div class="err"></div>
-<label for="lp">Senha</label><input id="lp" type="password"><div class="err"></div>
-<label style="font-weight:400"><input type="checkbox" id="sp" style="width:auto"> Mostrar senha</label>
-<p><a href="#/login" id="rec">Esqueci a senha</a></p><button class="btn" type="submit">Entrar</button></form>
-<hr style="border:none;border-top:1px solid var(--b);margin:1.5rem 0"><p style="font-size:.9rem">Não tem conta? <a href="#/cadastro">Criar agora</a></p></div></section>`,
-"/agendar":()=>`<section class="s"><div class="form card"><h2>Agendar coleta domiciliar</h2><div class="note">A solicitação é enviada para o backend. Nenhum e-mail, WhatsApp ou notificação é enviado.</div>
-<form id="af" novalidate><label for="a1">Tipo de resíduo</label><select id="a1"><option value="">Selecione</option>${CATEGORIAS_API.map(c=>`<option value="${c.id}">${esc(c.nome)}</option>`).join("")}</select><div class="err"></div>
-<div class="two"><div><label for="a2">Quantidade estimada</label><input id="a2" type="number" min="0.1" step="any"><div class="err"></div></div><div><label for="a3">Unidade</label><select id="a3"><option>kg</option><option>litros</option><option>unidades</option></select></div></div>
-<label for="a4">Endereço para retirada</label><input id="a4"><div class="err"></div>
-<div class="two"><div><label for="a5">Data preferencial</label><input id="a5" type="date"><div class="err"></div></div><div><label for="a6">Período</label><select id="a6"><option>Manhã (8h–12h)</option><option>Tarde (13h–18h)</option></select></div></div>
-<label for="a7">Observações</label><textarea id="a7" rows="3"></textarea><br><button class="btn" type="submit">Enviar solicitação</button></form></div></section>`,
-"/minhas":async()=>{let l=[];try{l=await api("/solicitacoes/minhas")}catch(err){return `<section class="s"><div class="note">${esc(err.message)}</div></section>`}
-return `<section class="s"><h2>Minhas solicitações</h2>${l.length?l.map(r=>{const st=STATUS_LABELS[r.status]||r.status;return `<div class="card" style="margin-bottom:.8rem"><div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem"><b style="flex:1">${r.id.slice(0,8)}</b><span class="st ${st}">${st}</span></div><p class="m"><b>${esc(r.categoria?.nome||"")}</b> · ${r.quantidade} ${r.unidade}</p><p class="m">${fdISO(r.dataPreferencial)}, ${esc(r.periodo)}</p>
-<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem"><button class="btn o s" data-det="${r.id}" title="Mostrar endereço e observações">📋 Detalhes</button> ${["PENDENTE","CONFIRMADO"].includes(r.status)?`<button class="btn d s" data-can="${r.id}" title="Cancelar esta solicitação">❌ Cancelar</button>`:""} ${["PENDENTE","CONFIRMADO","EM_ROTA"].includes(r.status)?`<button class="btn o s" data-adv="${r.id}" data-cur="${r.status}" title="Avançar o status (demonstração)">⏭ Próx. status</button>`:""}</div><div id="d${r.id}" class="m" hidden style="margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--b)">📍 ${esc(r.enderecoRetirada)}<br>📝 ${esc(r.observacoes||"(nenhuma observação)")}<br>🕐 ${new Date(r.criadoEm).toLocaleString("pt-BR")}</div></div>`}).join(""):`<div class="card">Você ainda não tem solicitações. <a href="#/agendar">Agendar agora →</a></div>`}</section>`},
-"/painel":async()=>{const s=sess();if(!s)return `<section class="s"><div class="card">Entre para acessar seu painel. <a href="#/login">Entrar</a></div></section>`;
-const head=`<h2>Painel — ${{DOADOR:"Doador",EMPRESA:"Empresa",COLETOR:"Coletor/Reciclador"}[s.perfil]||s.perfil}</h2>`;
-if(s.perfil=="COLETOR"){let l=[];try{l=await api("/solicitacoes/recebidas")}catch(err){return `<section class="s">${head}<div class="note">${esc(err.message)}</div></section>`}
-return `<section class="s">${head}<div class="card"><h3>Solicitações recebidas</h3>${l.length?l.map(r=>{const st=STATUS_LABELS[r.status]||r.status;return `<div style="padding:.8rem;border:1px solid var(--b);border-radius:12px;margin-bottom:.8rem"><div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem"><div style="flex:1"><b>${r.id.slice(0,8)}</b> · <span class="m">${esc(r.categoria?.nome||"")}</span></div><span class="st ${st}">${st}</span></div><p class="m">📍 ${esc(r.enderecoRetirada)}</p> ${r.status=="PENDENTE"?`<div style="display:flex;gap:.5rem;margin-top:.8rem"><button class="btn s" data-adv="${r.id}" data-cur="${r.status}" title="Aceitar esta coleta">✅ Aceitar</button> <button class="btn d s" data-rej="${r.id}" title="Rejeitar esta solicitação">❌ Rejeitar</button></div>`:["CONFIRMADO","EM_ROTA"].includes(r.status)?`<div style="margin-top:.8rem"><button class="btn o s" data-adv="${r.id}" data-cur="${r.status}" title="Atualizar status">⏭ Próximo status</button></div>`:""}</div>`}).join(""):"<p class='m'>Nenhuma solicitação no momento.</p>"}</div>
-<div class="card" style="margin-top:1rem"><h3>Meus pontos de coleta</h3><p class="m">Cadastro, edição e desativação de pontos pela interface: ainda não implementado nesta versão (a API já aceita, ver README).</p><label for="dest">Destinação final dos resíduos</label><textarea id="dest" rows="3" placeholder="Descreva para onde os resíduos são encaminhados">${esc(db.get("dest",""))}</textarea><button class="btn s" id="sd">Salvar (local)</button></div></section>`}
-let l=[];try{l=await api("/solicitacoes/minhas")}catch(err){return `<section class="s">${head}<div class="note">${esc(err.message)}</div></section>`}
-const cnt=x=>l.filter(r=>r.status==x).length;
-if(s.perfil=="EMPRESA")return `<section class="s">${head}<div class="grid"><div class="card"><div class="big">${l.length}</div>solicitações registradas</div><div class="card"><div class="big">${cnt("CONCLUIDO")}</div>concluídas</div></div>
-<div class="card" style="margin-top:1rem"><h3>Relatório</h3><table><tr><th>ID</th><th>Material</th><th>Qtd.</th><th>Status</th></tr>${l.map(r=>`<tr><td>${r.id.slice(0,8)}</td><td>${esc(r.categoria?.nome||"")}</td><td>${r.quantidade} ${r.unidade}</td><td>${STATUS_LABELS[r.status]||r.status}</td></tr>`).join("")||"<tr><td colspan=4 class=m>Sem dados.</td></tr>"}</table><div style="margin-top:1.2rem;display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn s" id="csv" title="Baixar relatório em CSV">📥 Exportar CSV</button> <span class="m" style="align-self:center">📄 PDF: não implementado</span></div></div></section>`;
-const pts=cnt("CONCLUIDO")*10;
-return `<section class="s">${head}<div class="grid"><div class="card"><div class="big">${cnt("PENDENTE")+cnt("CONFIRMADO")+cnt("EM_ROTA")}</div>coletas em andamento</div><div class="card"><div class="big">${pts}</div>pontos acumulados</div></div>
-<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin:1.2rem 0"><a class="btn" href="#/pontos">🗺 Encontrar pontos</a><a class="btn o" href="#/agendar">📞 Agendar coleta</a><a class="btn o" href="#/minhas">📋 Minhas solicitações</a></div>
-<div class="card"><h3>📊 Descartes por categoria ${DEMOTAG}</h3>${bars()}</div>
-<div class="card" style="margin-top:1rem"><h3>🏆 Recompensas ${DEMOTAG}</h3><p class="m">Sem valor financeiro real.</p><div style="display:flex;gap:.5rem;flex-wrap:wrap"><span class="tag">✔ Primeira coleta ${pts?"desbloqueado":"bloqueado"}</span><span class="tag">Sacola reutilizável — 50 pts</span></div></div>
-<div class="card" style="margin-top:1rem"><h3>⏰ Atividades recentes</h3><div style="font-size:.9rem">${l.slice(0,4).map(r=>`<p class="m">${new Date(r.criadoEm).toLocaleString("pt-BR")}: <b>${r.id.slice(0,8)}</b> → ${STATUS_LABELS[r.status]||r.status}</p>`).join("")||"<p class='m'>Nenhuma atividade ainda.</p>"}</div></div></section>`},
-"/guia":()=>`<section class="s"><h2>Guia de descarte</h2><p class="m">Orientações gerais. Confirme regras locais com a prefeitura e os órgãos oficiais citados.</p><div class="grid">${GUIA.map(g=>`<div class="card"><h3>${g[0]}</h3><p class="m"><b>Exemplos:</b> ${g[1]}</p><p class="m"><b>Preparo:</b> ${g[2]}</p><p class="m"><b>Segurança/não misturar:</b> ${g[3]}</p><p class="m"><b>Fonte/onde procurar:</b> ${g[4]}</p><a href="#/pontos?c=${CATS.indexOf(g[0])<0?0:CATS.indexOf(g[0])}">Ver pontos</a></div>`).join("")}</div></section>`,
-"/impacto":()=>`<section class="s"><h2>📈 Painel público de impacto</h2><div class="note">${DEMOTAG} Valores de exemplo apenas. Nenhum dado real, cálculo de CO₂ ou estatística ambiental é apresentado.</div><div class="card"><h3>Resíduos coletados (em kg) ${DEMOTAG}</h3><p class="m" style="margin-bottom:1rem">Distribuição por categoria.</p>${bars()}</div></section>`
-};
-function bars(){const m=Math.max(...IMPACTO_DEMO.map(x=>x[1]));return IMPACTO_DEMO.map(([n,v])=>`<div class="bar"><span>${n}</span><i style="width:${v/m*60}%"></i><span>${v} kg</span></div>`).join("")}
-function pCard(p){return `<div class="card"><h3>${esc(p.nome)} ${DEMOTAG}</h3><p class="m">${esc(p.end)}</p>${p.cats.map(i=>`<span class="tag">${CATS[i]}</span>`).join("")}
-<div id="pd${p.id}" class="m" hidden><br>Horário: ${p.hor}<br>Contato: ${p.tel}</div><div class="row"><button class="btn o s" data-pd="${p.id}">Ver detalhes</button><a class="btn s" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.end+", Concórdia, SC")}">Como chegar</a></div></div>`}
-/* ===== Interações ===== */
-const P={q:"",f:new Set()};
-function renderList(){const q=P.q.toLowerCase();const r=PONTOS.filter(p=>(!P.f.size||[...P.f].every(i=>p.cats.includes(i)))&&(p.nome+p.end+p.bairro).toLowerCase().includes(q));
-$("#list").innerHTML=r.length?r.map(pCard).join(""):'<div class="card">Nenhum ponto encontrado. Tente limpar os filtros.</div>'}
-const PERFIL_API={doador:"DOADOR",empresa:"EMPRESA",coletor:"COLETOR"};
-const CF={doador:[["Nome","text","nome"],["E-mail","email","email"],["CPF","text","cpfCnpj"],["Endereço","text","endereco"],["Senha","password","senha"],["Confirmar senha","password","confirmar"]],
-empresa:[["Razão social","text","nome"],["CNPJ","text","cpfCnpj"],["Responsável","text",""],["E-mail","email","email"],["Endereço","text","endereco"],["Senha","password","senha"]],
-coletor:[["Empresa ou responsável","text","nome"],["CNPJ ou CPF","text","cpfCnpj"],["E-mail","email","email"],["Endereço","text","endereco"],["Telefone","tel","telefone"],["Resíduos aceitos","text",""],["Destinação dos resíduos","text",""]]};
-function fieldsFor(p){$("#cfields").innerHTML=CF[p].map(([l,t,k],i)=>`<label for="f${i}">${l}</label><input id="f${i}" type="${t}" data-l="${l}" data-k="${k}"><div class="err"></div>`).join("")}
-function setErr(el,m){el.nextElementSibling.textContent=m||"";el.setAttribute("aria-invalid",!!m);return !m}
-async function avancarStatus(id,novo){try{await api(`/solicitacoes/${id}/status`,{method:"PATCH",body:JSON.stringify({status:novo})});toast("Status atualizado.");route()}catch(err){toast(err.message)}}
-function bind(path,qs){
-if(path=="/"){const go=()=>{P.q=$("#hq").value;location.hash="#/pontos"};$("#hb").onclick=go;$("#hq").onkeydown=e=>e.key=="Enter"&&go()}
-if(path=="/pontos"){renderList();$("#q").oninput=e=>{P.q=e.target.value;renderList()};
-$("#chips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;const i=+b.dataset.i;P.f.has(i)?P.f.delete(i):P.f.add(i);b.setAttribute("aria-pressed",P.f.has(i));renderList()};
-$("#clr").onclick=()=>{P.q="";P.f.clear();route()}}
-if(path=="/cadastro"){fieldsFor("doador");$("#perfil").onchange=e=>fieldsFor(e.target.value);
-$("#cf").onsubmit=async e=>{e.preventDefault();let ok=true;const ins=[...document.querySelectorAll("#cfields input")];const senhaInput=ins.find(i=>i.dataset.l=="Senha");
-ins.forEach(i=>{let m="";const v=i.value.trim();if(!v)m="Campo obrigatório.";else if(i.type=="email"&&!/^\S+@\S+\.\S+$/.test(v))m="E-mail inválido.";else if(i.type=="password"&&v.length<8)m="Use ao menos 8 caracteres.";
-if(i.dataset.l=="Confirmar senha"&&v!==senhaInput.value)m="As senhas não coincidem.";ok=setErr(i,m)&&ok});
-if(!ok)return;const perfilSel=$("#perfil").value;const payload={perfil:PERFIL_API[perfilSel]};
-ins.forEach(i=>{if(i.dataset.k)payload[i.dataset.k]=i.value.trim()});delete payload.confirmar;
-try{const data=await api("/auth/registro",{method:"POST",body:JSON.stringify(payload)});
-db.set("sess",{token:data.token,id:data.usuario.id,nome:data.usuario.nome,email:data.usuario.email,perfil:data.usuario.perfil});
-toast("Conta criada com sucesso!");location.hash="#/painel"}catch(err){toast(err.message)}}}
-if(path=="/login"){$("#sp").onchange=e=>$("#lp").type=e.target.checked?"text":"password";$("#rec").onclick=e=>{e.preventDefault();toast("Recuperação de senha requer e-mail configurado (não implementado).")};
-$("#lf").onsubmit=async e=>{e.preventDefault();const a=setErr($("#le"),/^\S+@\S+\.\S+$/.test($("#le").value)?"":"Informe um e-mail válido.");const b=setErr($("#lp"),$("#lp").value?"":"Informe a senha.");
-if(!(a&&b))return;try{const data=await api("/auth/login",{method:"POST",body:JSON.stringify({email:$("#le").value,senha:$("#lp").value})});
-db.set("sess",{token:data.token,id:data.usuario.id,nome:data.usuario.nome,email:data.usuario.email,perfil:data.usuario.perfil});
-const back=qs.get("back");toast("Bem-vindo!");location.hash=back||"#/painel"}catch(err){toast(err.message)}}}
-if(path=="/agendar"){$("#a5").min=new Date().toISOString().slice(0,10);
-$("#af").onsubmit=async e=>{e.preventDefault();const g=i=>$("#a"+i);let ok=true;
-ok=setErr(g(1),g(1).value?"":"Selecione o tipo.")&ok;ok=setErr(g(2),+g(2).value>0?"":"Informe uma quantidade válida.")&ok;ok=setErr(g(4),g(4).value.trim()?"":"Informe o endereço.")&ok;ok=setErr(g(5),g(5).value?"":"Escolha uma data.")&ok;
-if(!ok)return;
-try{const r=await api("/solicitacoes",{method:"POST",body:JSON.stringify({categoriaId:g(1).value,quantidade:+g(2).value,unidade:g(3).value,enderecoRetirada:g(4).value.trim(),dataPreferencial:g(5).value,periodo:g(6).value,observacoes:g(7).value.trim()})});
-const catNome=CATEGORIAS_API.find(c=>c.id==g(1).value)?.nome||"";
-$("#app").innerHTML=`<section class="s"><div class="form card"><h2>Solicitação enviada ✔</h2><p>Identificador: <b>${r.id.slice(0,8)}</b></p><p class="m">${esc(catNome)} · ${r.quantidade} ${r.unidade}<br>${esc(r.enderecoRetirada)}<br>${fdISO(r.dataPreferencial)}, ${esc(r.periodo)}</p><a class="btn" href="#/minhas">Acompanhar status</a></div></section>`;$("#app").focus()}catch(err){toast(err.message)}}}
-if(["/minhas","/painel"].includes(path)){
-$("#app").onclick=async e=>{const t=e.target,id=k=>t.dataset[k];
-if(id("det"))$("#d"+id("det")).hidden=!$("#d"+id("det")).hidden;
-if(id("can")&&confirm("Deseja realmente cancelar esta solicitação?"))avancarStatus(id("can"),"CANCELADO");
-if(id("rej")&&confirm("Rejeitar este pedido?"))avancarStatus(id("rej"),"CANCELADO");
-if(id("adv")){const cur=t.dataset.cur;const prox=STATUS_ORDEM[Math.min(STATUS_ORDEM.indexOf(cur)+1,3)];avancarStatus(id("adv"),prox)}
-if(t.id=="sd"){db.set("dest",$("#dest").value);toast("Salvo neste navegador (demo).")}
-if(t.id=="csv"){try{const l=await api("/solicitacoes/minhas");const c=["ID;Material;Quantidade;Unidade;Status",...l.map(r=>[r.id,r.categoria?.nome||"",r.quantidade,r.unidade,STATUS_LABELS[r.status]||r.status].join(";"))].join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+c],{type:"text/csv"}));a.download="relatorio-ecoradar.csv";a.click()}catch(err){toast(err.message)}}}}
-document.querySelectorAll("[data-pd]").forEach(b=>b.onclick=()=>{const d=$("#pd"+b.dataset.pd);d.hidden=!d.hidden})}
-/* ===== Roteador ===== */
-const NAV=[["/","Início"],["/pontos","Pontos de coleta"],["/agendar","Agendar"],["/minhas","Solicitações"],["/painel","Painel"],["/guia","Guia"],["/impacto","Impacto"]];
-const PROTECTED=["/agendar","/minhas","/painel"];
-async function route(){const h=location.hash.slice(1)||"/";const path=h.split("?")[0];const qs=new URLSearchParams(h.split("?")[1]||"");
-const s=sess();const isProtected=PROTECTED.includes(path);
-if(isProtected&&!s){location.hash=`#/login?back=${encodeURIComponent("#"+path)}`;return}
-if(qs.has("c")&&path=="/pontos"){P.f=new Set([+qs.get("c")])}
-$("#app").onclick=null;const pg=pages[path]||pages["/"];
-$("#app").innerHTML='<p class="m" style="padding:2rem 0">Carregando…</p>';
-let html;try{html=await pg(qs)}catch(err){html=`<section class="s"><div class="note">${esc(err.message)}</div></section>`}
-$("#app").innerHTML=html;
-const navToShow=s?NAV:NAV.filter(([p])=>!PROTECTED.includes(p));
-$("#nav").innerHTML=navToShow.map(([p,n])=>`<a href="#${p}" class="${p==path?"on":""}" ${p==path?'aria-current="page"':""}>${n}</a>`).join("");
-$("#auth").innerHTML=s?`<button class="btn o s" id="out">Sair</button>`:`<a class="btn o s" href="#/login">Entrar</a> <a class="btn s" href="#/cadastro">Cadastrar</a>`;
-bind(path,qs);if(h.includes("?"))history.replaceState(null,"","#"+path);window.scrollTo(0,0)}
-document.addEventListener("click",e=>{if(e.target.id==="out"){db.set("sess",null);location.hash="#/"}});
-addEventListener("hashchange",route);
-(async function init(){try{CATEGORIAS_API=await api("/categorias")}catch(e){console.error(e)}route()})();
-</script></body></html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>EcoRadar — Descarte consciente</title>
+  <style>
+    :root {
+      --g: #1f9d55;
+      --gd: #0f3d2a;
+      --bg: #f6f9f7;
+      --c: #fff;
+      --t: #1d2b24;
+      --m: #5b6b63;
+      --b: #dbe6df;
+      --w: #b45309;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme=light]) {
+        --g: #3ecf80;
+        --gd: #d7f3e2;
+        --bg: #0e1712;
+        --c: #16221b;
+        --t: #e6f0ea;
+        --m: #9db1a6;
+        --b: #26382d;
+        --w: #f0b35a;
+      }
+    }
+    :root[data-theme=dark] {
+      --g: #3ecf80;
+      --gd: #d7f3e2;
+      --bg: #0e1712;
+      --c: #16221b;
+      --t: #e6f0ea;
+      --m: #9db1a6;
+      --b: #26382d;
+      --w: #f0b35a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--t);
+      font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    h1, h2, h3 { color: var(--gd); line-height: 1.2; margin: 0 0 .5rem; }
+    a { color: var(--g); }
+    .w { max-width: 1100px; margin: 0 auto; padding: 0 1rem; }
+    header {
+      background: var(--c);
+      border-bottom: 1px solid var(--b);
+      position: sticky;
+      top: env(safe-area-inset-top, 0px);
+      z-index: 5;
+    }
+    .nav { display: flex; align-items: center; gap: 1rem; padding: .7rem 0; flex-wrap: wrap; }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--gd);
+      text-decoration: none;
+    }
+    nav { display: flex; gap: .25rem; flex-wrap: wrap; flex: 1; }
+    nav a { padding: .4rem .7rem; border-radius: 8px; color: var(--t); text-decoration: none; font-size: .95rem; }
+    nav a:hover, nav a.on { background: var(--bg); color: var(--g); }
+    .btn {
+      display: inline-block;
+      border: 1px solid var(--g);
+      background: var(--g);
+      color: #fff;
+      padding: .6rem 1.1rem;
+      border-radius: 10px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: .15s;
+    }
+    .btn:hover { filter: brightness(.92); transform: translateY(-1px); }
+    .btn:focus-visible, input:focus-visible, select:focus-visible,
+    textarea:focus-visible, a:focus-visible, .chip:focus-visible {
+      outline: 3px solid var(--g);
+      outline-offset: 2px;
+    }
+    .btn.o { background: transparent; color: var(--g); }
+    .btn.s { padding: .35rem .7rem; font-size: .9rem; }
+    .btn.d { border-color: #c0392b; color: #c0392b; background: transparent; }
+    .hero { padding: 3.5rem 0 2.5rem; background: linear-gradient(180deg, var(--c), var(--bg)); }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); }
+    .hero p { max-width: 620px; color: var(--m); font-size: 1.1rem; }
+    .row { display: flex; gap: .6rem; flex-wrap: wrap; margin: 1rem 0; }
+    section.s { padding: 2rem 0; }
+    .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+    .card {
+      background: var(--c);
+      border: 1px solid var(--b);
+      border-radius: 16px;
+      padding: 1.1rem;
+      box-shadow: 0 2px 8px rgba(15, 61, 42, .06);
+    }
+    .card h3 { font-size: 1.05rem; }
+    .m { color: var(--m); font-size: .92rem; }
+    .tag {
+      display: inline-block;
+      background: var(--bg);
+      border: 1px solid var(--b);
+      border-radius: 99px;
+      padding: .1rem .6rem;
+      font-size: .8rem;
+      margin: .15rem .15rem 0 0;
+    }
+    .demo {
+      display: inline-block;
+      background: #fef3c7;
+      color: #78350f;
+      border-radius: 6px;
+      padding: .1rem .5rem;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+    .note {
+      background: #fef3c7;
+      color: #78350f;
+      border-radius: 10px;
+      padding: .7rem 1rem;
+      margin: 1rem 0;
+      font-size: .92rem;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: .6rem .7rem;
+      border: 1px solid var(--b);
+      border-radius: 10px;
+      font: inherit;
+      background: var(--c);
+      color: var(--t);
+    }
+    label { display: block; font-weight: 600; font-size: .92rem; margin: .8rem 0 .25rem; }
+    .err { color: #c0392b; font-size: .85rem; min-height: 1em; }
+    .chip {
+      border: 1px solid var(--b);
+      background: var(--c);
+      color: var(--t);
+      border-radius: 99px;
+      padding: .3rem .8rem;
+      cursor: pointer;
+      font: inherit;
+      font-size: .9rem;
+    }
+    .chip[aria-pressed=true] { background: var(--g); color: #fff; border-color: var(--g); }
+    .form { max-width: 560px; margin: 0 auto; }
+    .two { display: grid; gap: 0 1rem; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+    .st { font-weight: 700; font-size: .8rem; padding: .15rem .6rem; border-radius: 99px; background: var(--bg); border: 1px solid var(--b); }
+    .st.Concluído { color: var(--g); }
+    .st.Cancelado { color: #c0392b; }
+    .st.Pendente { color: var(--w); }
+    .bar { display: flex; align-items: center; gap: .6rem; margin: .4rem 0; font-size: .9rem; }
+    .bar i { display: block; height: 14px; border-radius: 7px; background: var(--g); }
+    .bar span:first-child { width: 90px; }
+    .big { font-size: 2rem; font-weight: 800; color: var(--g); }
+    table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+    td, th { padding: .45rem; border-bottom: 1px solid var(--b); text-align: left; }
+    footer { background: #0f3d2a; color: #fff; padding: 2rem 0; margin-top: 2rem; font-size: .92rem; line-height: 1.7; }
+    footer a { color: #52d273; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    #toast {
+      position: fixed;
+      bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--gd);
+      color: var(--bg);
+      padding: .7rem 1.2rem;
+      border-radius: 10px;
+      display: none;
+      z-index: 9;
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="w nav">
+      <a class="logo" href="#/">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M16 2a9 9 0 0 0-9 9c0 7 9 17 9 17s9-10 9-17a9 9 0 0 0-9-9z" fill="#1f9d55"/>
+          <path d="M12 14c0-4 3-6 8-6 0 5-2 8-6 8-1 0-2-.5-2-2zm2 3c1-3 3-5 5-6" stroke="#fff" stroke-width="1.5" fill="none"/>
+        </svg>
+        EcoRadar
+      </a>
+      <nav id="nav" aria-label="Principal"></nav>
+      <span id="auth"></span>
+    </div>
+  </header>
+
+  <main id="app" class="w" tabindex="-1"></main>
+
+  <footer>
+    <div class="w">
+      <strong>EcoRadar</strong> — projeto acadêmico de Análise e Desenvolvimento de Sistemas, Senac Concórdia (SC).<br>
+      <a href="#/pontos">Pontos de coleta</a> ·
+      <a href="#/agendar">Agendar</a> ·
+      <a href="#/guia">Guia de descarte</a> ·
+      <a href="#/impacto">Impacto</a><br>
+      <span>Contato demonstrativo: contato@ecoradar.exemplo · Todos os dados exibidos são demonstrativos.</span>
+    </div>
+  </footer>
+
+  <div id="toast" role="status"></div>
+
+  <script>
+    /* ===========================================================
+       Dados demonstrativos (pontos de coleta, guia e indicadores
+       de impacto ainda não vêm do backend — ver README)
+    =========================================================== */
+    const CATS = [
+      "Lixo eletrônico", "Pilhas e baterias", "Óleo de cozinha usado", "Vidro",
+      "Plástico", "Papel e papelão", "Metal", "Outros recicláveis"
+    ];
+
+    const PONTOS = [
+      { id: 1, nome: "Ponto Demo Centro", end: "Rua Exemplo, 100 — Centro", bairro: "Centro", cats: [0, 1, 5], hor: "Seg–Sex, 8h–18h", tel: "(49) 0000-0001" },
+      { id: 2, nome: "Ecoponto Demo Bairro Norte", end: "Av. Modelo, 250 — Norte", bairro: "Norte", cats: [2, 3, 4], hor: "Seg–Sáb, 9h–17h", tel: "(49) 0000-0002" },
+      { id: 3, nome: "Cooperativa Demo de Recicláveis", end: "Rua Fictícia, 45 — Industrial", bairro: "Industrial", cats: [4, 5, 6, 7], hor: "Seg–Sex, 7h–16h", tel: "Não informado" },
+      { id: 4, nome: "Posto Demo de Pilhas", end: "Rua Teste, 12 — Centro", bairro: "Centro", cats: [1], hor: "Não informado", tel: "Não informado" }
+    ];
+
+    const GUIA = [
+      ["Lixo eletrônico", "Celulares, carregadores, teclados, placas.", "Guarde inteiros, sem desmontar; apague seus dados antes.", "Não quebre telas nem baterias.", "Logística reversa (Lei 12.305/2010)."],
+      ["Pilhas e baterias", "Pilhas comuns, baterias de celular e notebook.", "Armazene em pote seco e fechado.", "Evite calor; baterias estufadas exigem cuidado extra.", "Resolução CONAMA 401/2008."],
+      ["Óleo de cozinha usado", "Óleo de fritura já frio.", "Filtre e guarde em garrafa PET bem fechada.", "Nunca descarte na pia nem misture com água.", "Consulte a prefeitura ou cooperativas locais."],
+      ["Vidro", "Garrafas e potes.", "Enxágue e embale cacos para proteger quem manuseia.", "Não misture com espelhos, cerâmica ou lâmpadas.", "Programas municipais de coleta seletiva."],
+      ["Plástico", "Embalagens, garrafas, potes.", "Esvazie e enxágue; mantenha secos.", "Não misture com embalagens contaminadas por gordura.", "Programas municipais de coleta seletiva."],
+      ["Papel e papelão", "Caixas, jornais, revistas.", "Mantenha seco e dobre as caixas.", "Não recicle papel engordurado ou molhado.", "Programas municipais de coleta seletiva."]
+    ];
+
+    const IMPACTO_DEMO = [
+      ["Plástico", 38], ["Papel e papelão", 52], ["Vidro", 21],
+      ["Metal", 14], ["Eletrônicos", 9], ["Pilhas", 4]
+    ];
+
+    const STATUS = ["Pendente", "Confirmado", "Em rota", "Concluído", "Cancelado"];
+
+    /* ===========================================================
+       Serviço de dados local (apenas sessão e preferências —
+       as solicitações já vêm do backend)
+    =========================================================== */
+    const db = {
+      get(k, d) {
+        try { return JSON.parse(localStorage.getItem("eco_" + k)) ?? d; }
+        catch (e) { return d; }
+      },
+      set(k, v) {
+        try { localStorage.setItem("eco_" + k, JSON.stringify(v)); }
+        catch (e) {}
+      }
+    };
+
+    const sess = () => db.get("sess", null);
+
+    const $ = s => document.querySelector(s);
+
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+
+    const toast = m => {
+      const t = $("#toast");
+      t.textContent = m;
+      t.style.display = "block";
+      setTimeout(() => t.style.display = "none", 3000);
+    };
+
+    const fd = d => new Date(d + "T12:00").toLocaleDateString("pt-BR");
+    const fdISO = d => new Date(d).toLocaleDateString("pt-BR");
+
+    const DEMOTAG = '<span class="demo">DEMONSTRAÇÃO</span>';
+
+    /* ===========================================================
+       API (backend real — Node.js + Express + Prisma)
+    =========================================================== */
+    const API = "http://localhost:3333/api";
+    let CATEGORIAS_API = [];
+
+    const STATUS_LABELS = {
+      PENDENTE: "Pendente", CONFIRMADO: "Confirmado", EM_ROTA: "Em rota",
+      CONCLUIDO: "Concluído", CANCELADO: "Cancelado"
+    };
+    const STATUS_ORDEM = ["PENDENTE", "CONFIRMADO", "EM_ROTA", "CONCLUIDO", "CANCELADO"];
+
+    async function api(path, opts = {}) {
+      const s = sess();
+      const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
+      if (s && s.token) headers.Authorization = "Bearer " + s.token;
+
+      let res;
+      try {
+        res = await fetch(API + path, { ...opts, headers });
+      } catch (e) {
+        throw new Error("Não foi possível conectar à API. Verifique se o backend está rodando em " + API);
+      }
+
+      let data = null;
+      try { data = await res.json(); } catch (e) {}
+
+      if (!res.ok) {
+        const msg = data && data.erro ? data.erro : "Erro na requisição.";
+        throw new Error(msg);
+      }
+      return data;
+    }
+
+    /* ===========================================================
+       Páginas
+    =========================================================== */
+    const pages = {
+
+      "/": () => {
+        const s = sess();
+        return `
+          <section class="hero">
+            <h1>Descarte consciente, futuro sustentável.</h1>
+            <p>O EcoRadar conecta pessoas a pontos de coleta e serviços de reciclagem em Concórdia-SC, com estrutura pensada para crescer para outras cidades.</p>
+            <div class="row">
+              <a class="btn" href="#/pontos">Encontrar ponto de coleta</a>
+              <a class="btn o" href="#/${s ? 'agendar' : 'login'}">Agendar coleta</a>
+            </div>
+            <div class="row">
+              <input id="hq" style="max-width:420px" placeholder="Busque por resíduo ou bairro" aria-label="Buscar">
+              <button class="btn" id="hb">Buscar</button>
+            </div>
+          </section>
+
+          <section class="s">
+            <h2>Resíduos aceitos</h2>
+            <div class="grid">
+              ${CATS.map((c, i) => `
+                <a class="card" style="text-decoration:none;color:inherit" href="#/pontos?c=${i}">
+                  <h3>${c}</h3><span class="m">Ver pontos →</span>
+                </a>`).join("")}
+            </div>
+          </section>
+
+          <section class="s">
+            <h2>Como funciona</h2>
+            <div class="grid">
+              ${["Busque o material ou o bairro", "Escolha um ponto ou peça coleta em casa", "Acompanhe o status da solicitação", "Veja seu impacto e acumule pontos"]
+                .map((t, i) => `<div class="card"><div class="big">${i + 1}</div>${t}</div>`).join("")}
+            </div>
+          </section>
+
+          <section class="s">
+            <h2>Prévia dos pontos ${DEMOTAG}</h2>
+            <div class="grid">${PONTOS.slice(0, 3).map(pCard).join("")}</div>
+            <p class="m">O mapa interativo depende de serviço externo ainda não configurado; a lista é a alternativa funcional.</p>
+          </section>
+
+          <section class="s">
+            <h2>Indicadores ${DEMOTAG}</h2>
+            <div class="grid">
+              <div class="card"><div class="big">138 kg</div>exemplo de resíduos</div>
+              <div class="card"><div class="big">4</div>pontos de exemplo</div>
+              <div class="card"><div class="big">6</div>categorias no guia</div>
+            </div>
+          </section>
+
+          <section class="s">
+            <div class="card">
+              <h2>Aprenda a descartar certo</h2>
+              <p>Veja como preparar e armazenar cada material com segurança.</p>
+              <a class="btn o" href="#/guia">Abrir guia de descarte</a>
+            </div>
+          </section>
+
+          ${!s ? `
+          <section class="s">
+            <div class="card">
+              <h2>🔒 Funcionalidades de usuários logados</h2>
+              <p class="m">Ao criar uma conta, você poderá:</p>
+              <div style="margin:.8rem 0">
+                <p class="m">✔ <b>Agendar coletas domiciliares</b> de resíduos</p>
+                <p class="m">✔ <b>Acompanhar</b> suas solicitações em tempo real</p>
+                <p class="m">✔ <b>Acessar seu painel pessoal</b> com histórico e impacto</p>
+              </div>
+              <a class="btn" href="#/cadastro" style="width:100%;text-align:center">Criar conta agora</a>
+            </div>
+          </section>` : ``}
+        `;
+      },
+
+      "/pontos": () => `
+        <section class="s">
+          <h2>Pontos de coleta</h2>
+          <div class="note">${DEMOTAG} Endereços fictícios, apenas para demonstração. Não são locais reais de coleta. Mapa interativo: requer API externa (não configurada).</div>
+          <input id="q" placeholder="Pesquisar por nome, bairro ou endereço" aria-label="Pesquisar" value="${esc(P.q)}">
+          <div class="row" id="chips">
+            ${CATS.map((c, i) => `<button class="chip" data-i="${i}" aria-pressed="${P.f.has(i)}">${c}</button>`).join("")}
+            <button class="btn o s" id="clr">Limpar filtros</button>
+          </div>
+          <div id="list" class="grid"></div>
+        </section>`,
+
+      "/cadastro": () => `
+        <section class="s">
+          <div class="form card">
+            <h2>Criar conta</h2>
+            <div class="note">Os dados são enviados para o backend, que cria a conta com senha criptografada.</div>
+            <label for="perfil">Perfil</label>
+            <select id="perfil">
+              <option value="doador">Doador individual</option>
+              <option value="empresa">Empresa geradora de resíduos</option>
+              <option value="coletor">Coletor ou reciclador</option>
+            </select>
+            <form id="cf" novalidate>
+              <div id="cfields"></div><br>
+              <button class="btn" type="submit">Cadastrar</button>
+            </form>
+          </div>
+        </section>`,
+
+      "/login": () => `
+        <section class="s">
+          <div class="form card">
+            <h2>Entrar</h2>
+            <div class="note">O e-mail e a senha são validados pelo backend. O perfil (doador, empresa ou coletor) é identificado automaticamente pela sua conta.</div>
+            <form id="lf" novalidate>
+              <label for="le">E-mail</label>
+              <input id="le" type="email"><div class="err"></div>
+
+              <label for="lp">Senha</label>
+              <input id="lp" type="password"><div class="err"></div>
+
+              <label style="font-weight:400">
+                <input type="checkbox" id="sp" style="width:auto"> Mostrar senha
+              </label>
+
+              <p><a href="#/login" id="rec">Esqueci a senha</a></p>
+              <button class="btn" type="submit">Entrar</button>
+            </form>
+            <hr style="border:none;border-top:1px solid var(--b);margin:1.5rem 0">
+            <p style="font-size:.9rem">Não tem conta? <a href="#/cadastro">Criar agora</a></p>
+          </div>
+        </section>`,
+
+      "/agendar": () => `
+        <section class="s">
+          <div class="form card">
+            <h2>Agendar coleta domiciliar</h2>
+            <div class="note">A solicitação é enviada para o backend. Nenhum e-mail, WhatsApp ou notificação é enviado.</div>
+            <form id="af" novalidate>
+              <label for="a1">Tipo de resíduo</label>
+              <select id="a1">
+                <option value="">Selecione</option>
+                ${CATEGORIAS_API.map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join("")}
+              </select>
+              <div class="err"></div>
+
+              <div class="two">
+                <div>
+                  <label for="a2">Quantidade estimada</label>
+                  <input id="a2" type="number" min="0.1" step="any"><div class="err"></div>
+                </div>
+                <div>
+                  <label for="a3">Unidade</label>
+                  <select id="a3"><option>kg</option><option>litros</option><option>unidades</option></select>
+                </div>
+              </div>
+
+              <label for="a4">Endereço para retirada</label>
+              <input id="a4"><div class="err"></div>
+
+              <div class="two">
+                <div>
+                  <label for="a5">Data preferencial</label>
+                  <input id="a5" type="date"><div class="err"></div>
+                </div>
+                <div>
+                  <label for="a6">Período</label>
+                  <select id="a6"><option>Manhã (8h–12h)</option><option>Tarde (13h–18h)</option></select>
+                </div>
+              </div>
+
+              <label for="a7">Observações</label>
+              <textarea id="a7" rows="3"></textarea><br>
+              <button class="btn" type="submit">Enviar solicitação</button>
+            </form>
+          </div>
+        </section>`,
+
+      "/minhas": async () => {
+        let l = [];
+        try { l = await api("/solicitacoes/minhas"); }
+        catch (err) { return `<section class="s"><div class="note">${esc(err.message)}</div></section>`; }
+
+        if (!l.length) {
+          return `
+            <section class="s">
+              <h2>Minhas solicitações</h2>
+              <div class="card">Você ainda não tem solicitações. <a href="#/agendar">Agendar agora →</a></div>
+            </section>`;
+        }
+
+        return `
+          <section class="s">
+            <h2>Minhas solicitações</h2>
+            ${l.map(r => {
+              const st = STATUS_LABELS[r.status] || r.status;
+              const podeCancelar = ["PENDENTE", "CONFIRMADO"].includes(r.status);
+              const podeAvancar = ["PENDENTE", "CONFIRMADO", "EM_ROTA"].includes(r.status);
+              return `
+                <div class="card" style="margin-bottom:.8rem">
+                  <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">
+                    <b style="flex:1">${r.id.slice(0, 8)}</b>
+                    <span class="st ${st}">${st}</span>
+                  </div>
+                  <p class="m"><b>${esc(r.categoria?.nome || "")}</b> · ${r.quantidade} ${r.unidade}</p>
+                  <p class="m">${fdISO(r.dataPreferencial)}, ${esc(r.periodo)}</p>
+
+                  <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem">
+                    <button class="btn o s" data-det="${r.id}" title="Mostrar endereço e observações">📋 Detalhes</button>
+                    ${podeCancelar ? `<button class="btn d s" data-can="${r.id}" title="Cancelar esta solicitação">❌ Cancelar</button>` : ""}
+                    ${podeAvancar ? `<button class="btn o s" data-adv="${r.id}" data-cur="${r.status}" title="Avançar o status (demonstração)">⏭ Próx. status</button>` : ""}
+                  </div>
+
+                  <div id="d${r.id}" class="m" hidden style="margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--b)">
+                    📍 ${esc(r.enderecoRetirada)}<br>
+                    📝 ${esc(r.observacoes || "(nenhuma observação)")}<br>
+                    🕐 ${new Date(r.criadoEm).toLocaleString("pt-BR")}
+                  </div>
+                </div>`;
+            }).join("")}
+          </section>`;
+      },
+
+      "/painel": async () => {
+        const s = sess();
+        if (!s) return `<section class="s"><div class="card">Entre para acessar seu painel. <a href="#/login">Entrar</a></div></section>`;
+
+        const head = `<h2>Painel — ${{ DOADOR: "Doador", EMPRESA: "Empresa", COLETOR: "Coletor/Reciclador" }[s.perfil] || s.perfil}</h2>`;
+
+        // ---- Painel do coletor ----
+        if (s.perfil == "COLETOR") {
+          let l = [];
+          try { l = await api("/solicitacoes/recebidas"); }
+          catch (err) { return `<section class="s">${head}<div class="note">${esc(err.message)}</div></section>`; }
+
+          return `
+            <section class="s">
+              ${head}
+              <div class="card">
+                <h3>Solicitações recebidas</h3>
+                ${l.length ? l.map(r => {
+                  const st = STATUS_LABELS[r.status] || r.status;
+                  return `
+                    <div style="padding:.8rem;border:1px solid var(--b);border-radius:12px;margin-bottom:.8rem">
+                      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">
+                        <div style="flex:1"><b>${r.id.slice(0, 8)}</b> · <span class="m">${esc(r.categoria?.nome || "")}</span></div>
+                        <span class="st ${st}">${st}</span>
+                      </div>
+                      <p class="m">📍 ${esc(r.enderecoRetirada)}</p>
+                      ${r.status == "PENDENTE" ? `
+                        <div style="display:flex;gap:.5rem;margin-top:.8rem">
+                          <button class="btn s" data-adv="${r.id}" data-cur="${r.status}" title="Aceitar esta coleta">✅ Aceitar</button>
+                          <button class="btn d s" data-rej="${r.id}" title="Rejeitar esta solicitação">❌ Rejeitar</button>
+                        </div>` : ["CONFIRMADO", "EM_ROTA"].includes(r.status) ? `
+                        <div style="margin-top:.8rem">
+                          <button class="btn o s" data-adv="${r.id}" data-cur="${r.status}" title="Atualizar status">⏭ Próximo status</button>
+                        </div>` : ""}
+                    </div>`;
+                }).join("") : "<p class='m'>Nenhuma solicitação no momento.</p>"}
+              </div>
+
+              <div class="card" style="margin-top:1rem">
+                <h3>Meus pontos de coleta</h3>
+                <p class="m">Cadastro, edição e desativação de pontos pela interface: ainda não implementado nesta versão (a API já aceita, ver README).</p>
+                <label for="dest">Destinação final dos resíduos</label>
+                <textarea id="dest" rows="3" placeholder="Descreva para onde os resíduos são encaminhados">${esc(db.get("dest", ""))}</textarea>
+                <button class="btn s" id="sd">Salvar (local)</button>
+              </div>
+            </section>`;
+        }
+
+        // ---- Painel do doador / empresa ----
+        let l = [];
+        try { l = await api("/solicitacoes/minhas"); }
+        catch (err) { return `<section class="s">${head}<div class="note">${esc(err.message)}</div></section>`; }
+
+        const cnt = x => l.filter(r => r.status == x).length;
+
+        if (s.perfil == "EMPRESA") {
+          return `
+            <section class="s">
+              ${head}
+              <div class="grid">
+                <div class="card"><div class="big">${l.length}</div>solicitações registradas</div>
+                <div class="card"><div class="big">${cnt("CONCLUIDO")}</div>concluídas</div>
+              </div>
+              <div class="card" style="margin-top:1rem">
+                <h3>Relatório</h3>
+                <table>
+                  <tr><th>ID</th><th>Material</th><th>Qtd.</th><th>Status</th></tr>
+                  ${l.map(r => `
+                    <tr>
+                      <td>${r.id.slice(0, 8)}</td>
+                      <td>${esc(r.categoria?.nome || "")}</td>
+                      <td>${r.quantidade} ${r.unidade}</td>
+                      <td>${STATUS_LABELS[r.status] || r.status}</td>
+                    </tr>`).join("") || "<tr><td colspan=4 class=m>Sem dados.</td></tr>"}
+                </table>
+                <div style="margin-top:1.2rem;display:flex;gap:.5rem;flex-wrap:wrap">
+                  <button class="btn s" id="csv" title="Baixar relatório em CSV">📥 Exportar CSV</button>
+                  <span class="m" style="align-self:center">📄 PDF: não implementado</span>
+                </div>
+              </div>
+            </section>`;
+        }
+
+        const pts = cnt("CONCLUIDO") * 10;
+        return `
+          <section class="s">
+            ${head}
+            <div class="grid">
+              <div class="card"><div class="big">${cnt("PENDENTE") + cnt("CONFIRMADO") + cnt("EM_ROTA")}</div>coletas em andamento</div>
+              <div class="card"><div class="big">${pts}</div>pontos acumulados</div>
+            </div>
+
+            <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin:1.2rem 0">
+              <a class="btn" href="#/pontos">🗺 Encontrar pontos</a>
+              <a class="btn o" href="#/agendar">📞 Agendar coleta</a>
+              <a class="btn o" href="#/minhas">📋 Minhas solicitações</a>
+            </div>
+
+            <div class="card"><h3>📊 Descartes por categoria ${DEMOTAG}</h3>${bars()}</div>
+
+            <div class="card" style="margin-top:1rem">
+              <h3>🏆 Recompensas ${DEMOTAG}</h3>
+              <p class="m">Sem valor financeiro real.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+                <span class="tag">✔ Primeira coleta ${pts ? "desbloqueado" : "bloqueado"}</span>
+                <span class="tag">Sacola reutilizável — 50 pts</span>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:1rem">
+              <h3>⏰ Atividades recentes</h3>
+              <div style="font-size:.9rem">
+                ${l.slice(0, 4).map(r => `
+                  <p class="m">${new Date(r.criadoEm).toLocaleString("pt-BR")}: <b>${r.id.slice(0, 8)}</b> → ${STATUS_LABELS[r.status] || r.status}</p>
+                `).join("") || "<p class='m'>Nenhuma atividade ainda.</p>"}
+              </div>
+            </div>
+          </section>`;
+      },
+
+      "/guia": () => `
+        <section class="s">
+          <h2>Guia de descarte</h2>
+          <p class="m">Orientações gerais. Confirme regras locais com a prefeitura e os órgãos oficiais citados.</p>
+          <div class="grid">
+            ${GUIA.map(g => `
+              <div class="card">
+                <h3>${g[0]}</h3>
+                <p class="m"><b>Exemplos:</b> ${g[1]}</p>
+                <p class="m"><b>Preparo:</b> ${g[2]}</p>
+                <p class="m"><b>Segurança/não misturar:</b> ${g[3]}</p>
+                <p class="m"><b>Fonte/onde procurar:</b> ${g[4]}</p>
+                <a href="#/pontos?c=${CATS.indexOf(g[0]) < 0 ? 0 : CATS.indexOf(g[0])}">Ver pontos</a>
+              </div>`).join("")}
+          </div>
+        </section>`,
+
+      "/impacto": () => `
+        <section class="s">
+          <h2>📈 Painel público de impacto</h2>
+          <div class="note">${DEMOTAG} Valores de exemplo apenas. Nenhum dado real, cálculo de CO₂ ou estatística ambiental é apresentado.</div>
+          <div class="card">
+            <h3>Resíduos coletados (em kg) ${DEMOTAG}</h3>
+            <p class="m" style="margin-bottom:1rem">Distribuição por categoria.</p>
+            ${bars()}
+          </div>
+        </section>`
+    };
+
+    function bars() {
+      const m = Math.max(...IMPACTO_DEMO.map(x => x[1]));
+      return IMPACTO_DEMO.map(([n, v]) => `
+        <div class="bar">
+          <span>${n}</span>
+          <i style="width:${v / m * 60}%"></i>
+          <span>${v} kg</span>
+        </div>`).join("");
+    }
+
+    function pCard(p) {
+      return `
+        <div class="card">
+          <h3>${esc(p.nome)} ${DEMOTAG}</h3>
+          <p class="m">${esc(p.end)}</p>
+          ${p.cats.map(i => `<span class="tag">${CATS[i]}</span>`).join("")}
+          <div id="pd${p.id}" class="m" hidden><br>Horário: ${p.hor}<br>Contato: ${p.tel}</div>
+          <div class="row">
+            <button class="btn o s" data-pd="${p.id}">Ver detalhes</button>
+            <a class="btn s" target="_blank" rel="noopener"
+               href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.end + ', Concórdia, SC')}">
+              Como chegar
+            </a>
+          </div>
+        </div>`;
+    }
+
+    /* ===========================================================
+       Interações e formulários
+    =========================================================== */
+    const P = { q: "", f: new Set() };
+
+    function renderList() {
+      const q = P.q.toLowerCase();
+      const r = PONTOS.filter(p =>
+        (!P.f.size || [...P.f].every(i => p.cats.includes(i))) &&
+        (p.nome + p.end + p.bairro).toLowerCase().includes(q)
+      );
+      $("#list").innerHTML = r.length ? r.map(pCard).join("") : '<div class="card">Nenhum ponto encontrado. Tente limpar os filtros.</div>';
+    }
+
+    const PERFIL_API = { doador: "DOADOR", empresa: "EMPRESA", coletor: "COLETOR" };
+
+    // Cada campo é [rótulo, tipo do input, chave esperada pela API — vazio quando o campo ainda não é salvo no backend]
+    const CF = {
+      doador: [
+        ["Nome", "text", "nome"],
+        ["E-mail", "email", "email"],
+        ["CPF", "text", "cpfCnpj"],
+        ["Endereço", "text", "endereco"],
+        ["Senha", "password", "senha"],
+        ["Confirmar senha", "password", "confirmar"]
+      ],
+      empresa: [
+        ["Razão social", "text", "nome"],
+        ["CNPJ", "text", "cpfCnpj"],
+        ["Responsável", "text", ""],
+        ["E-mail", "email", "email"],
+        ["Endereço", "text", "endereco"],
+        ["Senha", "password", "senha"]
+      ],
+      coletor: [
+        ["Empresa ou responsável", "text", "nome"],
+        ["CNPJ ou CPF", "text", "cpfCnpj"],
+        ["E-mail", "email", "email"],
+        ["Endereço", "text", "endereco"],
+        ["Telefone", "tel", "telefone"],
+        ["Resíduos aceitos", "text", ""],
+        ["Destinação dos resíduos", "text", ""]
+      ]
+    };
+
+    function fieldsFor(p) {
+      $("#cfields").innerHTML = CF[p].map(([l, t, k], i) => `
+        <label for="f${i}">${l}</label>
+        <input id="f${i}" type="${t}" data-l="${l}" data-k="${k}">
+        <div class="err"></div>`
+      ).join("");
+    }
+
+    function setErr(el, m) {
+      el.nextElementSibling.textContent = m || "";
+      el.setAttribute("aria-invalid", !!m);
+      return !m;
+    }
+
+    async function avancarStatus(id, novo) {
+      try {
+        await api(`/solicitacoes/${id}/status`, { method: "PATCH", body: JSON.stringify({ status: novo }) });
+        toast("Status atualizado.");
+        route();
+      } catch (err) {
+        toast(err.message);
+      }
+    }
+
+    function bind(path, qs) {
+
+      if (path == "/") {
+        const go = () => { P.q = $("#hq").value; location.hash = "#/pontos"; };
+        $("#hb").onclick = go;
+        $("#hq").onkeydown = e => e.key == "Enter" && go();
+      }
+
+      if (path == "/pontos") {
+        renderList();
+        $("#q").oninput = e => { P.q = e.target.value; renderList(); };
+        $("#chips").onclick = e => {
+          const b = e.target.closest(".chip");
+          if (!b) return;
+          const i = +b.dataset.i;
+          P.f.has(i) ? P.f.delete(i) : P.f.add(i);
+          b.setAttribute("aria-pressed", P.f.has(i));
+          renderList();
+        };
+        $("#clr").onclick = () => { P.q = ""; P.f.clear(); route(); };
+      }
+
+      if (path == "/cadastro") {
+        fieldsFor("doador");
+        $("#perfil").onchange = e => fieldsFor(e.target.value);
+
+        $("#cf").onsubmit = async e => {
+          e.preventDefault();
+          let ok = true;
+          const ins = [...document.querySelectorAll("#cfields input")];
+          const senhaInput = ins.find(i => i.dataset.l == "Senha");
+
+          ins.forEach(i => {
+            let m = "";
+            const v = i.value.trim();
+            if (!v) m = "Campo obrigatório.";
+            else if (i.type == "email" && !/^\S+@\S+\.\S+$/.test(v)) m = "E-mail inválido.";
+            else if (i.type == "password" && v.length < 8) m = "Use ao menos 8 caracteres.";
+            if (i.dataset.l == "Confirmar senha" && v !== senhaInput.value) m = "As senhas não coincidem.";
+            ok = setErr(i, m) && ok;
+          });
+          if (!ok) return;
+
+          const perfilSel = $("#perfil").value;
+          const payload = { perfil: PERFIL_API[perfilSel] };
+          ins.forEach(i => { if (i.dataset.k) payload[i.dataset.k] = i.value.trim(); });
+          delete payload.confirmar;
+
+          try {
+            const data = await api("/auth/registro", { method: "POST", body: JSON.stringify(payload) });
+            db.set("sess", { token: data.token, id: data.usuario.id, nome: data.usuario.nome, email: data.usuario.email, perfil: data.usuario.perfil });
+            toast("Conta criada com sucesso!");
+            location.hash = "#/painel";
+          } catch (err) {
+            toast(err.message);
+          }
+        };
+      }
+
+      if (path == "/login") {
+        $("#sp").onchange = e => $("#lp").type = e.target.checked ? "text" : "password";
+        $("#rec").onclick = e => { e.preventDefault(); toast("Recuperação de senha requer e-mail configurado (não implementado)."); };
+
+        $("#lf").onsubmit = async e => {
+          e.preventDefault();
+          const a = setErr($("#le"), /^\S+@\S+\.\S+$/.test($("#le").value) ? "" : "Informe um e-mail válido.");
+          const b = setErr($("#lp"), $("#lp").value ? "" : "Informe a senha.");
+          if (!(a && b)) return;
+
+          try {
+            const data = await api("/auth/login", { method: "POST", body: JSON.stringify({ email: $("#le").value, senha: $("#lp").value }) });
+            db.set("sess", { token: data.token, id: data.usuario.id, nome: data.usuario.nome, email: data.usuario.email, perfil: data.usuario.perfil });
+            const back = qs.get("back");
+            toast("Bem-vindo!");
+            location.hash = back || "#/painel";
+          } catch (err) {
+            toast(err.message);
+          }
+        };
+      }
+
+      if (path == "/agendar") {
+        $("#a5").min = new Date().toISOString().slice(0, 10);
+
+        $("#af").onsubmit = async e => {
+          e.preventDefault();
+          const g = i => $("#a" + i);
+          let ok = true;
+          ok = setErr(g(1), g(1).value ? "" : "Selecione o tipo.") & ok;
+          ok = setErr(g(2), +g(2).value > 0 ? "" : "Informe uma quantidade válida.") & ok;
+          ok = setErr(g(4), g(4).value.trim() ? "" : "Informe o endereço.") & ok;
+          ok = setErr(g(5), g(5).value ? "" : "Escolha uma data.") & ok;
+          if (!ok) return;
+
+          try {
+            const r = await api("/solicitacoes", {
+              method: "POST",
+              body: JSON.stringify({
+                categoriaId: g(1).value,
+                quantidade: +g(2).value,
+                unidade: g(3).value,
+                enderecoRetirada: g(4).value.trim(),
+                dataPreferencial: g(5).value,
+                periodo: g(6).value,
+                observacoes: g(7).value.trim()
+              })
+            });
+            const catNome = CATEGORIAS_API.find(c => c.id == g(1).value)?.nome || "";
+            $("#app").innerHTML = `
+              <section class="s">
+                <div class="form card">
+                  <h2>Solicitação enviada ✔</h2>
+                  <p>Identificador: <b>${r.id.slice(0, 8)}</b></p>
+                  <p class="m">${esc(catNome)} · ${r.quantidade} ${r.unidade}<br>${esc(r.enderecoRetirada)}<br>${fdISO(r.dataPreferencial)}, ${esc(r.periodo)}</p>
+                  <a class="btn" href="#/minhas">Acompanhar status</a>
+                </div>
+              </section>`;
+            $("#app").focus();
+          } catch (err) {
+            toast(err.message);
+          }
+        };
+      }
+
+      if (["/minhas", "/painel"].includes(path)) {
+        $("#app").onclick = async e => {
+          const t = e.target;
+          const id = k => t.dataset[k];
+
+          if (id("det")) $("#d" + id("det")).hidden = !$("#d" + id("det")).hidden;
+
+          if (id("can") && confirm("Deseja realmente cancelar esta solicitação?")) avancarStatus(id("can"), "CANCELADO");
+          if (id("rej") && confirm("Rejeitar este pedido?")) avancarStatus(id("rej"), "CANCELADO");
+
+          if (id("adv")) {
+            const cur = t.dataset.cur;
+            const prox = STATUS_ORDEM[Math.min(STATUS_ORDEM.indexOf(cur) + 1, 3)];
+            avancarStatus(id("adv"), prox);
+          }
+
+          if (t.id == "sd") {
+            db.set("dest", $("#dest").value);
+            toast("Salvo neste navegador (demo).");
+          }
+
+          if (t.id == "csv") {
+            try {
+              const l = await api("/solicitacoes/minhas");
+              const c = [
+                "ID;Material;Quantidade;Unidade;Status",
+                ...l.map(r => [r.id, r.categoria?.nome || "", r.quantidade, r.unidade, STATUS_LABELS[r.status] || r.status].join(";"))
+              ].join("\n");
+              const a = document.createElement("a");
+              a.href = URL.createObjectURL(new Blob(["\ufeff" + c], { type: "text/csv" }));
+              a.download = "relatorio-ecoradar.csv";
+              a.click();
+            } catch (err) {
+              toast(err.message);
+            }
+          }
+        };
+      }
+
+      document.querySelectorAll("[data-pd]").forEach(b => {
+        b.onclick = () => { const d = $("#pd" + b.dataset.pd); d.hidden = !d.hidden; };
+      });
+    }
+
+    /* ===========================================================
+       Roteador
+    =========================================================== */
+    const NAV = [
+      ["/", "Início"], ["/pontos", "Pontos de coleta"], ["/agendar", "Agendar"],
+      ["/minhas", "Solicitações"], ["/painel", "Painel"], ["/guia", "Guia"], ["/impacto", "Impacto"]
+    ];
+    const PROTECTED = ["/agendar", "/minhas", "/painel"];
+
+    async function route() {
+      const h = location.hash.slice(1) || "/";
+      const path = h.split("?")[0];
+      const qs = new URLSearchParams(h.split("?")[1] || "");
+      const s = sess();
+      const isProtected = PROTECTED.includes(path);
+
+      if (isProtected && !s) {
+        location.hash = `#/login?back=${encodeURIComponent("#" + path)}`;
+        return;
+      }
+
+      if (qs.has("c") && path == "/pontos") P.f = new Set([+qs.get("c")]);
+
+      $("#app").onclick = null;
+      const pg = pages[path] || pages["/"];
+      $("#app").innerHTML = '<p class="m" style="padding:2rem 0">Carregando…</p>';
+
+      let html;
+      try { html = await pg(qs); }
+      catch (err) { html = `<section class="s"><div class="note">${esc(err.message)}</div></section>`; }
+      $("#app").innerHTML = html;
+
+      const navToShow = s ? NAV : NAV.filter(([p]) => !PROTECTED.includes(p));
+      $("#nav").innerHTML = navToShow.map(([p, n]) =>
+        `<a href="#${p}" class="${p == path ? "on" : ""}" ${p == path ? 'aria-current="page"' : ""}>${n}</a>`
+      ).join("");
+
+      $("#auth").innerHTML = s
+        ? `<button class="btn o s" id="out">Sair</button>`
+        : `<a class="btn o s" href="#/login">Entrar</a> <a class="btn s" href="#/cadastro">Cadastrar</a>`;
+
+      bind(path, qs);
+      if (h.includes("?")) history.replaceState(null, "", "#" + path);
+      window.scrollTo(0, 0);
+    }
+
+    document.addEventListener("click", e => {
+      if (e.target.id === "out") { db.set("sess", null); location.hash = "#/"; }
+    });
+
+    addEventListener("hashchange", route);
+
+    (async function init() {
+      try { CATEGORIAS_API = await api("/categorias"); }
+      catch (e) { console.error(e); }
+      route();
+    })();
+  </script>
+
+</body>
+</html>
