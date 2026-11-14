@@ -3,14 +3,14 @@
         <section class="hero-section">
             <div class="hero-blob hero-blob--one"></div>
             <div class="hero-blob hero-blob--two"></div>
-            <div class="hero-grid mx-auto w-[min(1180px,calc(100%-40px))] max-[760px]:w-[min(calc(100%-30px),600px)]">
+            <div class="eco-container hero-grid">
                 <div class="hero-copy">
                     <span class="eyebrow"><q-icon name="eco" /> Descarte consciente começa aqui</span>
                     <h1>Seu descarte encontra o <em>lugar certo.</em></h1>
                     <p>Encontre pontos de coleta, agende retiradas e acompanhe o impacto positivo das suas escolhas em
                         Concórdia.</p>
                     <div class="hero-actions">
-                        <q-btn unelevated no-caps class="hero-button min-h-[43px] rounded-[11px] bg-eco-600 px-[17px] font-bold text-white hover:bg-eco-700" icon="location_on"
+                        <q-btn unelevated no-caps class="primary-button hero-button" icon="location_on"
                             label="Encontrar ponto de coleta" href="#pontos" />
                         <q-btn outline no-caps class="secondary-button hero-button" icon="calendar_month"
                             label="Agendar coleta" />
@@ -42,7 +42,7 @@
         </section>
 
         <section id="materiais" class="content-section materials-section">
-            <div class="mx-auto w-[min(1180px,calc(100%-40px))] max-[760px]:w-[min(calc(100%-30px),600px)]">
+            <div class="eco-container">
                 <div class="section-heading section-heading--split">
                     <div><span class="section-kicker">O que descartar</span>
                         <h2>Encontre o destino de cada material</h2>
@@ -56,7 +56,7 @@
         </section>
 
         <section id="como-funciona" class="content-section how-section">
-            <div class="mx-auto w-[min(1180px,calc(100%-40px))] max-[760px]:w-[min(calc(100%-30px),600px)]">
+            <div class="eco-container">
                 <div class="section-heading section-heading--center">
                     <span class="section-kicker">Simples do começo ao fim</span>
                     <h2>Como o EcoRadar funciona</h2>
@@ -75,7 +75,7 @@
         </section>
 
         <section id="pontos" class="content-section points-section">
-            <div class="mx-auto w-[min(1180px,calc(100%-40px))] max-[760px]:w-[min(calc(100%-30px),600px)]">
+            <div class="eco-container">
                 <div class="section-heading section-heading--split">
                     <div><span class="section-kicker">Perto de você</span>
                         <h2>Pontos de coleta em destaque</h2>
@@ -90,7 +90,7 @@
         </section>
 
         <section class="content-section cta-section">
-            <div class="mx-auto w-[min(1180px,calc(100%-40px))] max-[760px]:w-[min(calc(100%-30px),600px)]">
+            <div class="eco-container">
                 <div class="cta-card">
                     <div class="cta-card__icon"><q-icon name="volunteer_activism" /></div>
                     <div><span class="section-kicker">Faça parte da mudança</span>

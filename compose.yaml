@@ -24,12 +24,34 @@ services:
     container_name: ecordar_api
     restart: unless-stopped
     ports:
-      - "8090:8090"
+      - "8000:8000"
     volumes:
-      - ./api:/app
+      - ./api:/var/www/html
+      - ecordar_backend_vendor:/var/www/html/vendor
     env_file:
       - ./api/.env
+    environment:
+      PORT: "8000"
+
+  postgres:
+    image: postgres:18-alpine
+    container_name: ecoradar_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ecoradar_db
+      POSTGRES_USER: ecoradar
+      POSTGRES_PASSWORD: masterkey
+    ports:
+      - "5548:5432"
+    volumes:
+      - ecoradar_postgres_data:/var/lib/postgresql
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U ecoradar -d ecoradar_db"]
+        interval: 5s
+        timeout: 5s
+        retries: 10
 
 volumes:
-  ecordar_postgres_data:
+  ecoradar_postgres_data:
   ecordar_frontend_node_modules:
+  ecordar_backend_vendor:

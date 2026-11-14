@@ -1,14 +1,115 @@
-import { defineBoot } from '#q-app'
-import axios from 'axios'
+import { boot } from 'quasar/wrappers';
+import axios, { type AxiosInstance } from 'axios';
+import { LocalStorage } from 'quasar';
+import { useNotify } from 'src/helpers/QNotify/useNotify';
+
+axios.defaults.withCredentials = false;
+declare module 'vue' {
+    interface ComponentCustomProperties {
+        $axios: AxiosInstance;
+        $api: AxiosInstance;
+    }
+}
+
+// Be careful when using SSR for cross-request state pollution
+// due to creating a Singleton instance here;
+// If any client changes this (global) instance, it might be a
+// good idea to move this instance creation inside of the
+// "export default () => {}" function below (which runs individually
+// for each client)
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: process.env.VITE_API_URL,
     headers: {
-        Accept: 'application/json'
+        Accept: 'application/json',
+        "Content-Type": 'application/json'
     }
 });
 
-export default defineBoot(async (/* { app, router, ... } */) => {
+const apiCep = axios.create({
+    baseURL: process.env.API_CEP,
+    headers: {
+        Accept: 'application/json',
+        "Content-Type": 'application/json'
+    }
 });
 
-export { api };
+const apiCnpj = axios.create({
+    baseURL: process.env.API_CNPJ,
+    headers: {
+        Accept: 'application/json',
+        "Content-Type": 'application/json'
+    }
+});
+
+const showConsoleMessage = (error: any) => {
+    if(process.env.VITE_APP_ENV === 'dev')
+    {
+        console.error('Erro:', error);
+        console.error('Status:', error.response.status);
+        console.error('Mensagem:', error.response.data.message);
+        console.error('Erro:', error.response.data.data);
+    };
+};
+
+export default boot(({ app, router }) => {
+    api.interceptors.request.use(
+        (config) => {
+            const publicRoutes: string[] = [
+                '/auth/login',
+            ];
+
+            const isPublic = publicRoutes.some(route => config.url?.includes(route));
+            const token = LocalStorage.getItem("authToken");
+
+            if (!isPublic && (token === "undefined" || !token))
+            {
+                router.replace({
+                    path: '/auth/login'
+                });
+
+                LocalStorage.remove("authToken");
+            };
+
+            if (token) config.headers.Authorization = `Bearer ${token}`;
+
+            return config;
+        },
+        (error) => {
+            return Promise.reject(error);
+        }
+    );
+
+    api.interceptors.response.use(
+        (response) => response,
+        (error) => {
+            if (error.response.status === 401)
+            {
+                router.replace({
+                    path: '/auth/login'
+                });
+
+                return Promise.reject(error);
+            };
+
+            if (error.response) {
+                showConsoleMessage(error);
+
+            } else {
+                showConsoleMessage(error);
+            };
+
+            return Promise.reject(error);
+        }
+    );
+
+    app.config.globalProperties.$axios = axios;
+    // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
+    //       so you won't necessarily have to import axios in each vue file
+
+    app.config.globalProperties.$api = api;
+    // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
+    //       so you can easily perform requests against your app's API
+});
+
+export { api, apiCnpj, apiCep };
