@@ -1,11 +1,34 @@
-FROM php:8.5.8-cli
+FROM php:8.4-cli
 
-# Dependências do sistema
 RUN apt-get update && apt-get install -y \
-    git unzip libpq-dev libzip-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip
+    git \
+    unzip \
+    libpq-dev \
+    libzip-dev \
+    && docker-php-ext-install \
+        pdo_pgsql \
+        zip \
+        bcmath \
+    && rm -rf /var/lib/apt/lists/*
 
-# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www
+WORKDIR /var/www/html
+
+COPY composer.json composer.lock ./
+
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --no-scripts \
+    --prefer-dist \
+    --optimize-autoloader
+
+COPY . .
+
+RUN php artisan package:discover --ansi \
+    && php artisan config:clear \
+    && php artisan route:clear \
+    && php artisan view:clear
+
+CMD php artisan serve --host=0.0.0.0 --port=${PORT}
