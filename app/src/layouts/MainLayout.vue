@@ -14,8 +14,9 @@
                 </nav>
 
                 <div class="desktop-actions">
-                    <q-btn flat no-caps label="Entrar" class="login-button" />
-                    <q-btn unelevated no-caps label="Criar conta" class="primary-button" />
+                    <q-btn flat no-caps label="Entrar" class="login-button" to="/login" />
+
+                    <q-btn unelevated no-caps label="Criar conta" class="primary-button" to="/cadastro" />
                 </div>
 
                 <q-btn flat round dense icon="menu" class="mobile-menu" aria-label="Abrir menu" @click="drawerOpen = true" />
@@ -33,8 +34,8 @@
                 </q-item>
             </q-list>
             <div class="drawer-actions">
-                <q-btn outline no-caps label="Entrar" class="full-width" />
-                <q-btn unelevated no-caps label="Criar conta" class="primary-button full-width" />
+                <q-btn outline no-caps label="Entrar" class="full-width" to="/login" />
+                <q-btn unelevated no-caps label="Criar conta" class="primary-button full-width" to="/cadastro" />
             </div>
         </q-drawer>
 
@@ -71,6 +72,5 @@
         { label: 'Pontos de coleta', to: { path: '/', hash: '#pontos' } },
         { label: 'Como funciona', to: { path: '/', hash: '#como-funciona' } },
         { label: 'Guia de descarte', to: { path: '/', hash: '#materiais' } },
-        { label: 'Categorias', to: '/categories' },
     ];
 </script>

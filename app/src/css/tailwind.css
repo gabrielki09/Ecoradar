@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@theme {
+    --color-eco-50: #f3faf6;
+    --color-eco-100: #e4f4eb;
+    --color-eco-200: #cfe7d9;
+    --color-eco-600: #16805b;
+    --color-eco-700: #176f50;
+    --color-eco-800: #17503d;
+    --color-eco-900: #123a2e;
+    --color-cream: #fbfaf5;
+    --color-ink: #17342b;
+    --color-muted: #697b74;
+    --color-line: #dfeae4;
+    --shadow-eco: 0 14px 45px rgba(21, 75, 56, 0.09);
+}
