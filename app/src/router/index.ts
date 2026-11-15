@@ -7,6 +7,7 @@ import {
 } from 'vue-router';
 
 import routes from './routes';
+import { useAuthStore } from '@/modules/auth/stores/auth.store';
 
 /*
  * If not building with SSR mode, you can
@@ -30,6 +31,27 @@ export default defineRouter((/* { store, ssrContext } */) => {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(import.meta.env.QUASAR_VUE_ROUTER_BASE)
+  });
+
+  Router.beforeEach(async (to) => {
+    const authStore = useAuthStore();
+    await authStore.restoreSession();
+
+    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+      return { name: 'login', query: { redirect: to.fullPath } };
+    }
+
+    if (to.meta.guestOnly && authStore.isAuthenticated) {
+      return authStore.destinationFor();
+    }
+
+    if (authStore.isAuthenticated && to.meta.requiresAuth) {
+      const expectedDestination = authStore.destinationFor();
+      const onboardingStep = to.meta.onboardingStep;
+
+      if (onboardingStep && to.path !== expectedDestination) return expectedDestination;
+      if (to.name === 'user-home' && expectedDestination !== '/area') return expectedDestination;
+    }
   });
 
   return Router;

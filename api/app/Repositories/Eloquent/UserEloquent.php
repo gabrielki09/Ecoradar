@@ -5,7 +5,7 @@ namespace App\Repositories\Eloquent;
 use App\Models\User;
 use App\Repositories\Interface\UserInterface;
 
-class UserEloquentRepository extends BaseEloquentRepository implements UserInterface
+class UserEloquent extends BaseEloquent implements UserInterface
 {
     protected function modelClass(): string
     {

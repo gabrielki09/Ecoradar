@@ -1,5 +1,6 @@
 <?php
 
+use App\Enum\CompanyUsers\RoleUser;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -21,11 +22,7 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->enum('role', [
-                'responsible',
-                'admin',
-                'member',
-            ])->default('member');
+            $table->enum('role', array_column(RoleUser::cases(), 'value'))->default('member');
 
             $table->primary([
                 'user_id',

@@ -18,7 +18,6 @@ use Laravel\Sanctum\HasApiTokens;
     'name',
     'email',
     'password',
-
     'address',
     'document',
     'profile_type',

@@ -6,6 +6,12 @@ use App\Enum\ProfileTypes;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Repositories\Interface\UserInterface;
+use Exception;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class AuthUserService
 {
@@ -13,34 +19,35 @@ class AuthUserService
         protected UserInterface $userRepository
     ){}
 
-    private function validatePassword(string $password)
-    {
-
-    }
-
     private function generateToken(User $user): string
     {
         return $user->createToken('web')->plainTextToken;
     }
 
-    public function login(string $email, string $password)
+    private function findByEmail(
+        string $email
+    ): ?User
     {
-
+        return $this->userRepository->findBy(
+            parameters: [
+                'email' => $email
+            ],
+            columns: [
+                'id',
+                'name',
+                'password',
+                'email',
+                'profile_type',
+                'onboarding_completed_at'
+            ]
+        ) ?? throw new AuthenticationException('Credencias incorretas');
     }
 
-    public function register(array $data)
+    private function authenticationPayload(User $user): array
     {
-        $data['onboarding_completed_at'] = $data['profile_type'] === ProfileTypes::COMMON->value
-            ? now()
-            : null;
-
-        $user = $this->userRepository->create($data);
-
-        $token = $this->generateToken($user);
-
         return [
             'user' => new UserResource($user),
-            'token' => $token,
+            'token' => $this->generateToken($user),
             'token_type' => 'Bearer',
 
             'onboarding' => [
@@ -53,7 +60,26 @@ class AuthUserService
                     default => null,
                 }
             ]
-
         ];
+    }
+
+    public function login(string $email, string $password)
+    {
+        $user = $this->findByEmail($email);
+
+        if (! Hash::check($password, $user->password) ) throw new AuthenticationException('Credencias incorretas');
+
+        return $this->authenticationPayload($user);
+    }
+
+    public function register(array $data)
+    {
+        return DB::transaction(function() use ($data) {
+            $data['onboarding_completed_at'] = $data['profile_type'] === ProfileTypes::COMMON->value
+                ? now()
+                : null;
+
+            return $this->authenticationPayload(user: $this->userRepository->create($data));
+        });
     }
 }

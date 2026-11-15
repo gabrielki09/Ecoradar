@@ -1,25 +1,3 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowJs": true,
-    "jsx": "preserve",
-    "esModuleInterop": true,
-    "strictNullChecks": false,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "allowImportingTsExtensions": true,
-    "paths": {
-      "src/*": ["./src/*"],
-      "#q-app/*": ["./src/*"]
-    }
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    "src/**/*.vue",
-    "src/interfaces"
-  ]
+    "extends": "./.quasar/tsconfig.json"
 }

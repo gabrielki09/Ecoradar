@@ -5,7 +5,6 @@ namespace App\Http\Requests\Auth;
 use App\Enum\ProfileTypes;
 use App\Http\Requests\ApiFormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;

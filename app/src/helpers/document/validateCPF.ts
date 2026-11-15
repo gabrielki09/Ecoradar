@@ -1,12 +1,16 @@
 function validateCPF (cpf: string): boolean
 {
     cpf = cpf.replace(/\D/g, '');
+
+
     if(cpf.length !== 11)
     {
+        console.log('volto aq');
+
         return false;
     };
 
-    const getFirstDigit = (incorretCPF: string) => 
+    const getFirstDigit = (incorretCPF: string) =>
     {
         let sum: number = 0;
 
@@ -23,17 +27,17 @@ function validateCPF (cpf: string): boolean
     };
 
     const firstDigit = getFirstDigit(cpf.substring(0, 9));
-    const secondDigit = getFirstDigit(cpf.substring(0, 9) + firstDigit); 
+    const secondDigit = getFirstDigit(cpf.substring(0, 9) + firstDigit);
 
     let correctCPF = cpf.substring(0, 9) + firstDigit + secondDigit;
 
-    if(cpf !== correctCPF)
-    {
-        return false;
-    } else {
-        return true;
+    console.log('Validate CPF', {
+        cpf: cpf,
+        correctCPF: correctCPF,
+        isValid: cpf === correctCPF
+    });
 
-    };
+    return cpf === correctCPF;
 };
 
 export default validateCPF;

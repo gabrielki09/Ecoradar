@@ -1,7 +1,7 @@
-import { boot } from 'quasar/wrappers';
+import { defineBoot } from '#q-app';
 import axios, { type AxiosInstance } from 'axios';
 import { LocalStorage } from 'quasar';
-import { useNotify } from 'src/helpers/QNotify/useNotify';
+import { ApiErrorResponse } from '@/types/api/api.types';
 
 axios.defaults.withCredentials = false;
 declare module 'vue' {
@@ -19,7 +19,7 @@ declare module 'vue' {
 // for each client)
 
 const api = axios.create({
-    baseURL: process.env.VITE_API_URL,
+    baseURL: import.meta.env.VITE_API_URL ?? '',
     headers: {
         Accept: 'application/json',
         "Content-Type": 'application/json'
@@ -27,7 +27,7 @@ const api = axios.create({
 });
 
 const apiCep = axios.create({
-    baseURL: process.env.API_CEP,
+    baseURL: import.meta.env.VITE_API_CEP ?? '',
     headers: {
         Accept: 'application/json',
         "Content-Type": 'application/json'
@@ -35,41 +35,33 @@ const apiCep = axios.create({
 });
 
 const apiCnpj = axios.create({
-    baseURL: process.env.API_CNPJ,
+    baseURL: import.meta.env.VITE_API_CNPJ ?? '',
     headers: {
         Accept: 'application/json',
         "Content-Type": 'application/json'
     }
 });
 
+let unauthorizedHandler: (() => void) | undefined;
+
+export function setUnauthorizedHandler(handler: () => void) {
+    unauthorizedHandler = handler;
+}
+
 const showConsoleMessage = (error: any) => {
-    if(process.env.VITE_APP_ENV === 'dev')
+    if (import.meta.env.VITE_APP_ENV === "dev")
     {
-        console.error('Erro:', error);
-        console.error('Status:', error.response.status);
-        console.error('Mensagem:', error.response.data.message);
-        console.error('Erro:', error.response.data.data);
+        const res: ApiErrorResponse | undefined = error.response?.data;
+
+        console.error('Erro:', res ?? error);
+
     };
 };
 
-export default boot(({ app, router }) => {
+export default defineBoot(({ app }) => {
     api.interceptors.request.use(
         (config) => {
-            const publicRoutes: string[] = [
-                '/auth/login',
-            ];
-
-            const isPublic = publicRoutes.some(route => config.url?.includes(route));
             const token = LocalStorage.getItem("authToken");
-
-            if (!isPublic && (token === "undefined" || !token))
-            {
-                router.replace({
-                    path: '/auth/login'
-                });
-
-                LocalStorage.remove("authToken");
-            };
 
             if (token) config.headers.Authorization = `Bearer ${token}`;
 
@@ -83,11 +75,10 @@ export default boot(({ app, router }) => {
     api.interceptors.response.use(
         (response) => response,
         (error) => {
-            if (error.response.status === 401)
+            if (error.response?.status === 401)
             {
-                router.replace({
-                    path: '/auth/login'
-                });
+                LocalStorage.remove('authToken');
+                unauthorizedHandler?.();
 
                 return Promise.reject(error);
             };

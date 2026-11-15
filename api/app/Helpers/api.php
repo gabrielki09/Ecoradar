@@ -1,7 +1,7 @@
 <?php
 
 function apiSuccess(
-    string $message = 'Sucesso!',
+    string $message,
     mixed $data = [],
     ?int $status = 200
 ) {

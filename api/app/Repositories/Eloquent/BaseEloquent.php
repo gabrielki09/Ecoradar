@@ -8,11 +8,11 @@ use Illuminate\Container\Container as Application;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
+use Override;
 
-abstract class BaseEloquentRepository implements BaseInterface
+abstract class BaseEloquent implements BaseInterface
 {
     protected Model $model;
 
@@ -301,8 +301,6 @@ abstract class BaseEloquentRepository implements BaseInterface
             $query->where($column, $value);
         }
 
-        Log::info('q', ['q' => $query]);
-
         return $query->first();
     }
 
@@ -327,5 +325,13 @@ abstract class BaseEloquentRepository implements BaseInterface
         }
 
         return $query->exists();
+    }
+
+    public function findByUpdate(int $id, array $columns = ['*']): Model
+    {
+        return $this->model
+            ->newQuery()
+            ->lockForUpdate()
+            ->findOrFail($id, $columns);
     }
 }

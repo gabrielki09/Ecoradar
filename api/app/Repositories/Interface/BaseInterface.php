@@ -20,6 +20,10 @@ interface BaseInterface
         array $columns = ['*'],
         array $relationships = []
     ): ?Model;
+    public function findByUpdate(
+        int $id,
+        array $columns = ['*']
+    ): Model;
 
     public function existsBy(array $parameters): bool;
 }

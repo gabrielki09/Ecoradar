@@ -97,7 +97,7 @@
                         <h2>Um descarte de cada vez transforma a cidade.</h2>
                         <p>Crie sua conta para agendar coletas, acompanhar solicitações e visualizar seu impacto.</p>
                     </div>
-                    <q-btn unelevated no-caps class="cta-button" label="Começar agora" icon-right="arrow_forward" />
+                    <q-btn unelevated no-caps class="cta-button" label="Começar agora" icon-right="arrow_forward" to="/cadastro" />
                 </div>
             </div>
         </section>
