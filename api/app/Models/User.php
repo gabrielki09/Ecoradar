@@ -5,11 +5,15 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Enum\ProfileTypes;
+use App\Models\Collector\CollectorProfile;
 use App\Models\Company\Company;
+use App\Models\Company\CompanyUser;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -44,9 +48,24 @@ class User extends Authenticatable
         ];
     }
 
+    public function companyUsers() : HasMany
+    {
+        return $this->hasMany(CompanyUser::class)
+                ->withTimestamps();
+    }
+
     public function companies() : BelongsToMany
     {
-        return $this->belongsToMany(Company::class)
-                ->withTimestamps();
+        return $this->BelongsToMany(
+            Company::class,
+            'company_users',
+            'user_id',
+            'company_id'
+        )->withTimestamps();
+    }
+
+    public function collectorProfile(): HasOne
+    {
+        return $this->hasOne(CollectorProfile::class);
     }
 }

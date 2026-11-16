@@ -11,6 +11,14 @@
             </section>
 
             <section class="mt-7 grid gap-4 md:grid-cols-3" aria-label="Próximos passos">
+                <RouterLink v-if="authStore.user?.profile_type === 'collector'" to="/area/perfil-coleta"
+                    class="rounded-2xl border border-line bg-white p-6 text-inherit no-underline shadow-sm transition hover:-translate-y-1 hover:shadow-eco focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eco-600">
+                    <span class="grid size-11 place-items-center rounded-xl bg-eco-100 text-eco-700"><q-icon
+                            name="tune" size="24px" /></span>
+                    <h2 class="mb-2 mt-5 text-lg font-extrabold text-eco-900">Perfil de coleta</h2>
+                    <p class="m-0 text-sm leading-6 text-muted">Configure a cidade atendida e os resíduos que você aceita.</p>
+                </RouterLink>
+
                 <RouterLink to="/#pontos"
                     class="rounded-2xl border border-line bg-white p-6 text-inherit no-underline shadow-sm transition hover:-translate-y-1 hover:shadow-eco focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eco-600">
                     <span class="grid size-11 place-items-center rounded-xl bg-eco-100 text-eco-700"><q-icon

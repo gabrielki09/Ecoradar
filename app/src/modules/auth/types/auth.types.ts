@@ -8,6 +8,7 @@ export type Onboarding = {
 
 export interface MeResponse {
     user: UserResource;
+    onboarding: Onboarding;
 }
 
 export interface LoginPayload {

@@ -1,88 +1,159 @@
 <template>
-    <OnboardingShell title-id="collector-onboarding-title" icon="local_shipping" title="Ative seu perfil de coletor"
-        description="Sua conta já está pronta. Confirme abaixo para ativar o perfil de coletor individual no EcoRadar.">
-        <div v-if="feedback" :role="feedbackKind === 'success' ? 'status' : 'alert'" aria-live="polite"
-            class="mb-6 flex items-start gap-3 rounded-xl border p-4 text-sm leading-6"
-            :class="feedbackKind === 'success' ? 'border-[#c8ddcf] bg-[#f4faf6] text-eco-800' : 'border-[#efbaba] bg-[#fff3f3] text-[#8f2929]'">
-            <q-icon :name="feedbackKind === 'success' ? 'check_circle' : 'error_outline'" size="21px"
-                class="mt-0.5 shrink-0" />
-            <span>{{ feedback }}</span>
-        </div>
+    <OnboardingShell title-id="collector-onboarding-title" icon="local_shipping" title="Configure seu perfil de coleta"
+        description="Informe como e onde você realiza coletas para ativar seu perfil individual no EcoRadar.">
+        <q-form class="grid gap-6" greedy @submit="completeOnboarding">
+            <div v-if="feedback" role="alert" aria-live="assertive"
+                class="flex items-start gap-3 rounded-xl border border-[#efbaba] bg-[#fff3f3] p-4 text-sm leading-6 text-[#8f2929]">
+                <q-icon name="error_outline" size="21px" class="mt-0.5 shrink-0" />
+                <span>{{ feedback }}</span>
+            </div>
 
-        <div class="grid gap-5 sm:grid-cols-2">
-            <article class="rounded-2xl border border-line bg-eco-50 p-5">
-                <q-icon name="person" size="25px" class="text-eco-700" />
-                <h2 class="mb-2 mt-3 text-base font-extrabold text-eco-900">Conta confirmada</h2>
-                <p class="m-0 break-words text-sm leading-6 text-muted">{{ authStore.user?.name }}, seus dados de acesso
-                    já estão vinculados a esta etapa.</p>
-            </article>
-            <article class="rounded-2xl border border-line bg-white p-5">
-                <q-icon name="verified" size="25px" class="text-eco-700" />
-                <h2 class="mb-2 mt-3 text-base font-extrabold text-eco-900">Ativação imediata</h2>
-                <p class="m-0 text-sm leading-6 text-muted">Nenhuma informação adicional é necessária nesta versão. Ao
-                    continuar, seu perfil individual será ativado.</p>
-            </article>
-        </div>
+            <section>
+                <h2 class="mb-1 text-base font-extrabold text-eco-900"><q-icon name="description" class="mr-2 text-eco-600" />Descrição do serviço</h2>
+                <p class="mb-3 mt-0 text-xs text-muted">Explique de forma clara como funciona sua coleta.</p>
+                <q-input v-model="form.service_description" outlined type="textarea" autogrow maxlength="500" counter
+                    name="service_description" label="Descrição do serviço *" :disable="loading"
+                    :error="Boolean(errors.service_description)" :error-message="errors.service_description"
+                    :rules="descriptionRules" />
+                <div v-if="form.service_description.trim()" class="mt-2 rounded-xl bg-eco-50 p-4">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-eco-700">Prévia</span>
+                    <p class="mb-0 mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-ink">{{ form.service_description.trim() }}</p>
+                </div>
+            </section>
 
-        <button type="button" :disabled="loading" :aria-busy="loading" @click="completeOnboarding"
-            class="mt-8 inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-eco-600 px-5 text-[15px] font-extrabold text-white shadow-[0_10px_24px_rgba(22,128,91,.2)] transition hover:bg-eco-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eco-600 disabled:cursor-wait disabled:opacity-70">
-            <q-spinner v-if="loading" size="22px" color="white" />
-            <span>{{ loading ? 'Ativando perfil…' : 'Ativar perfil de coletor' }}</span>
-        </button>
+            <section>
+                <h2 class="mb-1 text-base font-extrabold text-eco-900"><q-icon name="location_on" class="mr-2 text-eco-600" />Cidade atendida</h2>
+                <p class="mb-3 mt-0 text-xs text-muted">Escolha uma ou mais cidades onde você realiza coletas.</p>
+                <div v-if="catalogLoading" class="grid min-h-20 place-items-center" role="status"><q-spinner color="primary" size="30px" /></div>
+                <div v-else-if="cities.length" class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <button v-for="city in cities" :key="city.id" type="button" :disabled="loading"
+                        :aria-pressed="citySelected(city.id)" @click="toggleCity(city.id)"
+                        class="min-h-[58px] rounded-xl border px-4 py-3 text-left text-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eco-600"
+                        :class="citySelected(city.id) ? 'border-eco-600 bg-eco-100 text-eco-900' : 'border-line bg-white text-ink hover:bg-eco-50'">
+                        <span class="flex items-center gap-2"><q-icon :name="citySelected(city.id) ? 'check_circle' : 'radio_button_unchecked'" size="19px" class="shrink-0 text-eco-600" />
+                            <strong>{{ city.municipio_tom || city.municipio_ibge }}</strong><span class="ml-auto text-xs text-muted">{{ city.uf }}</span></span>
+                    </button>
+                </div>
+                <div v-else class="rounded-xl border border-dashed border-line p-4 text-center text-sm text-muted">Nenhuma cidade disponível.</div>
+                <p class="mb-0 mt-2 text-xs" :class="errors.cities ? 'text-negative' : 'text-muted'">{{ errors.cities || citySummary }}</p>
+            </section>
+
+            <section>
+                <h2 class="mb-1 text-base font-extrabold text-eco-900"><q-icon name="recycling" class="mr-2 text-eco-600" />Resíduos aceitos</h2>
+                <p class="mb-3 mt-0 text-xs text-muted">Selecione pelo menos uma categoria.</p>
+                <div v-if="catalogLoading" class="grid min-h-24 place-items-center" role="status"><q-spinner color="primary" size="30px" /></div>
+                <div v-else-if="categories.length" class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    <button v-for="category in categories" :key="category.id" type="button" :disabled="loading"
+                        :aria-pressed="selected(category.id)" @click="toggleCategory(category.id)"
+                        class="min-h-[60px] rounded-xl border px-3 py-3 text-left text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eco-600"
+                        :class="selected(category.id) ? 'border-eco-600 bg-eco-100 text-eco-900' : 'border-line bg-white text-ink hover:bg-eco-50'">
+                        <span class="flex items-center gap-2"><q-icon :name="selected(category.id) ? 'check_circle' : 'radio_button_unchecked'" size="19px" class="shrink-0 text-eco-600" />{{ category.name }}</span>
+                    </button>
+                </div>
+                <div v-else class="rounded-xl border border-dashed border-line p-4 text-center text-sm text-muted">Nenhuma categoria disponível.</div>
+                <p class="mb-0 mt-2 text-xs" :class="errors.waste_category ? 'text-negative' : 'text-muted'">{{ errors.waste_category || categorySummary }}</p>
+            </section>
+
+            <button type="submit" :disabled="loading || catalogLoading" :aria-busy="loading"
+                class="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-eco-600 px-5 text-[15px] font-extrabold text-white shadow-[0_10px_24px_rgba(22,128,91,.2)] transition hover:bg-eco-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eco-600 disabled:cursor-not-allowed disabled:opacity-50">
+                <q-spinner v-if="loading" size="22px" color="white" />
+                <span>{{ loading ? 'Ativando perfil…' : 'Ativar perfil de coletor' }}</span>
+            </button>
+        </q-form>
     </OnboardingShell>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 import OnboardingShell from '../components/OnboardingShell.vue';
 import { onboardingService } from '../services/onboarding.service';
 import { useAuthStore } from '@/modules/auth/stores/auth.store';
 import { readFormError } from '@/modules/auth/utils/form-errors';
+import { collectorProfileService } from '@/modules/collector-profile/services/collector-profile.service';
+import type { CityOption, WasteCategoryOption } from '@/modules/collector-profile/types/collector-profile.types';
 
 const authStore = useAuthStore();
 const router = useRouter();
 const loading = ref(false);
+const catalogLoading = ref(true);
 const feedback = ref('');
-const feedbackKind = ref<'error' | 'success'>('error');
+const categories = ref<WasteCategoryOption[]>([]);
+const cities = ref<CityOption[]>([]);
+const form = reactive({ service_description: '', cities: [] as number[], waste_category: [] as number[] });
+const errors = reactive({ service_description: '', cities: '', waste_category: '' });
+const descriptionRules = [
+    (value: string) => Boolean(value.trim()) || 'Descreva o serviço de coleta.',
+    (value: string) => value.length <= 500 || 'Use no máximo 500 caracteres.',
+];
+const categorySummary = computed(() => form.waste_category.length
+    ? `${form.waste_category.length} ${form.waste_category.length === 1 ? 'categoria selecionada' : 'categorias selecionadas'}.`
+    : 'Nenhuma categoria selecionada.');
+const citySummary = computed(() => form.cities.length
+    ? `${form.cities.length} ${form.cities.length === 1 ? 'cidade selecionada' : 'cidades selecionadas'}.`
+    : 'Nenhuma cidade selecionada.');
+
+function selected(id: number) { return form.waste_category.includes(id); }
+function toggleCategory(id: number) {
+    const values = new Set(form.waste_category);
+    values.has(id) ? values.delete(id) : values.add(id);
+    form.waste_category = [...values];
+    errors.waste_category = '';
+}
+function citySelected(id: number) { return form.cities.includes(id); }
+function toggleCity(id: number) {
+    const values = new Set(form.cities);
+    values.has(id) ? values.delete(id) : values.add(id);
+    form.cities = [...values];
+    errors.cities = '';
+}
 
 async function completeOnboarding() {
+    if (loading.value) return;
     feedback.value = '';
-    loading.value = true;
+    errors.service_description = form.service_description.trim() ? '' : 'Descreva o serviço de coleta.';
+    errors.cities = form.cities.length ? '' : 'Selecione pelo menos uma cidade atendida.';
+    errors.waste_category = form.waste_category.length ? '' : 'Selecione pelo menos uma categoria.';
+    if (errors.service_description || errors.cities || errors.waste_category) return;
 
+    loading.value = true;
     try {
-        await onboardingService.completeCollector();
-        feedbackKind.value = 'success';
-        feedback.value = 'Perfil ativado com sucesso. Preparando sua área…';
+        await onboardingService.completeCollector({
+            service_description: form.service_description.trim(),
+            cities: [...new Set(form.cities)],
+            waste_category: [...new Set(form.waste_category)],
+        });
         await authStore.refreshCurrentUser();
         await router.replace('/area');
     } catch (error) {
         const status = axios.isAxiosError(error) ? error.response?.status : undefined;
-
         if (status === 401) {
             await router.replace({ name: 'login', query: { redirect: '/onboarding/collector' } });
             return;
         }
-
-        if (status === 409) {
-            try {
-                const user = await authStore.refreshCurrentUser();
-                if (user.onboarding_completed) {
-                    await router.replace('/area');
-                    return;
-                }
-            } catch {
-                // Mantém o erro original caso a sessão não possa ser atualizada.
-            }
-        }
-
-        feedbackKind.value = 'error';
+        const parsed = readFormError(error, 'Não foi possível ativar o perfil de coletor.');
+        errors.service_description = parsed.fields.service_description ?? '';
+        errors.cities = parsed.fields.cities ?? parsed.fields['cities.0'] ?? '';
+        errors.waste_category = parsed.fields.waste_category ?? parsed.fields['waste_category.0'] ?? '';
         feedback.value = status === 403
             ? 'Esta conta não possui permissão para ativar um perfil de coletor.'
-            : readFormError(error, 'Não foi possível ativar o perfil de coletor.').message;
+            : status === 409 ? 'Este perfil de coletor já foi ativado.' : parsed.message;
     } finally {
         loading.value = false;
     }
 }
+
+onMounted(async () => {
+    try {
+        [categories.value, cities.value] = await Promise.all([
+            collectorProfileService.getWasteCategories(),
+            collectorProfileService.getCities(),
+        ]);
+    } catch (error) {
+        feedback.value = readFormError(error, 'Não foi possível carregar as categorias de resíduos.').message;
+    } finally {
+        catalogLoading.value = false;
+    }
+});
 </script>

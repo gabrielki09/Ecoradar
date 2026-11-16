@@ -3,6 +3,12 @@ export interface CollectorProfile {
     user_id: number;
 }
 
+export interface CollectorOnboardingPayload {
+    service_description: string;
+    cities: number[];
+    waste_category: number[];
+}
+
 export interface CollectorOnboardingResponse {
     collector_profile: CollectorProfile;
 }

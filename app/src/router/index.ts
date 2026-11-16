@@ -51,6 +51,7 @@ export default defineRouter((/* { store, ssrContext } */) => {
 
       if (onboardingStep && to.path !== expectedDestination) return expectedDestination;
       if (to.name === 'user-home' && expectedDestination !== '/area') return expectedDestination;
+      if (to.meta.collectorOnly && authStore.user?.profile_type !== 'collector') return { name: 'user-home' };
     }
   });
 

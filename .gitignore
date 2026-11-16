@@ -4,5 +4,6 @@ dist/
 *.log
 /old
 /.ideia
+/doc
 .vercel
 .env*.local

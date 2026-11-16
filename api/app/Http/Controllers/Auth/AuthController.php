@@ -57,12 +57,12 @@ class AuthController extends Controller
                 'onboarding' => [
                     'required' => $user->onboarding_completed_at === null,
 
-                    'next_step' => match ($user->profile_type) {
+                    'next_step' => $user->onboarding_completed_at === null ? match ($user->profile_type) {
                         ProfileTypes::COLLECTOR => 'collector',
                         ProfileTypes::COMPANY => 'company',
 
                         default => null,
-                    }
+                    } : null
                 ]
             ]
         );

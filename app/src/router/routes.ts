@@ -43,6 +43,12 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('@/modules/account/pages/UserHomePage.vue'),
             },
             {
+                path: 'area/perfil-coleta',
+                name: 'collector-profile',
+                meta: { collectorOnly: true },
+                component: () => import('@/modules/collector-profile/pages/CollectorProfilePage.vue'),
+            },
+            {
                 path: 'onboarding/collector',
                 name: 'onboarding-collector',
                 meta: { onboardingStep: 'collector' },
