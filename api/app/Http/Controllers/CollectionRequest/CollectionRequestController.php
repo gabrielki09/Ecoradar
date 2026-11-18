@@ -114,7 +114,7 @@ class CollectionRequestController extends Controller
         return apiSuccess(
             'Coleta cancelada com sucesso!',
             [
-                'collection_request' => $this->collectionRequestService->complete(
+                'collection_request' => $this->collectionRequestService->cancel(
                     user: $req->user(),
                     data: $req->validated()
                 )

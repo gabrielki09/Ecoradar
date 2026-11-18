@@ -15,6 +15,7 @@ use App\Repositories\Interface\Collection\CollectionRequestItemInterface;
 use Carbon\CarbonInterface;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class CollectionRequestService
@@ -23,30 +24,40 @@ class CollectionRequestService
         protected CollectionRequestInterface $collectionRequestRepository,
         protected CollectionRequestItemInterface $collectionRequestItemRepository,
         protected CollectionHistoryInterface $collectionHistoryRepository
-    ){}
+    ) {}
 
     private function storeInHistory(
         CollectionRequest $request,
         CollectionRequestStatus $oldStatus,
         CollectionRequestStatus $newStatus,
-        CollectorProfile|Company $provider,
+        CollectorProfile|Company|User $operator,
         ?CarbonInterface $acceptanceDate,
         ?CarbonInterface $withdrawalDate,
         ?CarbonInterface $completionDate,
         ?CarbonInterface $canceledDate,
+        ?string $cancellationReason = ""
     ): void {
+
         $this->collectionHistoryRepository->create([
             'collection_request_id' => $request->id,
             'old_status' => $oldStatus,
             'new_status' => $newStatus,
-            'accepted_provider_type' => $provider instanceof CollectorProfile
-                ? 'collector_profiles'
-                : 'companies',
-            'accepted_provider_id' => $provider->id,
+            'request_operator_type' =>
+
+            $operator instanceof CollectorProfile
+                ? ProfileTypes::COLLECTOR
+                : ($operator instanceof Company
+                    ? ProfileTypes::COMPANY
+                    : ProfileTypes::COMMON
+
+                ),
+
+            'request_operator_id' => $operator->id,
             'acceptance_date' => $acceptanceDate ?? null,
             'withdrawal_date' => $withdrawalDate ?? null,
             'completion_date' => $completionDate ?? null,
             'canceled_date' => $canceledDate ?? null,
+            'cancellation_reason' => $cancellationReason ?? null
         ]);
     }
 
@@ -82,19 +93,23 @@ class CollectionRequestService
         });
     }
 
-    private function resolveCollectionProvider(User $user, ?int $companyId): CollectorProfile|Company
-    {
-        return match ($user->profile_type) {
-            ProfileTypes::COLLECTOR =>  $user->collectorProfile
-                ?? throw new AuthorizationException('Perfil do coletor não localizado.')
-            ,
+    private function resolveCollectionProvider(
+        User $user,
+        ?int $companyId
+    ): CollectorProfile|Company {
+        if ($user->profile_type === ProfileTypes::COLLECTOR) return $user->collectorProfile ?? throw new AuthorizationException('Perfil do coletor não localizado.');
 
-            ProfileTypes::COMPANY => $user->companies()
-                ->whereKey($companyId)
-                ->firstOrFail(),
+        if ($user->profile_type === ProfileTypes::COMPANY)
+        {
+            return $companyId === null
+                ? throw new InvalidArgumentException('Perfil condiz com perfil de empresa mas o código da empresa não foi definido')
+                : $user->companies()
+                    ->whereKey($companyId)
+                    ->firstOrFail();
 
-            default => throw new AuthorizationException('Usuário não pode atender coletas.'),
-        };
+        } else {
+            throw new AuthorizationException('Usuário não pode atender coletas.');
+        }
     }
 
     public function available(
@@ -219,7 +234,7 @@ class CollectionRequestService
                 request: $request,
                 oldStatus: $oldStatus,
                 newStatus: CollectionRequestStatus::ACCEPTED,
-                provider: $provider,
+                operator: $provider,
                 acceptanceDate: $acceptanceDate,
                 withdrawalDate: null,
                 completionDate: null,
@@ -231,7 +246,8 @@ class CollectionRequestService
     }
 
     public function collected(
-        User $user, array $data
+        User $user,
+        array $data
     ) {
         return DB::transaction(function() use ($user, $data) {
             $provider = $this->resolveCollectionProvider(
@@ -271,7 +287,7 @@ class CollectionRequestService
                 request: $request,
                 oldStatus: $oldStatus,
                 newStatus: CollectionRequestStatus::COLLECTED,
-                provider: $provider,
+                operator: $provider,
                 acceptanceDate: null,
                 withdrawalDate: $withdrawalDate,
                 completionDate: null,
@@ -283,7 +299,8 @@ class CollectionRequestService
     }
 
     public function complete(
-        User $user, array $data
+        User $user,
+        array $data
     ) {
         return DB::transaction(function() use ($user, $data) {
             $provider = $this->resolveCollectionProvider(
@@ -294,11 +311,19 @@ class CollectionRequestService
             $request = $this->collectionRequestRepository
                 ->findByUpdate($data['collection_request_id']);
 
-            if ((int) $request->requester_user_id !== (int) $user->id) throw new AuthorizationException('Este pedido não aceito por este prestador.');
-
             if ($request->status === CollectionRequestStatus::CANCELLED) throw new CollectionCanceledExcpetion('Este pedido já está cancelado');
 
             if ($request->status !== CollectionRequestStatus::COLLECTED) throw new ConflictHttpException('Este pedido não foi aceito e não pode ser concluído.');
+
+            if (
+                $provider instanceof Company &&
+                $provider->id !== $request->accepted_company_id
+            ) throw new AuthorizationException('Este pedido não foi aceito pela sua empresa.');
+
+            if (
+                $provider instanceof CollectorProfile &&
+                $provider->id !== $request->accepted_collector_profile_id
+            ) throw new AuthorizationException('Este pedido não foi aceito por esse prestador.');
 
             $oldStatus = $request->status;
             $completionDate = now();
@@ -319,7 +344,7 @@ class CollectionRequestService
                 request: $request,
                 oldStatus: $oldStatus,
                 newStatus: CollectionRequestStatus::COMPLETED,
-                provider: $provider,
+                operator: $provider,
                 acceptanceDate: null,
                 withdrawalDate: null,
                 completionDate: $completionDate,
@@ -331,45 +356,35 @@ class CollectionRequestService
     }
 
     public function cancel(
-        User $user, array $data
+        User $user,
+        array $data
     ) {
         return DB::transaction(function() use ($user, $data) {
-            $provider = $this->resolveCollectionProvider(
-                $user,
-                $data['company_id'] ?? null
-            );
-
             $request = $this->collectionRequestRepository
                 ->findByUpdate($data['collection_request_id']);
 
-            if ((int) $request->requester_user_id !== (int) $user->id) throw new AuthorizationException('Este pedido não aceito por este prestador.');
-
             if ($request->status !== CollectionRequestStatus::OPEN) throw new ConflictHttpException('Somente pedidos abertos podem ser caneclados.');
+
+            if ($request->requester_user_id !== $user->id) throw new AuthorizationException('Você não pode cancelar este pedido.');
 
             $oldStatus = $request->status;
             $canceledDate = now();
 
-            $dataForUpdate = $this->buildCollectionUpdateData(
-                provider: $provider,
-                status: CollectionRequestStatus::CANCELLED
-            );
-
-            $dataForUpdate['canceled_date'] = $canceledDate;
-
-            $this->collectionRequestRepository->update(
-                $request,
-                $dataForUpdate
-            );
+            $this->collectionRequestRepository->update($request, [
+                'status' => CollectionRequestStatus::CANCELLED,
+                'canceled_date' => $canceledDate
+            ]);
 
             $this->storeInHistory(
                 request: $request,
                 oldStatus: $oldStatus,
                 newStatus: CollectionRequestStatus::CANCELLED,
-                provider: $provider,
+                operator: $user,
                 acceptanceDate: null,
                 withdrawalDate: null,
                 completionDate: null,
-                canceledDate: $canceledDate
+                canceledDate: $canceledDate,
+                cancellationReason: $data['cancellation_reason']
             );
 
             return $request->refresh();

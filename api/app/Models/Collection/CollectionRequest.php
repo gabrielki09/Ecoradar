@@ -39,9 +39,9 @@ class CollectionRequest extends Model
         ];
     }
 
-    public function city() : HasOne
+    public function city(): BelongsTo
     {
-        return $this->hasOne(City::class);
+        return $this->belongsTo(City::class);
     }
 
     public function items(): HasMany

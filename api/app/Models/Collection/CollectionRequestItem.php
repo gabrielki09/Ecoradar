@@ -28,6 +28,11 @@ class CollectionRequestItem extends Model
         return $this->belongsTo(CollectionRequest::class);
     }
 
+    public function wasteCategory(): BelongsTo
+    {
+        return $this->belongsTo(WasteCategory::class);
+    }
+
     public function wasteCategories(): HasMany
     {
         return $this->hasMany(WasteCategory::class);

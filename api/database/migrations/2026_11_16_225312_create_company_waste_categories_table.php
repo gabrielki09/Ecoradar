@@ -11,22 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('company_and_activities', function (Blueprint $table) {
+        Schema::create('company_waste_categories', function (Blueprint $table) {
             $table->id();
-
             $table->foreignId('company_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->foreignId('company_activity_id')
+            $table->foreignId('waste_category_id')
                 ->constrained()
                 ->cascadeOnDelete();
+            $table->unique(
+                ['company_id', 'waste_category_id'],
+                'un_company_id_waste_category_id'
+            );
 
-            $table->primary([
-                'company_id',
-                'company_activity_id',
-            ]);
-
+            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -36,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('company_and_activities');
+        Schema::dropIfExists('company_waste_categories');
     }
 };

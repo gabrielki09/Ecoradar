@@ -11,5 +11,6 @@ Route::prefix('v1')->group(function() {
         require_once __DIR__."/wasteCategories/waste-categories.php";
 
         require_once __DIR__."/collector/collector-profile.php";
+        require_once __DIR__."/collectionRequest/collection-request.php";
     });
 });

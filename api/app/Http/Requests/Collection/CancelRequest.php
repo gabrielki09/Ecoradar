@@ -31,14 +31,6 @@ class CancelRequest extends ApiFormRequest
                 'exists:collection_requests,id'
             ],
 
-            'company_id' => [
-                Rule::requiredIf(
-                    fn () => $this->user()->profile_type === ProfileTypes::COMPANY
-                ),
-                'integer',
-                'min:1',
-            ],
-
             'cancellation_reason' => [
                 'required',
                 'string',

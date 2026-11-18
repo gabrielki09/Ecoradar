@@ -77,7 +77,11 @@ class CollectionRequestEloquent extends BaseEloquent implements CollectionReques
         $query = $this->model->newQuery()
             ->where('status', CollectionRequestStatus::OPEN->value)
             ->whereIn('city_id', $cityIds)
-            ->whereIn('waste_category_id', $categoryIds);
+            ->whereHas('items', function ($query) use ($categoryIds) {
+                //$query->whereIn('waste_category_id', $categoryIds);
+                $query->where(array_find($categoryIds, 'waste_category_id'));
+            })
+            ->with('items');
 
         $this->applyRelationships(
             $query,

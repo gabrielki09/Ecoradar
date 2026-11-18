@@ -8,8 +8,8 @@ Route::controller(CollectionRequestController::class)->prefix('collection-reques
     Route::get('mine', 'mine');
     Route::get('available', 'available');
     Route::get('{id}', 'details');
-    Route::post('{id}/accept', 'accept');
-    Route::post('{id}/collected', 'collected');
-    Route::post('{id}/complete', 'complete');
-    Route::post('{id}/cancel', 'cancel');
+    Route::post('accept', 'accept');
+    Route::post('collected', 'collected');
+    Route::post('complete', 'complete');
+    Route::post('cancel', 'cancel');
 });

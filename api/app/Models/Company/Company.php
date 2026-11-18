@@ -32,9 +32,14 @@ class Company extends Model
         return $this->hasMany(WasteCategory::class);
     }
 
-    // Categorias que a empresa aceita, inclusive as do seeder
-    public function acceptedWasteCategories(): BelongsToMany
+    public function cities(): HasMany
     {
-        return $this->belongsToMany(WasteCategory::class);
+        return $this->hasMany(CompanyCity::class);
+    }
+
+    // Categorias que a empresa aceita, inclusive as do seeder
+    public function wasteCategories(): HasMany
+    {
+        return $this->hasMany(CompanyWasteCategory::class);
     }
 }

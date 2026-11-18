@@ -34,40 +34,50 @@ class CollectorProfileService
                 $collectorProfileId
             );
 
-            if (!$collectorProfile) throw new ModelNotFoundException('Requisição não localizada.');
-
             if (array_key_exists('cities', $data))
             {
                 foreach ($data['cities'] as $city) {
-                    if ($city['delete'])
+
+                    $cityId = $city['city_id'];
+
+                    if ($city['delete'] ?? false)
                     {
-                        $this->collectorProfileCityRepository->delete();
+                        $collectorProfile->cities()
+                            ->where('city_id', $cityId)
+                            ->delete();
+
+                        continue;
                     }
 
-
-                    $this->collectorProfileCityRepository->update(
-                        $collectorProfile, [
-                        'city_id' => $city['city_id']
-                    ]);
+                    $collectorProfile->cities()
+                        ->firstOrCreate([
+                            'city_id' => $cityId
+                        ]);
                 }
             }
 
-            if (array_key_exists('waste_category', $data))
+            if (array_key_exists('waste_categories', $data))
             {
-                foreach ($data['waste_category'] as $wasteCategory) {
-                    $this->collectorProfileWasteCategoryRepository->update(
-                        $collectorProfile, [
-                        'waste_category_id' => $wasteCategory
-                    ]);
+                foreach ($data['waste_categories'] as $wasteCategory) {
+                    $wasteCategoryId = $wasteCategory['waste_category_id'];
+
+                    if ($wasteCategory['delete'] ?? false)
+                    {
+                        $collectorProfile->wasteCategories()
+                            ->where('waste_category_id', $wasteCategoryId)
+                            ->delete();
+
+                        continue;
+                    }
+
+                    $collectorProfile->wasteCategories()
+                        ->firstOrCreate([
+                            'waste_category_id' => $wasteCategoryId
+                        ]);
                 }
             }
 
-            $this->collectorProfileRepository->update(
-                $collectorProfile,
-                [
-                    'service_description' => $data['service_description']
-                ]
-            );
+            if (array_key_exists('service_description', $data)) $this->collectorProfileRepository->update($collectorProfile, ['service_description' => $data['service_description']]);
 
             return $collectorProfile->refresh();
         });

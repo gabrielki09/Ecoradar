@@ -27,7 +27,7 @@ class CollectionRequestStoreRequest extends ApiFormRequest
             'city_id' => [
                 'required',
                 'integer',
-                'exists,cities,id',
+                'exists:cities,id',
             ],
 
             'cep' => [
@@ -59,7 +59,7 @@ class CollectionRequestStoreRequest extends ApiFormRequest
                 'required',
                 'integer',
                 'distinct',
-                'exists,waste_categories,id',
+                'exists:waste_categories,id',
             ],
 
             'items.*.description' => [

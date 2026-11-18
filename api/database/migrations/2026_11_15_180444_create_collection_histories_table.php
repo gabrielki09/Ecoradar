@@ -22,8 +22,8 @@ return new class extends Migration
 
             $table->enum('old_status', array_column(CollectionRequestStatus::cases(), 'value'));
             $table->enum('new_status', array_column(CollectionRequestStatus::cases(), 'value'));
-            $table->enum('accepted_provider_type', array_column(ProfileTypes::cases(), 'value'));
-            $table->foreignId('accepted_provider_id');
+            $table->enum('request_operator_type', array_column(ProfileTypes::cases(), 'value'));
+            $table->foreignId('request_operator_id');
 
             $table->timestamp('acceptance_date')->nullable();
             $table->timestamp('withdrawal_date')->nullable();

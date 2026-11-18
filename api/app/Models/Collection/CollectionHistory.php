@@ -3,6 +3,7 @@
 namespace App\Models\Collection;
 
 use App\Enum\CollectionRequest\CollectionRequestStatus;
+use App\Enum\ProfileTypes;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,8 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 #[Fillable([
     'id',
     'collection_request_id',
-    'accepted_provider_type',
-    'accepted_provider_id',
+    'request_operator_type',
+    'request_operator_id',
     'old_status',
     'new_status',
     'acceptance_date',
@@ -25,6 +26,7 @@ class CollectionHistory extends Model
     protected function casts()
     {
         return [
+            'request_operator_type' => ProfileTypes::class,
             'old_status' => CollectionRequestStatus::class,
             'new_status' => CollectionRequestStatus::class,
             'acceptance_date' => 'datetime',

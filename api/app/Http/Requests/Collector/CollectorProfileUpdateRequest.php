@@ -49,14 +49,19 @@ class CollectorProfileUpdateRequest extends ApiFormRequest
                 'boolean',
             ],
 
-            'waste_category' => [
+            'waste_categories' => [
                 'sometimes',
                 'nullable',
                 'array',
                 'min:1'
             ],
 
-            'waste_category.*' => [
+            'waste_categories.*.delete' => [
+                'required',
+                'boolean',
+            ],
+
+            'waste_categories.*.waste_category_id' => [
                 'sometimes',
                 'integer',
                 'distinct',
