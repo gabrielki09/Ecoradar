@@ -9,7 +9,7 @@ interface BaseInterface
 {
     public function all(
         array $parameters = [],
-        array $columns = ['*'],
+        array $columns = ['*']
     ): Paginator;
 
     public function create(array $data): Model;
@@ -26,4 +26,5 @@ interface BaseInterface
     ): Model;
 
     public function existsBy(array $parameters): bool;
+    public function delete(Model $model): void;
 }

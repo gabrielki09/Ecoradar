@@ -6,6 +6,7 @@ import { authService } from '../services/auth.service';
 import type { AuthResponse, LoginPayload, RegisterPayload } from '../types/auth.types';
 import type { UserResource } from '../types/user.types';
 import { setUnauthorizedHandler } from '@/boot/axios';
+import { canProvideCollections, canRequestCollections, pendingOnboardingPath } from '../collection-access';
 
 export type SessionStatus = 'checking' | 'authenticated' | 'unauthenticated';
 
@@ -14,20 +15,26 @@ const TOKEN_KEY = 'authToken';
 export const useAuthStore = defineStore('auth', () => {
     const status = ref<SessionStatus>('checking');
     const user = ref<UserResource | null>(null);
+    const onboarding = ref<{ required: boolean; next_step: 'collector' | 'company' | null } | null>(null);
     let restorePromise: Promise<void> | null = null;
 
     const isAuthenticated = computed(() => status.value === 'authenticated' && user.value !== null);
     const isChecking = computed(() => status.value === 'checking');
+    const canRequest = computed(() => canRequestCollections(user.value));
+    const canProvide = computed(() => canProvideCollections(user.value));
+    const pendingOnboarding = computed(() => pendingOnboardingPath(user.value));
 
     function clearSession() {
         LocalStorage.remove(TOKEN_KEY);
         user.value = null;
+        onboarding.value = null;
         status.value = 'unauthenticated';
     }
 
     function acceptAuthentication(payload: AuthResponse) {
         LocalStorage.set(TOKEN_KEY, payload.token);
         user.value = payload.user;
+        onboarding.value = payload.onboarding;
         status.value = 'authenticated';
     }
 
@@ -35,7 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
         if (!currentUser) return '/login';
         if (currentUser.onboarding_completed) return '/area';
 
-        const nextStep = response?.onboarding.next_step;
+        const nextStep = response?.onboarding.next_step ?? onboarding.value?.next_step;
         if (nextStep === 'collector' || (!nextStep && currentUser.profile_type === 'collector')) {
             return '/onboarding/collector';
         }
@@ -60,6 +67,7 @@ export const useAuthStore = defineStore('auth', () => {
             try {
                 const response = await authService.me();
                 user.value = response.data.data.user;
+                onboarding.value = response.data.data.onboarding;
                 status.value = 'authenticated';
             } catch (error) {
                 if (axios.isAxiosError(error) && error.response?.status === 401) {
@@ -79,6 +87,7 @@ export const useAuthStore = defineStore('auth', () => {
     async function refreshCurrentUser() {
         const response = await authService.me();
         user.value = response.data.data.user;
+        onboarding.value = response.data.data.onboarding;
         status.value = 'authenticated';
         return user.value;
     }
@@ -108,8 +117,12 @@ export const useAuthStore = defineStore('auth', () => {
     return {
         status,
         user,
+        onboarding,
         isAuthenticated,
         isChecking,
+        canRequest,
+        canProvide,
+        pendingOnboarding,
         clearSession,
         destinationFor,
         restoreSession,

@@ -1,17 +1,17 @@
 <script setup lang="ts">
-    const modelValue = defineModel<boolean>({ required: true });
+const modelValue = defineModel<boolean>({ required: true });
 
-    defineProps<{
-        loading?: boolean
-    }>();
+defineProps<{
+    loading?: boolean;
+}>();
 
-    const emit = defineEmits<{
-        save: [boolean]
-    }>();
+const emit = defineEmits<{
+    save: [boolean];
+}>();
 
-    const submit = () => {
-        emit('save', true);
-    };
+const submit = () => {
+    emit("save", true);
+};
 </script>
 
 <template>

@@ -15,12 +15,14 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('company_id')
+                ->nullable()
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->string('name', 255);
+            $table->string('name');
             $table->boolean('is_system')->default(false);
 
+            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -30,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('waste_categories');
     }
 };

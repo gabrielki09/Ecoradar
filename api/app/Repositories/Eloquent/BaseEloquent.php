@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
-use Override;
 
 abstract class BaseEloquent implements BaseInterface
 {
@@ -74,7 +73,7 @@ abstract class BaseEloquent implements BaseInterface
                 !is_string($field)
                 || !in_array($field, $this->filterable, true)
             ) throw ValidationException::withMessages([
-                "filtersV2.{$index}.field" =>
+                "filtersV1.{$index}.field" =>
                     "O campo {$field} não pode ser filtrado.",
             ]);
 
@@ -86,7 +85,7 @@ abstract class BaseEloquent implements BaseInterface
                     true
                 )
             ) throw ValidationException::withMessages([
-                "filtersV2.{$index}.filterValue" =>
+                "filtersV1.{$index}.filterValue" =>
                 'O valor do filtro é obrigatório.',
             ]);
 
@@ -157,7 +156,7 @@ abstract class BaseEloquent implements BaseInterface
                 FilterV1Types::IsNotNull->value => $query->whereNotNull($column),
 
                 default => throw ValidationException::withMessages([
-                    "filtersV2.{$index}.filterType" =>
+                    "filtersV1.{$index}.filterType" =>
                         "O tipo de filtro {$filterType} não é permitido.",
                 ]),
             };
@@ -224,7 +223,7 @@ abstract class BaseEloquent implements BaseInterface
 
     public function all(
         array $parameters = [],
-        array $columns = ['*'],
+        array $columns = ['*']
     ): Paginator
     {
         $query = $this->model->newQuery();
@@ -247,7 +246,7 @@ abstract class BaseEloquent implements BaseInterface
         $perPage = max(
             1,
             min(
-                (int) ($parameters['paginate'] ?? 15),
+                (int) ($parameters['per_page'] ?? 15),
                 100
             )
         );
@@ -333,5 +332,10 @@ abstract class BaseEloquent implements BaseInterface
             ->newQuery()
             ->lockForUpdate()
             ->findOrFail($id, $columns);
+    }
+
+    public function delete(Model $model): void
+    {
+        $model->delete();
     }
 }

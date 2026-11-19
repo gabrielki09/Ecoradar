@@ -3,9 +3,11 @@
 namespace App\Models\Company;
 
 use App\Models\User;
+use App\Models\WasteCategory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'document',
@@ -22,5 +24,22 @@ class Company extends Model
     {
         return $this->belongsToMany(User::class)
             ->withTimestamps();
+    }
+
+    // Categorias personalizadas criadas por esta empresa (waste_categories.company_id)
+    public function customWasteCategories(): HasMany
+    {
+        return $this->hasMany(WasteCategory::class);
+    }
+
+    public function cities(): HasMany
+    {
+        return $this->hasMany(CompanyCity::class);
+    }
+
+    // Categorias que a empresa aceita, inclusive as do seeder
+    public function wasteCategories(): HasMany
+    {
+        return $this->hasMany(CompanyWasteCategory::class);
     }
 }

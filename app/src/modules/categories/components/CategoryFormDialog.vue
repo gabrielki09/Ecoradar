@@ -1,50 +1,47 @@
 <script setup lang="ts">
-    import { computed, reactive, watch } from 'vue';
-    import {
-        categoryTypesArray,
-        type CategoryPayload
-    } from '../types/category.types';
-    import { useCategoryStore } from '../stores/category.store';
-    import { storeToRefs } from 'pinia';
+import { computed, reactive, watch } from "vue";
+import { categoryTypesArray, type CategoryPayload } from "../types/category.types";
+import { useCategoryStore } from "../stores/category.store";
+import { storeToRefs } from "pinia";
 
-    const modelValue = defineModel<boolean>({ required: true });
+const modelValue = defineModel<boolean>({ required: true });
 
-    defineProps<{
-        loading?: boolean
-    }>();
+defineProps<{
+    loading?: boolean;
+}>();
 
-    const emit = defineEmits<{
-        save: [payload: CategoryPayload]
-    }>();
+const emit = defineEmits<{
+    save: [payload: CategoryPayload];
+}>();
 
-    const categoryStore = useCategoryStore();
-    const { categories } = storeToRefs(categoryStore);
+const categoryStore = useCategoryStore();
+const { categories } = storeToRefs(categoryStore);
 
-    const parentOptions = computed(() => {
-        return categories.value.filter(c => c.parentId === null);
+const parentOptions = computed(() => {
+    return categories.value.filter((c) => c.parentId === null);
+});
+
+const form = reactive<CategoryPayload>({
+    parentId: null,
+    name: "",
+    type: "both",
+});
+
+watch(modelValue, (opened) => {
+    if (opened) {
+        form.name = "";
+        form.type = "both";
+        form.parentId = null;
+    }
+});
+
+const submit = () => {
+    emit("save", {
+        name: form.name.trim(),
+        parentId: form.parentId,
+        type: form.type,
     });
-
-    const form = reactive<CategoryPayload>({
-        parentId: null,
-        name: '',
-        type: 'both',
-    });
-
-    watch(modelValue, (opened) => {
-        if (opened) {
-            form.name = '';
-            form.type = 'both';
-            form.parentId = null;
-        };
-    });
-
-    const submit = () => {
-        emit('save', {
-            name: form.name.trim(),
-            parentId: form.parentId,
-            type: form.type
-        });
-    };
+};
 </script>
 
 <template>
@@ -58,7 +55,9 @@
                 class="q-gutter-md"
             >
                 <q-card-section>
-                    <h6>Nova categoria</h6>
+                    <h6>
+                        Nova categoria
+                    </h6>
                 </q-card-section>
 
                 <q-card-section class="m-4">
@@ -79,9 +78,7 @@
                         label="Nome"
                         outlined
                         autofocus
-                        :rules="[
-                            value => Boolean(value?.trim()) || 'Informe o nome'
-                        ]"
+                        :rules="[(value) => Boolean(value?.trim()) || 'Informe o nome']"
                     />
 
                     <q-select
@@ -110,7 +107,6 @@
                         :loading="loading"
                     />
                 </q-card-actions>
-
             </q-form>
         </q-card>
     </q-dialog>

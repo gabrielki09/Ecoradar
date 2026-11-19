@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('document', 14)->unique();
             $table->string('company_name');
             $table->string('responsible', 120);
-            $table->string('cep', 8)->nullable();;
+            $table->string('cep', 8)->nullable();
             $table->string('neighborhood')->nullable();
             $table->string('address')->nullable();
             $table->string('contact_email')->nullable();

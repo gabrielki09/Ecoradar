@@ -19,6 +19,9 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
+            $table->string('service_description', 500)->nullable();
+            $table->boolean('is_active')->default(true);
+
             $table->timestamps();
         });
     }

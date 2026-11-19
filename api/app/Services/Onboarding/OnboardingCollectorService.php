@@ -3,8 +3,10 @@
 namespace App\Services\Onboarding;
 
 use App\Enum\ProfileTypes;
-use App\Models\CollectorProfile;
+use App\Models\Collector\CollectorProfile;
 use App\Models\User;
+use App\Repositories\Eloquent\Collector\CollectorProfileCityEloquent;
+use App\Repositories\Interface\Collector\CollectorProfileWasteCategoryInterface;
 use App\Repositories\Interface\Onboarding\OnboardingCollectorProfileInterface;
 use App\Repositories\Interface\UserInterface;
 use Illuminate\Support\Facades\DB;
@@ -13,12 +15,14 @@ class OnboardingCollectorService
 {
     public function __construct(
         protected OnboardingCollectorProfileInterface $onboardingCollectorProfileRepository,
+        protected CollectorProfileWasteCategoryInterface $collectorProfileWasteCategoryRepository,
+        protected CollectorProfileCityEloquent $collectorProfileCityRepository,
         protected UserInterface $userRepository
     ){}
 
-    public function store(User $user): CollectorProfile
+    public function store(User $user, array $data): CollectorProfile
     {
-        return DB::transaction(function() use ($user)
+        return DB::transaction(function() use ($user, $data)
         {
             $lockedUser = $this->userRepository->findByUpdate(
                 id: $user->id,
@@ -35,7 +39,22 @@ class OnboardingCollectorService
 
             $collectorProfile = $this->onboardingCollectorProfileRepository->create([
                 'user_id' => $lockedUser->id,
+                'service_description' => $data['service_description']
             ]);
+
+            foreach ($data['cities'] as $cityId) {
+                $this->collectorProfileCityRepository->create([
+                    'collector_profile_id' => $collectorProfile->id,
+                    'city_id' => $cityId
+                ]);
+            }
+
+            foreach ($data['waste_category'] as $wasteCategory) {
+                $this->collectorProfileWasteCategoryRepository->create([
+                    'collector_profile_id' => $collectorProfile->id,
+                    'waste_category_id' => $wasteCategory
+                ]);
+            }
 
             $this->userRepository->update($lockedUser, [
                 'onboarding_completed_at' => now()

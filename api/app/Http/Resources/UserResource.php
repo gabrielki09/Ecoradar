@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Enum\ProfileTypes;
+
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -19,7 +21,16 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'profile_type' => $this->profile_type,
-            'onboarding_completed' => $this->onboarding_completed_at !== null
+            'onboarding_completed' => $this->onboarding_completed_at !== null,
+            'companies' => $this->profile_type === ProfileTypes::COMPANY
+                ? $this->companies()
+                    ->get(['companies.id', 'companies.company_name'])
+                    ->map(fn ($company) => [
+                        'id' => $company->id,
+                        'company_name' => $company->company_name,
+                    ])
+                    ->values()
+                : [],
         ];
     }
 }

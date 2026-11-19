@@ -6,12 +6,9 @@ use App\Enum\ProfileTypes;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Repositories\Interface\UserInterface;
-use Exception;
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 
 class AuthUserService
 {
@@ -53,12 +50,12 @@ class AuthUserService
             'onboarding' => [
                 'required' => $user->onboarding_completed_at === null,
 
-                'next_step' => match ($user->profile_type) {
+                'next_step' => $user->onboarding_completed_at === null ? match ($user->profile_type) {
                     ProfileTypes::COLLECTOR => 'collector',
                     ProfileTypes::COMPANY => 'company',
 
                     default => null,
-                }
+                } : null
             ]
         ];
     }
