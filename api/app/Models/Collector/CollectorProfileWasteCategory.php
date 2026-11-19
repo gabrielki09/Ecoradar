@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 ])]
 class CollectorProfileWasteCategory extends Model
 {
-    use SoftDeletes;
+    //use SoftDeletes;
 
     public function collectorProfile(): BelongsTo
     {

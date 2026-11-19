@@ -50,8 +50,17 @@ export default defineRouter((/* { store, ssrContext } */) => {
       const onboardingStep = to.meta.onboardingStep;
 
       if (onboardingStep && to.path !== expectedDestination) return expectedDestination;
-      if (to.name === 'user-home' && expectedDestination !== '/area') return expectedDestination;
+      if (authStore.pendingOnboarding && to.path !== authStore.pendingOnboarding) return authStore.pendingOnboarding;
+      if (to.meta.requesterOnly && !authStore.canRequest) return { name: 'user-home' };
+      if (to.meta.providerOnly && !authStore.canProvide) return { name: 'user-home' };
       if (to.meta.collectorOnly && authStore.user?.profile_type !== 'collector') return { name: 'user-home' };
+      if (to.name === 'collection-list') {
+        const area = String(to.params.area);
+        if (!['all', 'available', 'for-me', 'mine'].includes(area)) return { name: 'user-home' };
+        if (area === 'mine' && !authStore.canRequest) return { name: 'user-home' };
+        if (area !== 'mine' && !authStore.canProvide) return { name: 'user-home' };
+      }
+      if (to.name === 'collection-detail' && !(authStore.canRequest || authStore.canProvide)) return { name: 'user-home' };
     }
   });
 

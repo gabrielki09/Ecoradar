@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Collection;
 
+use App\Support\CollectionAccess;
+
 use App\Enum\ProfileTypes;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -14,7 +16,7 @@ class CompleteRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return CollectionAccess::provider($this->user());
     }
 
     /**

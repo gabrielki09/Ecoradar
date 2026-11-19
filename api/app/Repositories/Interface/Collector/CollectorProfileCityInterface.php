@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Eloquent\Collector;
+namespace App\Repositories\Interface\Collector;
 
 use App\Repositories\Interface\BaseInterface;
 

@@ -27,6 +27,7 @@ return new class extends Migration
                 'un_collector_profile_id_waste_category_id'
             );
 
+            $table->softDeletes();
             $table->timestamps();
         });
     }

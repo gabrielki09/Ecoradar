@@ -49,9 +49,9 @@ class StandardWasteSeeder extends Seeder
         ];
 
         foreach ($wasteCategories as $category) {
-            WasteCategory::updateOrCre(
+            WasteCategory::updateOrCreate(
                 ['name' => $category['name']],
-                [$category]
+                $category
             );
         }
     }

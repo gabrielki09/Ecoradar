@@ -6,6 +6,7 @@ import { authService } from '../services/auth.service';
 import type { AuthResponse, LoginPayload, RegisterPayload } from '../types/auth.types';
 import type { UserResource } from '../types/user.types';
 import { setUnauthorizedHandler } from '@/boot/axios';
+import { canProvideCollections, canRequestCollections, pendingOnboardingPath } from '../collection-access';
 
 export type SessionStatus = 'checking' | 'authenticated' | 'unauthenticated';
 
@@ -19,6 +20,9 @@ export const useAuthStore = defineStore('auth', () => {
 
     const isAuthenticated = computed(() => status.value === 'authenticated' && user.value !== null);
     const isChecking = computed(() => status.value === 'checking');
+    const canRequest = computed(() => canRequestCollections(user.value));
+    const canProvide = computed(() => canProvideCollections(user.value));
+    const pendingOnboarding = computed(() => pendingOnboardingPath(user.value));
 
     function clearSession() {
         LocalStorage.remove(TOKEN_KEY);
@@ -116,6 +120,9 @@ export const useAuthStore = defineStore('auth', () => {
         onboarding,
         isAuthenticated,
         isChecking,
+        canRequest,
+        canProvide,
+        pendingOnboarding,
         clearSession,
         destinationFor,
         restoreSession,

@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Collection;
 
+use App\Support\CollectionAccess;
+
 use App\Enum\ProfileTypes;
 use App\Http\Requests\Filters\FilterV1Request;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -14,7 +16,7 @@ class AvailableCollectionRequestsRequest extends FilterV1Request
      */
     public function authorize(): bool
     {
-        return true;
+        return CollectionAccess::provider($this->user());
     }
 
     /**

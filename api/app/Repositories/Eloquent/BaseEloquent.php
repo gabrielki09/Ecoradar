@@ -246,7 +246,7 @@ abstract class BaseEloquent implements BaseInterface
         $perPage = max(
             1,
             min(
-                (int) ($parameters['paginate'] ?? 15),
+                (int) ($parameters['per_page'] ?? 15),
                 100
             )
         );

@@ -2,7 +2,8 @@
 
 namespace App\Http\Requests\Collection;
 
-use App\Enum\ProviderType;
+use App\Support\CollectionAccess;
+
 use App\Http\Requests\ApiFormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -13,7 +14,7 @@ class CollectionRequestStoreRequest extends ApiFormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return CollectionAccess::requester($this->user());
     }
 
     /**

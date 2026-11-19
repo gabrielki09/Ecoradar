@@ -61,10 +61,31 @@ class CollectionRequestService
         ]);
     }
 
-    public function all(User $user, array $parameters)
+    public function all(
+        array $parameters
+    ) {
+        return $this->collectionRequestRepository->all(
+            parameters: $parameters
+        );
+    }
+
+    public function mine(User $user, array $parameters)
     {
-        return $this->collectionRequestRepository->allForRequester(
+        return $this->collectionRequestRepository->mine(
             requesterId: $user->id,
+            parameters: $parameters
+        );
+    }
+
+    public function allForProvider(User $user, array $parameters)
+    {
+        $provider = $this->resolveCollectionProvider(
+            user: $user,
+            companyId: $parameters['company_id'] ?? null
+        );
+
+        return $this->collectionRequestRepository->allForProvider(
+            provider: $provider,
             parameters: $parameters
         );
     }
@@ -95,7 +116,7 @@ class CollectionRequestService
 
     private function resolveCollectionProvider(
         User $user,
-        ?int $companyId
+        ?int $companyId = null
     ): CollectorProfile|Company {
         if ($user->profile_type === ProfileTypes::COLLECTOR) return $user->collectorProfile ?? throw new AuthorizationException('Perfil do coletor não localizado.');
 
@@ -121,11 +142,11 @@ class CollectionRequestService
 
         return $this->collectionRequestRepository->availableFor(
             cityIds: $provider->cities()
-                    ->pluck('cities.id')
+                    ->pluck('city_id')
                     ->all(),
 
             categoryIds: $provider->wasteCategories()
-                    ->pluck('waste_categories.id')
+                    ->pluck('waste_category_id')
                     ->all(),
 
             parameters: $parameters
@@ -167,11 +188,7 @@ class CollectionRequestService
         CollectionRequest $request,
         CollectorProfile|Company $provider
     ): void {
-        $attendsCity = $provider->cities()
-            ->whereKey($request->city_id)
-            ->exists();
-
-        if (!$attendsCity) throw new ConflictHttpException('Este prestador não atende a cidade da solicitação');
+        if (!$provider->cities()->where('city_id', $request->city_id)->exists()) throw new ConflictHttpException('Este prestador não atende a cidade da solicitação');
 
         $requestCategoryIds = $request->items()
             ->pluck('waste_category_id')
@@ -181,7 +198,7 @@ class CollectionRequestService
         if ($requestCategoryIds === []) throw new ConflictHttpException('A solicitação não possui itens para coleta.');
 
         $providerCategoryIds = $provider->wasteCategories()
-            ->pluck('waste_categories.id')
+            ->pluck('waste_category_id')
             ->all();
 
         $unsupportedCategoryIds = array_diff(

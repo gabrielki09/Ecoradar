@@ -48,6 +48,9 @@ const routes: RouteRecordRaw[] = [
                 meta: { collectorOnly: true },
                 component: () => import('@/modules/collector-profile/pages/CollectorProfilePage.vue'),
             },
+            { path: 'area/coletas/nova', name: 'collection-create', meta: { requesterOnly: true }, component: () => import('@/modules/collection-requests/pages/CollectionCreatePage.vue') },
+            { path: 'area/coletas/detalhe/:id', name: 'collection-detail', component: () => import('@/modules/collection-requests/pages/CollectionDetailPage.vue') },
+            { path: 'area/coletas/:area', name: 'collection-list', component: () => import('@/modules/collection-requests/pages/CollectionListPage.vue') },
             {
                 path: 'onboarding/collector',
                 name: 'onboarding-collector',

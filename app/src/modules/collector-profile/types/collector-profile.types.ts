@@ -24,7 +24,7 @@ export interface PaginatedData<T> {
 }
 
 export interface WasteCategoryIndexData {
-    waste_categories: WasteCategoryOption[];
+    waste_categories: WasteCategoryOption[] | PaginatedData<WasteCategoryOption>;
 }
 
 export interface CityIndexData {

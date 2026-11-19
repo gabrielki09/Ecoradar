@@ -4,6 +4,9 @@ dist/
 *.log
 /old
 /.ideia
-/doc
+/doc/*
 .vercel
 .env*.local
+
+/app/.agents
+/app/AGENTS.md

@@ -37,6 +37,10 @@
                                                 dense
                                                 no-caps
                                                 icon="delete"
+                                                @click="
+                                                    selectedCategoryId = props.row.id;
+                                                    showConfirmDialog = true;
+                                                "
                                             />
                                         </div>
                                     </template>
@@ -67,70 +71,66 @@
 </template>
 
 <script setup lang="ts">
-    import { onMounted, ref } from 'vue';
-    import type { CategoryPayload } from '../types/category.types'
-    import type { QTableColumn } from 'quasar';
-    import { storeToRefs } from 'pinia';
-    import { useCategoryStore } from '../stores/category.store';
-    import CategoryFormDialog from '../components/CategoryFormDialog.vue';
-    import { handleApiError } from '@/utils/api-error-handler';
-    import ConfirmDeleteDialog from '@/components/QDialog/ConfirmDeleteDialog.vue';
+import { onMounted, ref } from "vue";
+import type { CategoryPayload } from "../types/category.types";
+import type { QTableColumn } from "quasar";
+import { storeToRefs } from "pinia";
+import { useCategoryStore } from "../stores/category.store";
+import CategoryFormDialog from "../components/CategoryFormDialog.vue";
+import { handleApiError } from "@/utils/api-error-handler";
+import ConfirmDeleteDialog from "@/components/QDialog/ConfirmDeleteDialog.vue";
 
+const categoryStore = useCategoryStore();
+const { categories, loading } = storeToRefs(categoryStore);
 
-    const categoryStore = useCategoryStore();
-    const { categories, loading } = storeToRefs(categoryStore);
+const showFormDialog = ref<boolean>(false);
+const showConfirmDialog = ref<boolean>(false);
+const selectedCategoryId = ref<number | null>(null);
 
-    const showFormDialog = ref<boolean>(false);
-    const showConfirmDialog = ref<boolean>(false);
-
-    const columns: QTableColumn[] = [
-        {
-            label: 'ID',
-            name: 'id',
-            field: 'id',
-            align: 'center'
-        },
-        {
-            label: 'Nome',
-            name: 'name',
-            field: 'name',
-            align: 'center'
-        },
-        {
-            label: 'Ações',
-            name: 'actions',
-            field: 'actions',
-            align: 'center'
-        }
-    ];
-
-    onMounted(async () => {
-        void categoryStore.fetchCategories();
-    });
-
-    async function createCategory(payload: CategoryPayload)
+const columns: QTableColumn[] = [
     {
-        try {
-            await categoryStore.createCategory(payload);
-            showFormDialog.value = false;
-        } catch (error) {
-            handleApiError(
-                error,
-                'Não foi possível cadastrar a categoria.'
-            );
-        };
-    };
-
-    async function deleteCategory(id: number)
+        label: "ID",
+        name: "id",
+        field: "id",
+        align: "center",
+    },
     {
-        try {
-            await categoryStore.deleteCategory(id);
-            showConfirmDialog.value = false;
-        } catch (error) {
-            handleApiError(
-                error,
-                'Não foi possível deletar a categoria.'
-            );
-        };
-    };
+        label: "Nome",
+        name: "name",
+        field: "name",
+        align: "center",
+    },
+    {
+        label: "Ações",
+        name: "actions",
+        field: "actions",
+        align: "center",
+    },
+];
+
+onMounted(async () => {
+    void categoryStore.fetchCategories();
+});
+
+async function createCategory(payload: CategoryPayload) {
+    try {
+        await categoryStore.createCategory(payload);
+        showFormDialog.value = false;
+    } catch (error) {
+        handleApiError(error, "Não foi possível cadastrar a categoria.");
+    }
+}
+
+async function deleteCategory() {
+    if (selectedCategoryId.value === null) {
+        return;
+    }
+    try {
+        await categoryStore.deleteCategory(selectedCategoryId.value);
+        showConfirmDialog.value = false;
+        selectedCategoryId.value = null;
+    } catch (error) {
+        handleApiError(error, "Não foi possível deletar a categoria.");
+    }
+}
 </script>

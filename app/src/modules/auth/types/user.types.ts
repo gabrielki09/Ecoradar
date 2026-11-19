@@ -6,4 +6,5 @@ export interface UserResource {
     email: string;
     profile_type: ProfileType;
     onboarding_completed: boolean;
+    companies?: Array<{ id: number; company_name: string }>;
 };
