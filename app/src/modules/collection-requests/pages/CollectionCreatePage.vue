@@ -33,10 +33,16 @@
                 <q-input
                     v-model="form.cep"
                     outlined
-                    label="CEP (8 dígitos) *"
-                    maxlength="8"
+                    label="CEP *"
+                    type="tel"
+                    inputmode="numeric"
+                    autocomplete="postal-code"
+                    placeholder="00000-000"
+                    mask="#####-###"
+                    maxlength="9"
                     :error="!!errors.cep"
                     :error-message="errors.cep"
+                    @update:model-value="handleAutocompleteCEP(String($event ?? ''))"
                 />
                 <q-input
                     v-model="form.neighborhood"
@@ -148,6 +154,8 @@ import { useRouter } from "vue-router";
 import CitySelect from "@/components/CitySelect.vue";
 import { collectorProfileService } from "@/modules/collector-profile/services/collector-profile.service";
 import { readFormError } from "@/modules/auth/utils/form-errors";
+import { useCepAutocomplete } from "@/composables/useCepAutocomplete";
+import { cepDigits } from "@/utils/cep";
 import { collectionService } from "../service";
 import { useCollectionStore } from "../store";
 
@@ -168,6 +176,7 @@ const form = reactive({
         },
     ],
 });
+const handleAutocompleteCEP = useCepAutocomplete(form);
 const errors = reactive<Record<string, string>>({});
 const message = ref("");
 const sending = ref(false);
@@ -206,7 +215,7 @@ function validate() {
     if (!form.city_id) {
         errors.city_id = "Selecione uma cidade.";
     }
-    if (!/^\d{8}$/.test(form.cep)) {
+    if (!/^\d{8}$/.test(cepDigits(form.cep))) {
         errors.cep = "Informe 8 dígitos.";
     }
     if (!form.neighborhood.trim()) {
@@ -238,7 +247,7 @@ async function submit() {
     try {
         const result = await collectionService.create({
             city_id: form.city_id,
-            cep: form.cep,
+            cep: cepDigits(form.cep),
             neighborhood: form.neighborhood.trim(),
             address: form.address.trim(),
             items: form.items.map((item) => ({

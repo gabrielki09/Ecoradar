@@ -2,11 +2,10 @@ node_modules/
 .env
 dist/
 *.log
-/old
-/.ideia
+/.agents
 /doc/*
 .vercel
 .env*.local
 
-/app/.agents
+/*/.agents
 /app/AGENTS.md

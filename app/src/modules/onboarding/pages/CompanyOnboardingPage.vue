@@ -110,7 +110,7 @@
                     :rules="cepRules"
                     :error="Boolean(errors.cep)"
                     :error-message="errors.cep"
-                    @update:model-value="handleAutocompleteCEP(form.cep)"
+                    @update:model-value="handleAutocompleteCEP(String($event ?? ''))"
                 />
 
                 <AuthField
@@ -171,6 +171,8 @@ import { useAuthStore } from "@/modules/auth/stores/auth.store";
 import { readFormError } from "@/modules/auth/utils/form-errors";
 import { scrollToFirstError } from "@/helpers/pages/scrollToFirstError";
 import { companyLookupService } from "../services/company-lookup.service.js";
+import { useCepAutocomplete } from "@/composables/useCepAutocomplete";
+import { cepDigits, formatCep } from "@/utils/cep";
 
 type CompanyForm = Record<keyof CompanyOnboardingPayload, string>;
 
@@ -190,6 +192,7 @@ const form = reactive<CompanyForm>({
     address: "",
     contact_email: "",
 });
+const handleAutocompleteCEP = useCepAutocomplete(form);
 
 const errors = reactive<CompanyForm>({
     company_name: "",
@@ -253,7 +256,7 @@ async function completeOnboarding() {
         await onboardingService.completeCompany({
             company_name: form.company_name.trim(),
             document: form.document.replace(/\D/g, ""),
-            cep: form.cep.replace(/\D/g, ""),
+            cep: cepDigits(form.cep),
             responsible: form.responsible.trim(),
             neighborhood: optional(form.neighborhood),
             address: optional(form.address),
@@ -313,25 +316,10 @@ const handleAutocompleteCNPJ = async (cnpj: string) => {
         form.contact_email = data.emails[0]?.address ?? "";
 
         if (form.cep === "") {
-            form.cep = data.address.zip;
-            form.address = data.address.district;
-            form.neighborhood = data.address.street;
+            form.cep = formatCep(data.address.zip);
+            form.address = data.address.street;
+            form.neighborhood = data.address.district;
         }
-
-        return;
-    }
-};
-
-const handleAutocompleteCEP = async (cep: string) => {
-    if (form.address !== "" && form.neighborhood !== "") {
-        return;
-    }
-
-    if (cep.replace(/\D/g, "").length === 8) {
-        const { data } = await companyLookupService.findAddressByCep(cep);
-
-        form.address = data.street;
-        form.neighborhood = data.neighborhood;
 
         return;
     }

@@ -37,7 +37,6 @@ class CollectorProfileService
             if (array_key_exists('cities', $data))
             {
                 foreach ($data['cities'] as $city) {
-
                     $cityId = $city['city_id'];
 
                     if ($city['delete'] ?? false)

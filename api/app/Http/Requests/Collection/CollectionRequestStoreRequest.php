@@ -9,6 +9,16 @@ use Illuminate\Contracts\Validation\ValidationRule;
 
 class CollectionRequestStoreRequest extends ApiFormRequest
 {
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'cep' => preg_replace(
+                '/\D/',
+                '',
+                (string) $this->input('cep')
+            ),
+        ]);
+    }
     /**
      * Determine if the user is authorized to make this request.
      */

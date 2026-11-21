@@ -2,6 +2,7 @@
 
 namespace App\Models\Company;
 
+use App\Trait\CanBeRecovered;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,5 +14,5 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 ])]
 class CompanyCity extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, CanBeRecovered;
 }

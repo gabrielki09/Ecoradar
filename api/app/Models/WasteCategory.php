@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Company\Company;
+use App\Trait\CanBeRecovered;
 use Illuminate\Console\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 ])]
 class WasteCategory extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, CanBeRecovered;
 
     protected function casts()
     {

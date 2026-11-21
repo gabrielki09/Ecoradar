@@ -85,16 +85,6 @@ class CollectionRequestEloquent extends BaseEloquent implements CollectionReques
             })
             ->with('items');
 
-        /*
-        foreach (array_unique($categoryIds) as $categoryId) {
-            $query->whereHas('items', function ($query) use ($categoryId, $requester) {
-                if ( $requester->requester() instanceof CollectorProfile)
-                {
-                    $query->where($requester->requester->collectorProfile->wasteCategories->pluck('waste_categories.id'), $categoryId);
-                }
-            });
-        }*/
-
         $this->applyRelationships(
             $query,
             $parameters['relationships'] ?? []
