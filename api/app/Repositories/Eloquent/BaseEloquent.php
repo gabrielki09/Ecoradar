@@ -303,6 +303,21 @@ abstract class BaseEloquent implements BaseInterface
         return $query->first();
     }
 
+    public function findWithTrashed(array $parameters = [], array $columns = ['*'], array $relationships = []): ?Model
+    {
+        if ($parameters === []) {
+            throw new InvalidArgumentException('É necessário informar pelo menos um parâmetro para a busca.');
+        }
+
+        $query = $this->model->newQuery()->withTrashed()->with($relationships)->select($columns);
+
+        foreach ($parameters as $column => $value) {
+            $query->where($column, $value);
+        }
+
+        return $query->first();
+    }
+
     public function existsBy(array $parameters): bool
     {
         if ($parameters === []) {
@@ -337,5 +352,35 @@ abstract class BaseEloquent implements BaseInterface
     public function delete(Model $model): void
     {
         $model->delete();
+    }
+
+    public function updateOrCreate(
+        array $uniqueColumns,
+        array $data
+    ): Model {
+        $model = $this->model
+            ->newQuery()
+            ->withTrashed()
+            ->firstOrNew($uniqueColumns);
+
+        if ($model->exists && $model->trashed())
+        {
+            $model->restore();
+        }
+
+        $model->fill($data);
+        $model->save();
+
+        return $model;
+    }
+
+    public function recovery(Model $model): void
+    {
+        $model->withTrashed();
+
+        if ($model->exists && $model->trashed())
+        {
+            $model->restore();
+        }
     }
 }

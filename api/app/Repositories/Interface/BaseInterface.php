@@ -15,11 +15,17 @@ interface BaseInterface
     public function create(array $data): Model;
     public function update(Model $model, array $data): Model;
     public function find(int $id, array $columns = ['*']): ?Model;
+
+    public function findWithTrashed(
+        array $parameters = []
+    ): ?Model;
+
     public function findBy(
         array $parameters = [],
         array $columns = ['*'],
         array $relationships = []
     ): ?Model;
+
     public function findByUpdate(
         int $id,
         array $columns = ['*']
@@ -27,4 +33,11 @@ interface BaseInterface
 
     public function existsBy(array $parameters): bool;
     public function delete(Model $model): void;
+
+    public function updateOrCreate(
+        array $uniqueColumns,
+        array $data
+    ): Model;
+
+    public function recovery(Model $model): void;
 }

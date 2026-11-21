@@ -15,7 +15,6 @@ use App\Repositories\Interface\Collection\CollectionRequestItemInterface;
 use Carbon\CarbonInterface;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
 class CollectionRequestService
@@ -37,7 +36,6 @@ class CollectionRequestService
         ?CarbonInterface $canceledDate,
         ?string $cancellationReason = ""
     ): void {
-
         $this->collectionHistoryRepository->create([
             'collection_request_id' => $request->id,
             'old_status' => $oldStatus,
@@ -79,13 +77,11 @@ class CollectionRequestService
 
     public function allForProvider(User $user, array $parameters)
     {
-        $provider = $this->resolveCollectionProvider(
-            user: $user,
-            companyId: $parameters['company_id'] ?? null
-        );
-
         return $this->collectionRequestRepository->allForProvider(
-            provider: $provider,
+            provider: resolveProvider(
+                user: $user,
+                companyId: $parameters['company_id'] ?? null
+            ),
             parameters: $parameters
         );
     }
@@ -114,31 +110,15 @@ class CollectionRequestService
         });
     }
 
-    private function resolveCollectionProvider(
-        User $user,
-        ?int $companyId = null
-    ): CollectorProfile|Company {
-        if ($user->profile_type === ProfileTypes::COLLECTOR) return $user->collectorProfile ?? throw new AuthorizationException('Perfil do coletor não localizado.');
-
-        if ($user->profile_type === ProfileTypes::COMPANY)
-        {
-            return $companyId === null
-                ? throw new InvalidArgumentException('Perfil condiz com perfil de empresa mas o código da empresa não foi definido')
-                : $user->companies()
-                    ->whereKey($companyId)
-                    ->firstOrFail();
-
-        } else {
-            throw new AuthorizationException('Usuário não pode atender coletas.');
-        }
-    }
-
     public function available(
         ?int $companyId,
         User $user,
         array $parameters = [],
     ) {
-        $provider = $this->resolveCollectionProvider($user, $companyId);
+        $provider = resolveProvider(
+            $user,
+            $companyId
+        );
 
         return $this->collectionRequestRepository->availableFor(
             cityIds: $provider->cities()
@@ -212,7 +192,7 @@ class CollectionRequestService
     public function accept(User $user, array $data)
     {
         return DB::transaction(function() use ($user, $data) {
-            $provider = $this->resolveCollectionProvider(
+            $provider = resolveProvider(
                 $user,
                 $data['company_id'] ?? null
             );
@@ -267,7 +247,7 @@ class CollectionRequestService
         array $data
     ) {
         return DB::transaction(function() use ($user, $data) {
-            $provider = $this->resolveCollectionProvider(
+            $provider = resolveProvider(
                 $user,
                 $data['company_id'] ?? null
             );
@@ -320,7 +300,7 @@ class CollectionRequestService
         array $data
     ) {
         return DB::transaction(function() use ($user, $data) {
-            $provider = $this->resolveCollectionProvider(
+            $provider = resolveProvider(
                 $user,
                 $data['company_id'] ?? null
             );

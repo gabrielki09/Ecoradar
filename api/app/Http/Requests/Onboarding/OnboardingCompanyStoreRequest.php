@@ -27,6 +27,12 @@ class OnboardingCompanyStoreRequest extends ApiFormRequest
                 '',
                 (string) $this->input('document')
             ),
+
+            'cep' => preg_replace(
+                '/\D/',
+                '',
+                (string) $this->input('cep')
+            ),
         ]);
     }
     /**
@@ -67,6 +73,7 @@ class OnboardingCompanyStoreRequest extends ApiFormRequest
 
             'cep' => [
                 'nullable',
+                'string',
                 'min:8',
                 'max:8',
             ],
