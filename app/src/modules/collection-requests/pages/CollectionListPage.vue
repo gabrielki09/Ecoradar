@@ -111,7 +111,7 @@
                         </q-badge>
                     </div>
                     <p class="mb-0 mt-2 text-sm">
-                        {{ record.address }}, {{ record.neighborhood }} · CEP {{ record.cep }}
+                        {{ record.address }}, {{ record.neighborhood }} · CEP {{ formatCep(record.cep) }}
                     </p>
                     <small
                         v-if="record.created_at"
@@ -141,6 +141,7 @@ import { computed, ref, watch, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 import { useAuthStore } from "@/modules/auth/stores/auth.store";
 import { readFormError } from "@/modules/auth/utils/form-errors";
+import { formatCep } from "@/utils/cep";
 import { useCollectionStore } from "../store";
 import { collectionService } from "../service";
 import {

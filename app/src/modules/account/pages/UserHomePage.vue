@@ -103,7 +103,7 @@
                 </RouterLink>
 
                 <RouterLink
-                    to="/#pontos"
+                    to="/pontos"
                     class="rounded-2xl border border-line bg-white p-6 text-inherit no-underline shadow-sm transition hover:-translate-y-1 hover:shadow-eco focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eco-600"
                 >
                     <span
@@ -118,7 +118,7 @@
                         Encontrar pontos
                     </h2>
                     <p class="m-0 text-sm leading-6 text-muted">
-                        Consulte os pontos de coleta apresentados no EcoRadar.
+                        Consulte os pontos de coleta cadastrados no EcoRadar.
                     </p>
                 </RouterLink>
 

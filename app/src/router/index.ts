@@ -8,6 +8,7 @@ import {
 
 import routes from './routes';
 import { useAuthStore } from '@/modules/auth/stores/auth.store';
+import { usePointStore } from '@/modules/collection-points/store';
 
 /*
  * If not building with SSR mode, you can
@@ -54,6 +55,12 @@ export default defineRouter((/* { store, ssrContext } */) => {
       if (to.meta.requesterOnly && !authStore.canRequest) return { name: 'user-home' };
       if (to.meta.providerOnly && !authStore.canProvide) return { name: 'user-home' };
       if (to.meta.collectorOnly && authStore.user?.profile_type !== 'collector') return { name: 'user-home' };
+      if (to.meta.pointManagement) {
+        if (!authStore.canProvide) return { name: 'user-home' };
+        if (authStore.user?.profile_type === 'company' && !usePointStore().selectedCompanyId) {
+          return { name: 'user-home' };
+        }
+      }
       if (to.name === 'collection-list') {
         const area = String(to.params.area);
         if (!['all', 'available', 'for-me', 'mine'].includes(area)) return { name: 'user-home' };

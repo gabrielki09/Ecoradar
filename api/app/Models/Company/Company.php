@@ -2,6 +2,7 @@
 
 namespace App\Models\Company;
 
+use App\Models\Collection\CollectionPoint;
 use App\Models\User;
 use App\Models\WasteCategory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -41,5 +42,11 @@ class Company extends Model
     public function wasteCategories(): HasMany
     {
         return $this->hasMany(CompanyWasteCategory::class);
+    }
+
+    public function collectionPoints(): HasMany
+    {
+        return $this->hasMany(CollectionPoint::class, 'responsible_operator_id', 'id')
+            ->where('responsible_operator_type', 'company');
     }
 }

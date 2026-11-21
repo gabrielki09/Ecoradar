@@ -32,6 +32,7 @@
                 >
                     Minhas solicitações
                 </RouterLink>
+
                 <RouterLink
                     v-if="authStore.canProvide"
                     to="/area/coletas/all"
@@ -39,6 +40,7 @@
                 >
                     Todas as requisições
                 </RouterLink>
+
                 <RouterLink
                     v-if="authStore.canProvide"
                     to="/area/coletas/available"
@@ -52,6 +54,12 @@
                     class="mr-4 text-sm font-bold text-eco-900"
                 >
                     Minhas coletas
+                </RouterLink>
+                <RouterLink to="/pontos" class="mr-4 text-sm font-bold text-eco-900">
+                    Pontos de coleta
+                </RouterLink>
+                <RouterLink v-if="authStore.canProvide" to="/pontos/meus" class="mr-4 text-sm font-bold text-eco-900">
+                    Meus pontos
                 </RouterLink>
 
                 <q-select

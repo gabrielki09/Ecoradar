@@ -2,6 +2,7 @@
 
 namespace App\Models\Collector;
 
+use App\Models\Collection\CollectionPoint;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -29,5 +30,11 @@ class CollectorProfile extends Model
     public function cities(): HasMany
     {
         return $this->hasMany(CollectorProfileCity::class);
+    }
+
+    public function collectionPoints(): HasMany
+    {
+        return $this->hasMany(CollectionPoint::class, 'responsible_operator_id', 'id')
+            ->where('responsible_operator_type', 'collector');
     }
 }

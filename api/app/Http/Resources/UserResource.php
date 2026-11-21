@@ -24,10 +24,12 @@ class UserResource extends JsonResource
             'onboarding_completed' => $this->onboarding_completed_at !== null,
             'companies' => $this->profile_type === ProfileTypes::COMPANY
                 ? $this->companies()
+                    ->withPivot('role')
                     ->get(['companies.id', 'companies.company_name'])
                     ->map(fn ($company) => [
                         'id' => $company->id,
                         'company_name' => $company->company_name,
+                        'role' => $company->pivot->role,
                     ])
                     ->values()
                 : [],

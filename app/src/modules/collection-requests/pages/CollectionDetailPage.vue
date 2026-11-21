@@ -45,7 +45,7 @@
                         Endereço e itens
                     </h2>
                     <p>
-                        {{ record.address }}, {{ record.neighborhood }} · CEP {{ record.cep }} ·
+                        {{ record.address }}, {{ record.neighborhood }} · CEP {{ formatCep(record.cep) }} ·
                         Cidade #{{ record.city_id }}
                     </p>
                     <ul v-if="record.items?.length">
@@ -120,6 +120,7 @@ import { useQuasar } from "quasar";
 import axios from "axios";
 import { useAuthStore } from "@/modules/auth/stores/auth.store";
 import { readFormError } from "@/modules/auth/utils/form-errors";
+import { formatCep } from "@/utils/cep";
 import { collectionService } from "../service";
 import { useCollectionStore } from "../store";
 import { statusLabels, type Area, type CollectionRequest } from "../types";

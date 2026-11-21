@@ -2,6 +2,7 @@
 
 namespace App\Models\Collector;
 
+use App\Trait\CanBeRecovered;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 ])]
 class CollectorProfileWasteCategory extends Model
 {
-    //use SoftDeletes;
+    use SoftDeletes, CanBeRecovered;
 
     public function collectorProfile(): BelongsTo
     {

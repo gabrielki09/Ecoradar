@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignId('waste_category_id')
                 ->constrained()
                 ->cascadeOnDelete();
+
             $table->unique(
                 ['company_id', 'waste_category_id'],
                 'un_company_id_waste_category_id'
