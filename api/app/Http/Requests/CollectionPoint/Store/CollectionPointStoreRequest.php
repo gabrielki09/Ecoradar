@@ -79,6 +79,9 @@ class CollectionPointStoreRequest extends ApiFormRequest
                 'max:120'
             ],
 
+            'latitude' => ['nullable', 'numeric', 'between:-90,90', 'required_with:longitude'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180', 'required_with:latitude'],
+
             'company_id' => [
                 Rule::requiredIf(
                     fn () => $this->user()->profile_type === ProfileTypes::COMPANY

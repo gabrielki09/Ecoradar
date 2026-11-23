@@ -15,6 +15,7 @@ class CollectionPointController extends Controller
     public function __construct(
         protected CollectionPointService $collectionPointService
     ){}
+    
     /**
      * Display a listing of the resource.
      */

@@ -42,6 +42,10 @@
             :error="!!errors[field.key]"
             :error-message="errors[field.key]"
         />
+        <div class="grid gap-4 sm:grid-cols-2">
+            <q-input v-model.number="form.latitude" outlined type="number" step="any" label="Latitude (opcional)" hint="Coordenada exata do endereço" :error="!!errors.latitude" :error-message="errors.latitude" />
+            <q-input v-model.number="form.longitude" outlined type="number" step="any" label="Longitude (opcional)" hint="Informe os dois valores para exibir no mapa" :error="!!errors.longitude" :error-message="errors.longitude" />
+        </div>
 
         <HoursEditor v-model="hours" :errors="errors" />
 
@@ -99,6 +103,7 @@ const form = reactive<PointFields>({
     name: props.initial?.name ?? '', cep: formatCep(props.initial?.cep ?? ''),
     neighborhood: props.initial?.neighborhood ?? '', address: props.initial?.address ?? '',
     guidelines: props.initial?.guidelines ?? '', contact: props.initial?.contact ?? '',
+    latitude: props.initial?.latitude ?? null, longitude: props.initial?.longitude ?? null,
 });
 const handleAutocompleteCEP = useCepAutocomplete(form);
 const hours = ref<OpeningHour[]>(props.initial?.opening_hours?.map(hour => ({
@@ -130,9 +135,14 @@ async function loadCategories() {
 function validate() {
     Object.keys(errors).forEach(key => delete errors[key]);
     for (const field of fieldLabels) {
-        if (!form[field.key].trim()) errors[field.key] = 'Campo obrigatório.';
+        if (!String(form[field.key] ?? '').trim()) errors[field.key] = 'Campo obrigatório.';
     }
     if (!/^\d{8}$/.test(cepDigits(form.cep))) errors.cep = 'Informe um CEP de 8 dígitos.';
+    const latitude = coordinate(form.latitude);
+    const longitude = coordinate(form.longitude);
+    if ((latitude === null) !== (longitude === null)) errors.latitude = 'Informe latitude e longitude juntas.';
+    if (latitude !== null && (!Number.isFinite(latitude) || Math.abs(latitude) > 90)) errors.latitude = 'Latitude inválida.';
+    if (longitude !== null && (!Number.isFinite(longitude) || Math.abs(longitude) > 180)) errors.longitude = 'Longitude inválida.';
     if (auth.user?.profile_type === 'company' && !store.selectedCompanyId) errors.company_id = 'Selecione uma empresa responsável.';
     if (!props.initial && !hours.value.length) errors.opening_hours = 'Selecione ao menos um dia.';
     if (!props.initial && !categories.value.length) errors.waste_categories = 'Selecione ao menos uma categoria.';
@@ -149,14 +159,20 @@ function validate() {
     return !Object.keys(errors).length;
 }
 
+function coordinate(value: unknown): number | null {
+    return value === '' || value === null || value === undefined ? null : Number(value);
+}
+
 async function submit() {
     if (sending.value || !validate()) return;
     sending.value = true;
     message.value = '';
     let submittedDays: number[] = [];
     try {
-        const fields = Object.fromEntries(fieldLabels.map(({ key }) => [key, form[key].trim()]));
+        const fields: Record<string, string | number | null> = Object.fromEntries(fieldLabels.map(({ key }) => [key, String(form[key] ?? '').trim()]));
         fields.cep = cepDigits(form.cep);
+        fields.latitude = coordinate(form.latitude);
+        fields.longitude = coordinate(form.longitude);
         const company = auth.user?.profile_type === 'company' ? { company_id: store.selectedCompanyId! } : {};
         let result: CollectionPoint;
         if (props.initial) {

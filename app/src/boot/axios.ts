@@ -19,7 +19,7 @@ declare module 'vue' {
 // for each client)
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL ?? '',
+    baseURL: import.meta.env.VITE_API_URL || '/api/v1',
     headers: {
         Accept: 'application/json',
         "Content-Type": 'application/json'

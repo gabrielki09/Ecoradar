@@ -1,5 +1,7 @@
 # app (app)
 
+Documentação da landing page: [Mapa público de pontos de coleta](docs/mapa-pontos-coleta.md).
+
 ## Install the dependencies
 
 ```bash

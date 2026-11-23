@@ -621,6 +621,46 @@ a {
     gap: 18px;
 }
 
+.points-map-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.points-map {
+    min-height: 420px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    z-index: 0;
+}
+
+.eco-map-marker {
+    display: grid;
+    place-items: center;
+}
+
+.eco-map-marker span {
+    display: block;
+    width: 26px;
+    height: 26px;
+    background: var(--eco-600);
+    border: 3px solid white;
+    border-radius: 50% 50% 50% 0;
+    box-shadow: 0 2px 9px rgba(0, 0, 0, .35);
+    transform: rotate(-45deg);
+}
+
+.eco-map-marker:focus-visible { outline: 3px solid var(--eco-900); outline-offset: 2px; }
+
+.points-selection { min-width: 0; }
+.points-state { padding: 20px; color: var(--muted); background: var(--eco-50); border-radius: 14px; }
+.points-list-link { color: var(--eco-700); font-weight: 700; }
+.point-card--selected { border-color: var(--eco-600); }
+.point-card__guidelines { white-space: pre-line; color: var(--muted); font-size: 12px; }
+.point-card__address, .point-card__schedule { line-height: 1.5; }
+.points-grid { scroll-margin-top: 85px; }
+
 .point-card {
     padding: 22px;
     border: 1px solid var(--line);
@@ -863,6 +903,8 @@ a {
 }
 
 @media (max-width: 760px) {
+    .points-map-layout { grid-template-columns: 1fr; }
+    .points-map { min-height: 310px; touch-action: pan-y; }
     .eco-container {
         width: min(100% - 30px, 600px);
     }
