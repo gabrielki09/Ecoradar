@@ -1,4 +1,4 @@
-import type { CollectionPoint, HowItWorksStep, WasteMaterial } from '../types/home.types';
+import type { HowItWorksStep, WasteMaterial } from '../types/home.types';
 
 export const wasteMaterials: WasteMaterial[] = [
     { name: 'Eletrônicos', description: 'Celulares, cabos e aparelhos', icon: 'devices', color: '#1976d2', background: '#eaf4ff' },
@@ -16,8 +16,3 @@ export const howItWorksSteps: HowItWorksStep[] = [
     { number: '04', title: 'Acompanhe', description: 'Veja seu impacto positivo e acompanhe cada solicitação em um só lugar.', icon: 'insights' },
 ];
 
-export const collectionPoints: CollectionPoint[] = [
-    { id: 1, name: 'Ecoponto Centro', address: 'Rua do Comércio, 280 · Centro', distance: '1,2 km', schedule: 'Aberto até 18h', materials: ['Eletrônicos', 'Pilhas', 'Papel'], icon: 'storefront' },
-    { id: 2, name: 'Cooperativa Recicla+', address: 'Rua das Indústrias, 45 · Industrial', distance: '2,8 km', schedule: 'Aberto até 17h', materials: ['Plástico', 'Vidro', 'Metal'], icon: 'warehouse' },
-    { id: 3, name: 'Ponto Verde Norte', address: 'Av. Brasil, 850 · Norte', distance: '3,4 km', schedule: 'Abre amanhã às 8h', materials: ['Óleo', 'Papel', 'Plástico'], icon: 'park' },
-];

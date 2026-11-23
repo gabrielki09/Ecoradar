@@ -51,7 +51,7 @@ class CollectionPointService
     ): array {
         return [
             ...array_intersect_key($data, array_flip([
-                'name', 'cep', 'neighborhood', 'address', 'guidelines', 'contact'
+                'name', 'cep', 'neighborhood', 'address', 'guidelines', 'contact', 'latitude', 'longitude'
             ])),
             'responsible_operator_type' =>
                 $responsibleProvider instanceof CollectorProfile
@@ -337,4 +337,10 @@ class CollectionPointService
             ]);
         });
     }
+
+    public function allPublic(array $parameters) {
+        return $this->collectionPointRepository->allPublic(
+            parameters: $parameters
+        );
+    }    
 }

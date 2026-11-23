@@ -80,6 +80,9 @@ class CollectionPointUpdateRequest extends ApiFormRequest
                 'max:120'
             ],
 
+            'latitude' => ['sometimes', 'nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['sometimes', 'nullable', 'numeric', 'between:-180,180'],
+
             'company_id' => [
                 Rule::requiredIf(
                     fn () => $this->user()->profile_type === ProfileTypes::COMPANY

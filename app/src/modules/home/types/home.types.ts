@@ -13,12 +13,3 @@ export interface HowItWorksStep {
     icon: string;
 }
 
-export interface CollectionPoint {
-    id: number;
-    name: string;
-    address: string;
-    distance: string;
-    schedule: string;
-    materials: string[];
-    icon: string;
-}

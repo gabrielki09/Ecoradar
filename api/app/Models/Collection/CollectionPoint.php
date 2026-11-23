@@ -23,7 +23,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'contact',
     'responsible_operator_type',
     'responsible_operator_id',
-    'status'
+    'status',
+    'latitude',
+    'longitude'
 ])]
 class CollectionPoint extends Model
 {
@@ -34,6 +36,8 @@ class CollectionPoint extends Model
         return [
             'responsible_operator_type' => CollectionResponsibleType::class,
             'status' => CollectionPointStatus::class,
+            'latitude' => 'float',
+            'longitude' => 'float',
         ];
     }
 

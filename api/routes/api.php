@@ -6,6 +6,8 @@ Route::prefix('v1')->group(function() {
     require_once __DIR__."/auth/auth-routes.php";
     require_once __DIR__."/general/general-routes.php";
 
+    Route::get('collection-points/public', [\App\Http\Controllers\CollectionPoint\PublicCollectionPointController::class, 'index']);
+
     Route::middleware(['auth:sanctum'])->group(function() {
         require_once __DIR__."/onboarding/onboarding-routes.php";
         require_once __DIR__."/wasteCategories/waste-categories.php";
