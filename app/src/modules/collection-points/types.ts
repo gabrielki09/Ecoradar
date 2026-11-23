@@ -33,6 +33,8 @@ export interface CollectionPoint {
     guidelines: string;
     contact: string;
     status: string;
+    latitude?: number | null;
+    longitude?: number | null;
     responsible_operator_type: string;
     responsible_operator_id: number;
     opening_hours?: OpeningHour[];
@@ -47,6 +49,8 @@ export interface PointFields {
     address: string;
     guidelines: string;
     contact: string;
+    latitude: number | null;
+    longitude: number | null;
 }
 
 export type HourChange = OpeningHour | { opening_day: number; delete: true };

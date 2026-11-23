@@ -168,26 +168,34 @@
                         <span class="section-kicker">
                             Perto de você
                         </span>
-                        <h2>
-                            Pontos de coleta em destaque
-                        </h2>
-                        <p>
-                            Locais demonstrativos para visualizar a experiência.
-                        </p>
+                        <h2>Pontos de coleta</h2>
+                        <p>Encontre um local para levar seus resíduos.</p>
                     </div>
-                    <q-btn
-                        outline
-                        no-caps
-                        icon="map"
-                        label="Explorar no mapa"
-                        class="secondary-button"
-                    />
+                    <a href="#lista-pontos" class="points-list-link">Consultar lista de pontos</a>
                 </div>
-                <div class="points-grid">
+                <div v-if="loading" role="status" class="points-state"><q-spinner color="primary" /> Carregando pontos…</div>
+                <div v-else-if="error" role="alert" class="points-state">
+                    {{ error }} <q-btn flat no-caps label="Tentar novamente" @click="load" />
+                </div>
+                <p v-else-if="!points.length" class="points-state">Nenhum ponto público disponível no momento.</p>
+                <template v-else>
+                    <p v-if="!mappedPoints.length" class="points-state">Os pontos cadastrados ainda não possuem coordenadas. Consulte os endereços na lista abaixo.</p>
+                    <div v-else class="points-map-layout">
+                        <PointsMap :points="mappedPoints" :selected-id="selectedId" @select="selectedId = $event" />
+                        <div v-if="selected" class="points-selection" aria-live="polite">
+                            <CollectionPointCard :point="selected" always-expanded />
+                        </div>
+                        <p v-else class="points-selection points-state">Selecione um marcador ou um ponto na lista para ver os detalhes.</p>
+                    </div>
+                    <p v-if="mappedPoints.length < points.length" class="points-state">Alguns pontos ainda não têm coordenadas e aparecem somente na lista.</p>
+                </template>
+                <div v-if="points.length" id="lista-pontos" class="points-grid" aria-label="Lista de pontos de coleta">
                     <CollectionPointCard
-                        v-for="point in collectionPoints"
+                        v-for="point in points"
                         :key="point.id"
                         :point="point"
+                        :selected="selectedId === point.id"
+                        @select="selectedId = point.id"
                     />
                 </div>
             </div>
@@ -224,7 +232,38 @@
 </template>
 
 <script setup lang="ts">
+import { computed, onMounted, ref } from 'vue';
 import CollectionPointCard from "../components/CollectionPointCard.vue";
 import MaterialCard from "../components/MaterialCard.vue";
-import { collectionPoints, howItWorksSteps, wasteMaterials } from "../data/home.data";
+import PointsMap from '../components/PointsMap.vue';
+import { howItWorksSteps, wasteMaterials } from "../data/home.data";
+import { loadPublicPoints } from '../services/public-points.service';
+import type { PublicPoint } from '../types/public-point.types';
+
+const points = ref<PublicPoint[]>([]);
+const selectedId = ref<number | null>(null);
+const loading = ref(true);
+const error = ref('');
+const selected = computed(() => points.value.find(point => point.id === selectedId.value));
+const mappedPoints = computed(() => points.value.filter(point =>
+    typeof point.latitude === 'number' && typeof point.longitude === 'number' &&
+    Number.isFinite(point.latitude) && Number.isFinite(point.longitude) &&
+    Math.abs(point.latitude) <= 90 && Math.abs(point.longitude) <= 180,
+));
+
+async function load() {
+    loading.value = true;
+    error.value = '';
+    try {
+        points.value = await loadPublicPoints();
+        if (!points.value.some(point => point.id === selectedId.value)) selectedId.value = null;
+    } catch {
+        points.value = [];
+        error.value = 'Não foi possível carregar os pontos de coleta.';
+    } finally {
+        loading.value = false;
+    }
+}
+
+onMounted(load);
 </script>

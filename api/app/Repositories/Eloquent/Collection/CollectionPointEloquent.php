@@ -2,12 +2,14 @@
 
 namespace App\Repositories\Eloquent\Collection;
 
+use App\Enum\Collection\CollectionPointStatus;
 use App\Models\Collection\CollectionPoint;
 use App\Models\Collector\CollectorProfile;
 use App\Models\Company\Company;
 use App\Enum\Collection\CollectionResponsibleType;
 use App\Repositories\Eloquent\BaseEloquent;
 use App\Repositories\Interface\Collection\CollectionPointInterface;
+use Override;
 
 class CollectionPointEloquent extends BaseEloquent implements CollectionPointInterface
 {
@@ -73,5 +75,60 @@ class CollectionPointEloquent extends BaseEloquent implements CollectionPointInt
         return $query->paginate(
             perPage: $perPage
         );
+    }
+
+    public function allPublic(array $parameters = [])
+    {
+        $query = $this->model->newQuery()
+            ->where('status', CollectionPointStatus::RECEIVING_MATERIALS->value)
+            ->select(['id', 'name', 'address', 'neighborhood', 'cep', 'guidelines', 'latitude', 'longitude']);
+        
+        $this->applyRelationships(
+            $query,
+            $parameters['relationships'] ?? []
+        );
+
+        $this->applyFilters(
+            $query,
+            $parameters['filtersV1'] ?? []
+        );
+
+        $this->applyOrderBy(
+            $query,
+            $parameters['orderBy'] ?? []
+        );
+
+        $perPage = max(
+            1,
+            min(
+                (int) ($parameters['per_page'] ?? 15),
+                100
+            )
+        );
+
+
+        return $query->paginate(
+            perPage: $perPage
+        )->through(fn (CollectionPoint $point) => [
+                'id' => $point->id,
+                'name' => $point->name,
+                'address' => $point->address,
+                'neighborhood' => $point->neighborhood,
+                'cep' => $point->cep,
+                'guidelines' => $point->guidelines,
+                'latitude' => $point->latitude,
+                'longitude' => $point->longitude,
+                'opening_hours' => $point->openingHours->map(fn ($hour) => [
+                    'opening_day' => $hour->opening_day->value,
+                    'opens_at' => $hour->opens_at,
+                    'closes_at' => $hour->closes_at,
+                ])->values(),
+                'categories' => $point->collectionWasteCategory
+                    ->filter(fn ($link) => $link->wasteCategory !== null)
+                    ->map(fn ($link) => [
+                        'id' => $link->wasteCategory->id,
+                        'name' => $link->wasteCategory->name,
+                    ])->values(),
+            ]);
     }
 }
