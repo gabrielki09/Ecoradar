@@ -20,7 +20,7 @@ function resolveProvider(
             ? throw new InvalidArgumentException('Perfil condiz com perfil de empresa mas o código da empresa não foi definido')
             : $user->companies()
                 ->whereKey($companyId)
-                ->when($responsibleOnly, fn ($query) => $query->wherePivot('role', RoleUser::RESPONSIBLE->value))
+                ->when($responsibleOnly, fn ($query) => $query->where('company_users.role', RoleUser::RESPONSIBLE->value))
                 ->firstOrFail();
 
     } else {
