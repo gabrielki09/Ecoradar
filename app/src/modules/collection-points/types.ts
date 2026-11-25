@@ -17,6 +17,7 @@ export interface OpeningHour {
 export interface LinkedCategory {
     id?: number;
     waste_category_id: number;
+    waste_category?: WasteCategory | null;
 }
 
 export interface WasteCategory {

@@ -3,7 +3,8 @@
 namespace App\Http\Requests\Collector;
 
 use App\Http\Requests\ApiFormRequest;
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Enum\ProfileTypes;
+use App\Support\CollectionAccess;
 use Illuminate\Validation\Rule;
 
 class CollectorProfileUpdateRequest extends ApiFormRequest
@@ -13,7 +14,7 @@ class CollectorProfileUpdateRequest extends ApiFormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->profile_type === ProfileTypes::COLLECTOR && CollectionAccess::provider($this->user());
     }
 
     /**
@@ -39,7 +40,8 @@ class CollectorProfileUpdateRequest extends ApiFormRequest
             ],
 
             'cities.*.city_id' => [
-                'sometimes',
+                'required',
+                'distinct',
                 'integer',
                 'exists:cities,id'
             ],
@@ -62,7 +64,7 @@ class CollectorProfileUpdateRequest extends ApiFormRequest
             ],
 
             'waste_categories.*.waste_category_id' => [
-                'sometimes',
+                'required',
                 'integer',
                 'distinct',
                 Rule::exists('waste_categories', 'id')

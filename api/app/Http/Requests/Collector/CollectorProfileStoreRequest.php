@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Collector;
 
+use App\Enum\ProfileTypes;
 use App\Http\Requests\ApiFormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -14,6 +15,11 @@ class CollectorProfileStoreRequest extends ApiFormRequest
      */
     public function authorize(): bool
     {
+        $user = $this->user();
+        if ($user->profile_type !== ProfileTypes::COLLECTOR) return false;
+
+        abort_if($user->onboarding_completed_at !== null, 409, 'O cadastro já foi concluído.');
+
         return true;
     }
 

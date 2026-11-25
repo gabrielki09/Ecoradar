@@ -13,7 +13,7 @@
             </h1>
 
             <q-form
-                class="grid gap-4 rounded-2xl border border-line bg-white p-6"
+                class="grid grid-cols-1 gap-4 rounded-2xl border border-line bg-white p-6"
                 @submit.prevent="submit"
             >
                 <p
@@ -26,12 +26,14 @@
 
                 <CitySelect
                     v-model="form.city_id"
+                    name="city_id"
                     label="Cidade *"
                     :error="errors.city_id ?? ''"
                     :disable="sending"
                 />
                 <q-input
                     v-model="form.cep"
+                    name="cep"
                     outlined
                     label="CEP *"
                     type="tel"
@@ -46,6 +48,7 @@
                 />
                 <q-input
                     v-model="form.neighborhood"
+                    name="neighborhood"
                     outlined
                     label="Bairro *"
                     maxlength="255"
@@ -54,6 +57,7 @@
                 />
                 <q-input
                     v-model="form.address"
+                    name="address"
                     outlined
                     label="Endereço *"
                     maxlength="255"
@@ -82,9 +86,9 @@
                 <div
                     v-for="(item, index) in form.items"
                     :key="item.key"
-                    class="grid gap-3 rounded-xl border border-line p-4"
+                    class="grid grid-cols-1 gap-3 rounded-xl border border-line p-4"
                 >
-                    <div class="flex justify-between">
+                    <div class="flex flex-wrap justify-between gap-2">
                         <strong>
                             Item {{ index + 1 }}
                         </strong>
@@ -99,6 +103,8 @@
                     </div>
                     <q-select
                         v-model="item.waste_category_id"
+                        :name="`items.${index}.waste_category_id`"
+                        :disable="catalogLoading || !!catalogError || sending"
                         outlined
                         emit-value
                         map-options
@@ -109,6 +115,7 @@
                     />
                     <q-input
                         v-model="item.approximate_quantity"
+                        :name="`items.${index}.approximate_quantity`"
                         outlined
                         type="number"
                         min="0"
@@ -119,6 +126,7 @@
                     />
                     <q-input
                         v-model="item.description"
+                        :name="`items.${index}.description`"
                         outlined
                         type="textarea"
                         label="Descrição (opcional)"
@@ -135,13 +143,21 @@
                     icon="add"
                     @click="addItem"
                 />
-                <q-btn
-                    type="submit"
-                    color="primary"
-                    label="Criar solicitação"
-                    :loading="sending"
-                    :disable="sending || catalogLoading"
-                />
+                <div class="flex flex-wrap gap-3">
+                    <q-btn
+                        type="submit"
+                        color="primary"
+                        label="Criar solicitação"
+                        :loading="sending"
+                        :disable="catalogLoading || !!catalogError"
+                    />
+                    <q-btn
+                        flat
+                        label="Cancelar"
+                        to="/area/coletas/mine"
+                        :disable="sending"
+                    />
+                </div>
             </q-form>
         </main>
     </q-page>
@@ -151,6 +167,8 @@
 import { onMounted, reactive, ref } from "vue";
 
 import { useRouter } from "vue-router";
+import { useQuasar } from "quasar";
+import { scrollToFirstError } from "@/helpers/pages/scrollToFirstError";
 import CitySelect from "@/components/CitySelect.vue";
 import { collectorProfileService } from "@/modules/collector-profile/services/collector-profile.service";
 import { readFormError } from "@/modules/auth/utils/form-errors";
@@ -160,6 +178,7 @@ import { collectionService } from "../service";
 import { useCollectionStore } from "../store";
 
 const router = useRouter();
+const $q = useQuasar();
 const store = useCollectionStore();
 let nextKey = 1;
 const form = reactive({
@@ -239,11 +258,13 @@ function validate() {
 }
 
 async function submit() {
-    if (sending.value || !validate() || !form.city_id) {
+    if (sending.value || catalogLoading.value || catalogError.value) return;
+    message.value = "";
+    if (!validate() || !form.city_id) {
+        await scrollToFirstError(Object.keys(errors), errors);
         return;
     }
     sending.value = true;
-    message.value = "";
     try {
         const result = await collectionService.create({
             city_id: form.city_id,
@@ -257,11 +278,13 @@ async function submit() {
             })),
         });
         store.invalidate();
+        $q.notify({ type: "positive", message: "Solicitação criada." });
         await router.replace(`/area/coletas/detalhe/${result.id}?origem=mine`);
     } catch (cause) {
         const parsed = readFormError(cause, "Não foi possível criar a solicitação.");
         Object.assign(errors, parsed.fields);
         message.value = parsed.message;
+        await scrollToFirstError(Object.keys(errors), errors);
     } finally {
         sending.value = false;
     }

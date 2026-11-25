@@ -1,18 +1,16 @@
 import { nextTick } from 'vue';
 
-export const scrollToFirstError = async (fieldOrder: string[], errors: any) => {
+export const scrollToFirstError = async (fieldOrder: string[], errors: Readonly<Record<string, string>>) => {
     await nextTick();
 
     const firstField = fieldOrder.find(field => Boolean(errors[field]));
     if (!firstField) return;
 
-    const input = document.querySelector<HTMLElement>(
-        `[name="${firstField}"]`
-    );
+    const input = document.querySelector<HTMLElement>(`[name="${CSS.escape(firstField)}"]`)
+        ?? [...document.querySelectorAll<HTMLElement>('[data-error-field]')]
+            .find(element => element.dataset.errorField === firstField);
 
     if (!input) return;
-
-    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
 
     input.scrollIntoView({
         behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches

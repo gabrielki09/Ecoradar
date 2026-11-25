@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Onboarding;
 
+use App\Enum\ProfileTypes;
 use App\Http\Requests\ApiFormRequest;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Auth;
@@ -40,6 +41,11 @@ class OnboardingCompanyStoreRequest extends ApiFormRequest
      */
     public function authorize(): bool
     {
+        $user = $this->user();
+        if ($user->profile_type !== ProfileTypes::COMPANY) return false;
+
+        abort_if($user->onboarding_completed_at !== null, 409, 'O cadastro já foi concluído.');
+
         return true;
     }
 

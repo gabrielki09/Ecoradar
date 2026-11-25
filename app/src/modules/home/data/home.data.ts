@@ -10,9 +10,9 @@ export const wasteMaterials: WasteMaterial[] = [
 ];
 
 export const howItWorksSteps: HowItWorksStep[] = [
-    { number: '01', title: 'Encontre', description: 'Busque pelo material que deseja descartar ou por um ponto perto de você.', icon: 'search' },
+    { number: '01', title: 'Encontre', description: 'Consulte o mapa e a lista de pontos de coleta.', icon: 'search' },
     { number: '02', title: 'Escolha', description: 'Compare locais, materiais aceitos, horários e escolha a melhor opção.', icon: 'location_on' },
     { number: '03', title: 'Descarte', description: 'Leve seus resíduos até o ponto ou solicite uma coleta domiciliar.', icon: 'recycling' },
-    { number: '04', title: 'Acompanhe', description: 'Veja seu impacto positivo e acompanhe cada solicitação em um só lugar.', icon: 'insights' },
+    { number: '04', title: 'Acompanhe', description: 'Acompanhe o status de cada solicitação na sua conta.', icon: 'insights' },
 ];
 

@@ -9,11 +9,6 @@ use Illuminate\Validation\Rule;
 
 class CollectionPointUpdateRequest extends ApiFormRequest
 {
-    public function __construct(
-        protected CollectionOpeningHourUpdateRequest $collectionOpeningHourUpdateRequest,
-        protected CollectionPointWasteCategoryUpdateRequest $collectionPointWasteCategoryUpdateRequest
-    ){}
-
     protected function prepareForValidation()
     {
         if (! $this->exists('cep')) return;
@@ -41,8 +36,8 @@ class CollectionPointUpdateRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            ...$this->collectionOpeningHourUpdateRequest->rules(),
-            ...$this->collectionPointWasteCategoryUpdateRequest->rules(),
+            ...(new CollectionOpeningHourUpdateRequest)->rules($this->input('opening_hours')),
+            ...(new CollectionPointWasteCategoryUpdateRequest)->rules(),
 
             'name' => [
                 'sometimes',

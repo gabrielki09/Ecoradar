@@ -47,7 +47,7 @@ class CollectionOpeningHourStoreRequest extends ApiFormRequest
             'opening_hours.*.closes_at' => [
                 'required',
                 'date_format:H:i',
-                'after:opens_at'
+                'after:opening_hours.*.opens_at'
             ],
         ];
     }
