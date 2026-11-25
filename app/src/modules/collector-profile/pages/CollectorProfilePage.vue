@@ -45,7 +45,7 @@
             </div>
 
             <q-form
-                v-else
+                v-else-if="ready"
                 class="grid gap-5"
                 greedy
                 @submit.prevent="submit"
@@ -164,6 +164,7 @@
                         </div>
                     </div>
                     <CitySelect
+                        name="cities"
                         v-model="form.cities"
                         multiple
                         label="Cidades atendidas"
@@ -282,6 +283,11 @@
                     </button>
                 </section>
             </q-form>
+
+            <div v-if="!loading && !ready" role="alert" class="text-negative">
+                {{ pageError }}
+                <q-btn flat label="Tentar novamente" @click="load" />
+            </div>
         </main>
     </q-page>
 </template>
@@ -290,16 +296,20 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import axios from "axios";
 import { collectorProfileService } from "../services/collector-profile.service";
-import type { CollectorProfileForm, WasteCategoryOption } from "../types/collector-profile.types";
+import type { WasteCategoryOption } from "../types/collector-profile.types";
 import CitySelect from "@/components/CitySelect.vue";
+import { scrollToFirstError } from "@/helpers/pages/scrollToFirstError";
 import { readFormError } from "@/modules/auth/utils/form-errors";
 
 const loading = ref(true);
 const submitting = ref(false);
+const ready = ref(false);
+const previous = { cities: [] as number[], categories: [] as number[] };
+const fieldOrder = ["service_description", "cities", "waste_category"];
 const pageError = ref("");
 const successMessage = ref("");
 const categories = ref<WasteCategoryOption[]>([]);
-const form = reactive<CollectorProfileForm>({
+const form = reactive<{ service_description: string; cities: number[]; waste_category: number[] }>({
     service_description: "",
     cities: [],
     waste_category: [],
@@ -344,33 +354,59 @@ async function submit() {
     errors.cities = form.cities.length ? "" : "Selecione pelo menos uma cidade atendida.";
     errors.waste_category = form.waste_category.length ? "" : "Selecione pelo menos uma categoria.";
     if (errors.service_description || errors.cities || errors.waste_category) {
+        await scrollToFirstError(fieldOrder, errors);
         return;
     }
     submitting.value = true;
     pageError.value = "";
     successMessage.value = "";
     try {
+        const cities = [...new Set(form.cities)];
+        const categories = [...new Set(form.waste_category)];
+        const cityChanges = [
+            ...previous.cities.filter(id => !cities.includes(id)).map(city_id => ({ city_id, delete: true })),
+            ...cities.filter(id => !previous.cities.includes(id)).map(city_id => ({ city_id, delete: false })),
+        ];
+        const categoryChanges = [
+            ...previous.categories.filter(id => !categories.includes(id)).map(waste_category_id => ({ waste_category_id, delete: true })),
+            ...categories.filter(id => !previous.categories.includes(id)).map(waste_category_id => ({ waste_category_id, delete: false })),
+        ];
         await collectorProfileService.update({
             service_description: form.service_description.trim(),
-            cities: [...new Set(form.cities)],
-            waste_category: [...new Set(form.waste_category)],
+            ...(cityChanges.length ? { cities: cityChanges } : {}),
+            ...(categoryChanges.length ? { waste_categories: categoryChanges } : {}),
         });
+        previous.cities = cities;
+        previous.categories = categories;
         successMessage.value = "Configuração atualizada com sucesso.";
     } catch (error) {
         const parsed = readFormError(error, "Não foi possível atualizar o perfil de coleta.");
         errors.service_description = parsed.fields.service_description ?? "";
         errors.cities = parsed.fields.cities ?? parsed.fields["cities.0"] ?? "";
         errors.waste_category =
-            parsed.fields.waste_category ?? parsed.fields["waste_category.0"] ?? "";
+            parsed.fields.waste_categories ?? Object.entries(parsed.fields).find(([key]) => key.startsWith("waste_categories."))?.[1] ?? "";
         pageError.value = parsed.message;
+        await scrollToFirstError(fieldOrder, errors);
     } finally {
         submitting.value = false;
     }
 }
 
-onMounted(async () => {
+async function load() {
+    loading.value = true;
+    pageError.value = "";
     try {
-        categories.value = await collectorProfileService.getWasteCategories();
+        const [catalog, profile] = await Promise.all([
+            collectorProfileService.getWasteCategories(),
+            collectorProfileService.getProfile(),
+        ]);
+        categories.value = catalog;
+        form.service_description = profile.service_description ?? "";
+        previous.cities = profile.cities.map(city => city.city_id);
+        previous.categories = profile.waste_categories.map(category => category.waste_category_id);
+        form.cities = [...previous.cities];
+        form.waste_category = [...previous.categories];
+        ready.value = true;
     } catch (error) {
         const status = axios.isAxiosError(error) ? error.response?.status : undefined;
         const parsed = readFormError(error, "Não foi possível carregar as categorias de resíduos.");
@@ -381,5 +417,7 @@ onMounted(async () => {
     } finally {
         loading.value = false;
     }
-});
+}
+
+onMounted(load);
 </script>

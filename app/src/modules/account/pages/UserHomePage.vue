@@ -142,27 +142,6 @@
                     </p>
                 </RouterLink>
 
-                <article class="rounded-2xl border border-dashed border-[#b9cec4] bg-white/65 p-6">
-                    <span
-                        class="grid size-11 place-items-center rounded-xl bg-[#f1f5f3] text-muted"
-                    >
-                        <q-icon
-                            name="insights"
-                            size="24px"
-                        />
-                    </span>
-                    <h2 class="mb-2 mt-5 text-lg font-extrabold text-eco-900">
-                        Seu impacto
-                    </h2>
-                    <p class="m-0 text-sm leading-6 text-muted">
-                        O acompanhamento das suas ações ficará disponível em uma próxima etapa.
-                    </p>
-                    <span
-                        class="mt-4 inline-block rounded-full bg-[#eef3f0] px-3 py-1 text-[11px] font-bold text-muted"
-                    >
-                        Em breve
-                    </span>
-                </article>
             </section>
         </main>
     </q-page>

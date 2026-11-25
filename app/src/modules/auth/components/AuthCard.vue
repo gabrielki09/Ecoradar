@@ -14,12 +14,12 @@
                 />
             </span>
 
-            <h2
+            <h1
                 :id="titleId"
-                class="m-0 text-sm font-extrabold leading-tight tracking-[-0.035em] text-eco-900"
+                class="auth-card-title m-0 font-extrabold leading-tight tracking-[-0.035em] text-eco-900"
             >
                 {{ title }}
-            </h2>
+            </h1>
             <p class="mx-auto mb-0 mt-3 max-w-md text-sm leading-6 text-muted">
                 {{ description }}
             </p>
@@ -36,3 +36,12 @@ defineProps<{
     description: string;
 }>();
 </script>
+
+
+<style scoped>
+.auth-card-title {
+    font-size: clamp(1.75rem, 5vw, 2.25rem);
+    line-height: 1.2;
+    font-weight: 800;
+}
+</style>

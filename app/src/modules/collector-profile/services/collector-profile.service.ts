@@ -1,6 +1,6 @@
 import { api } from '@/boot/axios';
 import type { ApiResponse } from '@/types/api/api.types';
-import type { CollectorProfileForm, WasteCategoryIndexData, WasteCategoryOption } from '../types/collector-profile.types';
+import type { CollectorProfileData, CollectorProfileForm, WasteCategoryIndexData, WasteCategoryOption } from '../types/collector-profile.types';
 
 export const collectorProfileService = {
     async getAllWasteCategories(): Promise<WasteCategoryOption[]> {
@@ -17,6 +17,11 @@ export const collectorProfileService = {
     },
     async getWasteCategories(): Promise<WasteCategoryOption[]> {
         return (await this.getAllWasteCategories()).filter(category => category.is_system);
+    },
+
+    async getProfile(): Promise<CollectorProfileData> {
+        const response = await api.get<ApiResponse<{ collector_profile: CollectorProfileData }>>('/collector-profile');
+        return response.data.data.collector_profile;
     },
 
     update(payload: CollectorProfileForm) {

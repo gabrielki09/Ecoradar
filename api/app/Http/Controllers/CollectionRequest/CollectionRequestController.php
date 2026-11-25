@@ -13,7 +13,10 @@ use App\Http\Requests\Collection\CollectionRequestStoreRequest;
 use App\Http\Requests\Collection\CompleteRequest;
 use App\Http\Requests\Filters\FilterV1Request;
 use App\Services\Collection\CollectionRequestService;
+use App\Enum\ProfileTypes;
+use App\Models\Collection\CollectionRequest;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class CollectionRequestController extends Controller
 {
@@ -31,15 +34,39 @@ class CollectionRequestController extends Controller
         abort_unless(CollectionAccess::provider($request->user()), 403);
     }
 
+    private const PRIVATE_REQUEST_FIELDS = ['address', 'cep', 'requester', 'requester_user_id'];
+
+    private function limitPreviewFilters(array $parameters): array
+    {
+        foreach ($parameters['filtersV1'] ?? [] as $index => $filter) {
+            if (in_array($filter['field'], self::PRIVATE_REQUEST_FIELDS, true)) {
+                throw ValidationException::withMessages([
+                    "filtersV1.{$index}.field" => 'O campo não está disponível para esta listagem.',
+                ]);
+            }
+        }
+
+        if (in_array('requester', $parameters['relationships'] ?? [], true)) {
+            throw ValidationException::withMessages(['relationships' => 'O solicitante não está disponível para esta listagem.']);
+        }
+
+        return $parameters;
+    }
+
+    private function preview(CollectionRequest $request): CollectionRequest
+    {
+        return $request->makeHidden(self::PRIVATE_REQUEST_FIELDS);
+    }
+
     public function all(FilterV1Request $req)
     {
         $this->authorizeProvider($req);
         return apiSuccess(
-            'Todas as coletas do disponíveis.',
+            'Todas as solicitações de coleta.',
             [
                 'collection_requests' => $this->collectionRequestService->all(
-                    parameters: $req->validated()
-                )
+                    parameters: $this->limitPreviewFilters($req->validated())
+                )->through($this->preview(...))
             ]
         );
     }
@@ -97,8 +124,8 @@ class CollectionRequestController extends Controller
                 'collection_requests' => $this->collectionRequestService->available(
                     user: $req->user(),
                     companyId: $data['company_id'] ?? null,
-                    parameters: $data
-                )
+                    parameters: $this->limitPreviewFilters($data)
+                )->through($this->preview(...))
             ]
         );
     }
@@ -112,10 +139,22 @@ class CollectionRequestController extends Controller
         abort_unless($collectionRequest, 404);
         if ($isRequester) abort_unless($collectionRequest->requester_user_id === $user->id, 403);
 
+        $actions = [];
+        if (!$isRequester) {
+            $companyId = $req->validate(['company_id' => ['sometimes', 'integer', 'min:1']])['company_id'] ?? null;
+            if ($user->profile_type !== ProfileTypes::COMPANY || $companyId !== null) {
+                $actions = $this->collectionRequestService->providerActions($collectionRequest, resolveProvider($user, $companyId));
+            }
+
+            if (!($actions['assigned_to_provider'] ?? false)) {
+                $this->preview($collectionRequest);
+            }
+        }
+
         return apiSuccess(
             'Dados da coleta.',
             [
-                'collection_request' => $collectionRequest
+                'collection_request' => [...$collectionRequest->toArray(), ...$actions]
             ]
         );
     }

@@ -4,4 +4,4 @@ use App\Http\Controllers\WasteCategoryController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::apiResource('waste-categories', WasteCategoryController::class);
+Route::apiResource('waste-categories', WasteCategoryController::class)->only(['index', 'show']);

@@ -1,9 +1,11 @@
 <template>
-    <q-form class="grid gap-4 rounded-2xl border border-line bg-white p-6" @submit.prevent="submit">
+    <q-form class="grid grid-cols-1 gap-4 rounded-2xl border border-line bg-white p-6" @submit.prevent="submit">
         <p v-if="message" role="alert" class="text-negative">{{ message }}</p>
         <q-select
             v-if="auth.user?.profile_type === 'company'"
-            :model-value="store.selectedCompanyId"
+            :model-value="companyId"
+            name="company_id"
+            :disable="!!initial || sending"
             :options="companyOptions"
             label="Empresa responsável *"
             outlined
@@ -15,6 +17,7 @@
         />
         <q-input
             v-model="form.name"
+            name="name"
             outlined
             label="Nome *"
             :error="!!errors.name"
@@ -22,6 +25,7 @@
         />
         <q-input
             v-model="form.cep"
+            name="cep"
             outlined
             type="tel"
             inputmode="numeric"
@@ -36,20 +40,21 @@
         />
         <q-input v-for="field in fieldLabels.slice(1)" :key="field.key"
             v-model="form[field.key]"
+            :name="field.key"
             outlined
             :type="field.key === 'guidelines' ? 'textarea' : 'text'"
             :label="field.label"
             :error="!!errors[field.key]"
             :error-message="errors[field.key]"
         />
-        <div class="grid gap-4 sm:grid-cols-2">
-            <q-input v-model.number="form.latitude" outlined type="number" step="any" label="Latitude (opcional)" hint="Coordenada exata do endereço" :error="!!errors.latitude" :error-message="errors.latitude" />
-            <q-input v-model.number="form.longitude" outlined type="number" step="any" label="Longitude (opcional)" hint="Informe os dois valores para exibir no mapa" :error="!!errors.longitude" :error-message="errors.longitude" />
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <q-input v-model.number="form.latitude" name="latitude" outlined type="number" step="any" label="Latitude (opcional)" hint="Coordenada exata do endereço" :error="!!errors.latitude" :error-message="errors.latitude" />
+            <q-input v-model.number="form.longitude" name="longitude" outlined type="number" step="any" label="Longitude (opcional)" hint="Informe os dois valores para exibir no mapa" :error="!!errors.longitude" :error-message="errors.longitude" />
         </div>
 
         <HoursEditor v-model="hours" :errors="errors" />
 
-        <section>
+        <section data-error-field="waste_categories" tabindex="-1">
             <h2 class="text-xl font-bold text-eco-900">Materiais recebidos</h2>
             <p v-if="catalogLoading" role="status">Carregando categorias…</p>
             <p v-if="catalogError" role="alert" class="text-negative">{{ catalogError }}</p>
@@ -71,8 +76,21 @@
             </p>
         </section>
 
-        <q-btn type="submit" color="primary" :label="initial ? 'Salvar alterações' : 'Criar ponto'"
-            :loading="sending" :disable="sending || catalogLoading || !!catalogError" />
+        <div class="flex flex-wrap gap-3">
+            <q-btn
+                type="submit"
+                color="primary"
+                :label="initial ? 'Salvar alterações' : 'Criar ponto'"
+                :loading="sending"
+                :disable="catalogLoading || !!catalogError"
+            />
+            <q-btn
+                flat
+                label="Cancelar"
+                :to="initial ? { name: 'point-detail', params: { id: initial.id }, query: companyQuery } : { name: 'point-mine' }"
+                :disable="sending"
+            />
+        </div>
     </q-form>
 </template>
 
@@ -80,6 +98,7 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { scrollToFirstError } from '@/helpers/pages/scrollToFirstError';
 import { readFormError } from '@/modules/auth/utils/form-errors';
 import { useCepAutocomplete } from '@/composables/useCepAutocomplete';
 import { cepDigits, formatCep } from '@/utils/cep';
@@ -117,6 +136,10 @@ const catalogError = ref('');
 const sending = ref(false);
 const message = ref('');
 const errors = reactive<Record<string, string>>({});
+const companyId = computed(() => auth.user?.profile_type === 'company'
+    ? props.initial?.responsible_operator_id ?? store.selectedCompanyId
+    : null);
+const companyQuery = computed(() => companyId.value ? { empresa: companyId.value } : {});
 const companyOptions = computed(() => store.companies.map(company => ({ label: company.company_name, value: company.id })));
 const categoryOptions = computed(() => catalog.value.map(category => ({ label: category.name, value: category.id })));
 
@@ -143,7 +166,7 @@ function validate() {
     if ((latitude === null) !== (longitude === null)) errors.latitude = 'Informe latitude e longitude juntas.';
     if (latitude !== null && (!Number.isFinite(latitude) || Math.abs(latitude) > 90)) errors.latitude = 'Latitude inválida.';
     if (longitude !== null && (!Number.isFinite(longitude) || Math.abs(longitude) > 180)) errors.longitude = 'Longitude inválida.';
-    if (auth.user?.profile_type === 'company' && !store.selectedCompanyId) errors.company_id = 'Selecione uma empresa responsável.';
+    if (auth.user?.profile_type === 'company' && !companyId.value) errors.company_id = 'Selecione uma empresa responsável.';
     if (!props.initial && !hours.value.length) errors.opening_hours = 'Selecione ao menos um dia.';
     if (!props.initial && !categories.value.length) errors.waste_categories = 'Selecione ao menos uma categoria.';
     const seen = new Set<number>();
@@ -164,16 +187,20 @@ function coordinate(value: unknown): number | null {
 }
 
 async function submit() {
-    if (sending.value || !validate()) return;
-    sending.value = true;
+    if (sending.value || catalogLoading.value || catalogError.value) return;
     message.value = '';
+    if (!validate()) {
+        await scrollToFirstError(Object.keys(errors), errors);
+        return;
+    }
+    sending.value = true;
     let submittedDays: number[] = [];
     try {
         const fields: Record<string, string | number | null> = Object.fromEntries(fieldLabels.map(({ key }) => [key, String(form[key] ?? '').trim()]));
         fields.cep = cepDigits(form.cep);
         fields.latitude = coordinate(form.latitude);
         fields.longitude = coordinate(form.longitude);
-        const company = auth.user?.profile_type === 'company' ? { company_id: store.selectedCompanyId! } : {};
+        const company = companyId.value ? { company_id: companyId.value } : {};
         let result: CollectionPoint;
         if (props.initial) {
             const changed = Object.fromEntries(Object.entries(fields).filter(([key, value]) => value !== props.initial?.[key as keyof PointFields]));
@@ -201,14 +228,17 @@ async function submit() {
         } else {
             submittedDays = hours.value.map(hour => hour.opening_day);
             result = await pointService.create({
-                ...form, ...company, cep: String(fields.cep),
+                ...form, ...company,
+                cep: String(fields.cep),
+                latitude: coordinate(form.latitude),
+                longitude: coordinate(form.longitude),
                 opening_hours: hours.value,
                 waste_categories: categories.value.map(waste_category_id => ({ waste_category_id })),
             });
         }
         store.invalidate();
         $q.notify({ type: 'positive', message: props.initial ? 'Ponto atualizado.' : 'Ponto criado.' });
-        await router.replace(`/pontos/meus/${result.id}`);
+        await router.replace({ name: 'point-detail', params: { id: result.id }, query: companyQuery.value });
     } catch (cause) {
         const parsed = readFormError(cause, 'Não foi possível salvar o ponto.');
         for (const [key, value] of Object.entries(parsed.fields)) {
@@ -218,6 +248,7 @@ async function submit() {
             errors[formIndex >= 0 && match ? `opening_hours.${formIndex}.${match[2]}` : key] = value;
         }
         message.value = parsed.message;
+        await scrollToFirstError(Object.keys(errors), errors);
     } finally {
         sending.value = false;
     }

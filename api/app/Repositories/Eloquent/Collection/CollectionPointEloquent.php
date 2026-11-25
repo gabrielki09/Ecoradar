@@ -29,6 +29,7 @@ class CollectionPointEloquent extends BaseEloquent implements CollectionPointInt
     protected array $allowedRelationships = [
         'openingHours',
         'collectionWasteCategory',
+        'collectionWasteCategory.wasteCategory',
     ];
 
     protected function modelClass(): string

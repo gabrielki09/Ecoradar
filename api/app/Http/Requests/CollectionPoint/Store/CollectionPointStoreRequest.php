@@ -9,11 +9,6 @@ use Illuminate\Validation\Rule;
 
 class CollectionPointStoreRequest extends ApiFormRequest
 {
-    public function __construct(
-        protected CollectionOpeningHourStoreRequest $collectionOpeningHourStoreRequest,
-        protected CollectionPointWasteCategoryStoreRequest $collectionPointWasteCategoryStoreRequest
-    ){}
-
     protected function prepareForValidation()
     {
         $this->merge([
@@ -40,8 +35,8 @@ class CollectionPointStoreRequest extends ApiFormRequest
     public function rules(): array
     {
         return [
-            ...$this->collectionOpeningHourStoreRequest->rules(),
-            ...$this->collectionPointWasteCategoryStoreRequest->rules(),
+            ...(new CollectionOpeningHourStoreRequest)->rules(),
+            ...(new CollectionPointWasteCategoryStoreRequest)->rules(),
 
             'name' => [
                 'required',

@@ -23,7 +23,8 @@ class CollectorProfileService
         return $this->collectorProfileRepository->findBy(
             parameters: [
                 'user_id' => $id
-            ]
+            ],
+            relationships: ['cities', 'wasteCategories']
         );
     }
 
@@ -34,7 +35,7 @@ class CollectorProfileService
                 $collectorProfileId
             );
 
-            if (array_key_exists('cities', $data))
+            if (isset($data['cities']))
             {
                 foreach ($data['cities'] as $city) {
                     $cityId = $city['city_id'];
@@ -48,14 +49,16 @@ class CollectorProfileService
                         continue;
                     }
 
-                    $collectorProfile->cities()
-                        ->firstOrCreate([
-                            'city_id' => $cityId
-                        ]);
+                    $link = $collectorProfile->cities()
+                        ->withTrashed()
+                        ->firstOrCreate(['city_id' => $cityId]);
+                    if ($link->trashed()) {
+                        $link->restore();
+                    }
                 }
             }
 
-            if (array_key_exists('waste_categories', $data))
+            if (isset($data['waste_categories']))
             {
                 foreach ($data['waste_categories'] as $wasteCategory) {
                     $wasteCategoryId = $wasteCategory['waste_category_id'];
@@ -69,16 +72,18 @@ class CollectorProfileService
                         continue;
                     }
 
-                    $collectorProfile->wasteCategories()
-                        ->firstOrCreate([
-                            'waste_category_id' => $wasteCategoryId
-                        ]);
+                    $link = $collectorProfile->wasteCategories()
+                        ->withTrashed()
+                        ->firstOrCreate(['waste_category_id' => $wasteCategoryId]);
+                    if ($link->trashed()) {
+                        $link->restore();
+                    }
                 }
             }
 
             if (array_key_exists('service_description', $data)) $this->collectorProfileRepository->update($collectorProfile, ['service_description' => $data['service_description']]);
 
-            return $collectorProfile->refresh();
+            return $collectorProfile->load(['cities', 'wasteCategories']);
         });
     }
 

@@ -73,7 +73,7 @@
         <span class="flex justify-center mt-4 text-sm text-muted">
             Ainda não possui uma conta?
             <RouterLink
-                to="/cadastro"
+                :to="{ name: 'register', query: route.query }"
                 class="font-extrabold text-eco-700 underline decoration-eco-200 underline-offset-4 hover:text-eco-900 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eco-600 ml-1"
             >
                 Criar conta
@@ -87,11 +87,13 @@ import { reactive, ref } from "vue";
 import AuthCard from "./components/AuthCard.vue";
 import AuthField from "./components/AuthField.vue";
 
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "./stores/auth.store";
+import getAuthDestination from "./helpers/getAuthdestinantion";
 import { readFormError } from "./utils/form-errors";
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 const form = reactive({ email: "", password: "" });
 const errors = reactive({ email: "", password: "" });
@@ -104,6 +106,7 @@ const emailRules = [
 const passwordRules = [(value: string) => Boolean(value) || "Informe sua senha."];
 
 const handleSubmit = async () => {
+    if (loading.value) return;
     loading.value = true;
     formError.value = "";
     errors.email = "";
@@ -111,7 +114,7 @@ const handleSubmit = async () => {
 
     try {
         const authentication = await authStore.login(form);
-        await router.replace(authStore.destinationFor(authentication.user, authentication));
+        await router.replace(getAuthDestination(router, route.query.redirect, authentication));
     } catch (error) {
         const parsed = readFormError(error, "Não foi possível entrar. Verifique seus dados.");
         errors.email = parsed.fields.email ?? "";

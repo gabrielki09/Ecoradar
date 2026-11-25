@@ -14,7 +14,7 @@ function pageOf<T>(value: Page<T> | undefined, label: string): Page<T> {
 export const pointService = {
     async list(page: number) {
         const response = await api.get<ApiResponse<{ collection_points: Page<CollectionPoint> }>>('/collection-points', {
-            params: { page, per_page: 15 },
+            params: { page, per_page: 15, relationships: ['openingHours', 'collectionWasteCategory.wasteCategory'] },
         });
         return pageOf(response.data.data.collection_points, 'Pontos');
     },
