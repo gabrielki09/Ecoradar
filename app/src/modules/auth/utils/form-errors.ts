@@ -10,10 +10,14 @@ export function readFormError(error: unknown, fallback: string) {
         return { message: 'Não foi possível conectar ao servidor.', fields: {} as Record<string, string> };
     }
 
+    if (error.response.status >= 500) {
+        return { message: fallback, fields: {} as Record<string, string> };
+    }
+
     const body = error.response.data;
     const fields = Object.fromEntries(
-        Object.entries(body.errors ?? {}).map(([field, messages]) => [field, messages[0] ?? fallback]),
+        Object.entries(body?.errors ?? {}).map(([field, messages]) => [field, messages[0] ?? fallback]),
     );
 
-    return { message: body.message || fallback, fields };
+    return { message: body?.message || fallback, fields };
 }

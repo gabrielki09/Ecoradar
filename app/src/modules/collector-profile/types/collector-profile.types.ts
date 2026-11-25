@@ -2,12 +2,19 @@ export interface WasteCategoryOption {
     id: number;
     name: string;
     is_system: boolean;
+    company_id?: number | null;
 }
 
 export interface CollectorProfileForm {
     service_description: string;
-    cities: number[];
-    waste_category: number[];
+    cities?: { city_id: number; delete: boolean }[];
+    waste_categories?: { waste_category_id: number; delete: boolean }[];
+}
+
+export interface CollectorProfileData {
+    service_description: string | null;
+    cities: { city_id: number }[];
+    waste_categories: { waste_category_id: number }[];
 }
 
 export interface CityOption {

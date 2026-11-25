@@ -25,7 +25,11 @@ export default defineRouter((/* { store, ssrContext } */) => {
     : (import.meta.env.QUASAR_VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory);
 
   const Router = createRouter({
-    scrollBehavior: () => ({ left: 0, top: 0 }),
+    scrollBehavior: (to, _from, savedPosition) => {
+      if (savedPosition) return savedPosition;
+      if (to.hash) return { el: to.hash, top: 80 };
+      return { left: 0, top: 0 };
+    },
     routes,
 
     // Leave this as is and make changes in quasar.conf.js instead!
@@ -55,6 +59,7 @@ export default defineRouter((/* { store, ssrContext } */) => {
       if (to.meta.requesterOnly && !authStore.canRequest) return { name: 'user-home' };
       if (to.meta.providerOnly && !authStore.canProvide) return { name: 'user-home' };
       if (to.meta.collectorOnly && authStore.user?.profile_type !== 'collector') return { name: 'user-home' };
+      if (to.meta.companyOnly && authStore.user?.profile_type !== 'company') return { name: 'user-home' };
       if (to.meta.pointManagement) {
         if (!authStore.canProvide) return { name: 'user-home' };
         if (authStore.user?.profile_type === 'company' && !usePointStore().selectedCompanyId) {

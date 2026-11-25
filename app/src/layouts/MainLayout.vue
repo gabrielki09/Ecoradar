@@ -44,14 +44,15 @@
                     <q-btn
                         flat
                         no-caps
-                        label="Entrar"
+                        :label="auth.isAuthenticated ? 'Minha área' : 'Entrar'"
                         class="login-button"
-                        to="/login"
+                        :to="auth.isAuthenticated ? auth.destinationFor() : '/login'"
                     />
 
                     <q-btn
                         unelevated
                         no-caps
+                        v-if="!auth.isAuthenticated"
                         label="Criar conta"
                         class="primary-button"
                         to="/cadastro"
@@ -111,11 +112,12 @@
                 <q-btn
                     outline
                     no-caps
-                    label="Entrar"
+                    :label="auth.isAuthenticated ? 'Minha área' : 'Entrar'"
                     class="full-width"
-                    to="/login"
+                    :to="auth.isAuthenticated ? auth.destinationFor() : '/login'"
                 />
                 <q-btn
+                    v-if="!auth.isAuthenticated"
                     unelevated
                     no-caps
                     label="Criar conta"
@@ -150,7 +152,7 @@
                 </div>
                 <div class="footer-links">
                     <RouterLink
-                        v-for="item in navigation.slice(0, 4)"
+                        v-for="item in navigation"
                         :key="item.label"
                         :to="item.to"
                     >
@@ -172,6 +174,9 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { useAuthStore } from "@/modules/auth/stores/auth.store";
+
+const auth = useAuthStore();
 
 const drawerOpen = ref(false);
 const currentYear = new Date().getFullYear();

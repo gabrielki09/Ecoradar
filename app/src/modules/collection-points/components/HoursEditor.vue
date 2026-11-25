@@ -1,5 +1,5 @@
 <template>
-    <section>
+    <section data-error-field="opening_hours" tabindex="-1">
         <h2 class="text-xl font-bold text-eco-900">Horários</h2>
         <p v-if="errors.opening_hours" role="alert" class="text-negative">{{ errors.opening_hours }}</p>
         <p class="text-sm text-eco-700">
@@ -46,6 +46,7 @@
                 outlined
                 type="time"
                 label="Abre"
+                :name="`opening_hours.${indexOf(day - 1)}.opens_at`"
                 :error="!!errors[`opening_hours.${indexOf(day - 1)}.opens_at`]"
                 :error-message="errors[`opening_hours.${indexOf(day - 1)}.opens_at`]"
                 @update:model-value="change(day - 1, 'opens_at', String($event))"
@@ -56,6 +57,7 @@
                 outlined
                 type="time"
                 label="Fecha"
+                :name="`opening_hours.${indexOf(day - 1)}.closes_at`"
                 :error="!!errors[`opening_hours.${indexOf(day - 1)}.closes_at`]"
                 :error-message="errors[`opening_hours.${indexOf(day - 1)}.closes_at`]"
                 @update:model-value="change(day - 1, 'closes_at', String($event))"

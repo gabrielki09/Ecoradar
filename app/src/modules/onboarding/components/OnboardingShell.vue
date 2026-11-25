@@ -39,7 +39,7 @@
                     </p>
                     <h1
                         :id="titleId"
-                        class="m-0 max-w-full break-words text-2xl font-extrabold leading-tight tracking-[-0.04em] text-eco-900 [overflow-wrap:anywhere] sm:text-[clamp(1.8rem,6vw,2.5rem)]"
+                        class="onboarding-title m-0 max-w-full tracking-[-0.04em] text-eco-900"
                     >
                         {{ title }}
                     </h1>
@@ -61,3 +61,13 @@ defineProps<{
     description: string;
 }>();
 </script>
+
+
+<style scoped>
+.onboarding-title {
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    line-height: 1.2;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+</style>

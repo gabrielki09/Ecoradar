@@ -9,7 +9,7 @@ Route::controller(CollectionRequestController::class)->prefix('collection-reques
     Route::post('', 'store');
     Route::get('mine', 'mine');
     Route::get('available', 'available');
-    Route::get('{id}', 'details');
+    Route::get('{id}', 'details')->whereNumber('id');
     Route::post('accept', 'accept');
     Route::post('collected', 'collected');
     Route::post('complete', 'complete');

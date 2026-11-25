@@ -1,7 +1,7 @@
 <template>
     <div class="fullscreen bg-blue text-white text-center q-pa-md flex flex-center">
         <div>
-            <div style="font-size: 30vh">
+            <div style="font-size: clamp(5rem, 26vw, 13rem)">
                 404
             </div>
 
@@ -9,7 +9,7 @@
                 class="text-h2"
                 style="opacity: 0.4"
             >
-                Oops. Nothing here...
+                Página não encontrada.
             </div>
 
             <q-btn
@@ -18,7 +18,7 @@
                 text-color="blue"
                 unelevated
                 to="/"
-                label="Voltar"
+                label="Voltar ao início"
                 no-caps
             />
         </div>

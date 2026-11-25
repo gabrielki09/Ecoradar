@@ -165,7 +165,7 @@
         <span class="flex justify-center mt-4 text-sm text-muted">
             Já possui uma conta?
             <RouterLink
-                to="/login"
+                :to="{ name: 'login', query: route.query }"
                 class="font-extrabold text-eco-700 underline decoration-eco-200 underline-offset-4 hover:text-eco-900 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eco-600 ml-1"
             >
                 Acessar login
@@ -182,9 +182,10 @@ import type { ProfileType } from "./types/profile/ProfileTypes";
 import validateCPF from "@/helpers/document/validateCPF";
 import type { RegisterPayload } from "./types/auth.types";
 
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { scrollToFirstError } from "@/helpers/pages/scrollToFirstError";
 import { useAuthStore } from "./stores/auth.store";
+import getAuthDestination from "./helpers/getAuthdestinantion";
 import { readFormError } from "./utils/form-errors";
 
 const profiles: Array<{ value: ProfileType; label: string; description: string; icon: string }> = [
@@ -221,6 +222,7 @@ const formError = ref("");
 const loading = ref(false);
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 
 const nameRules = [
@@ -245,6 +247,7 @@ const passwordRules = [
 
 const handleSubmit = async () => {
     formError.value = "";
+    if (loading.value) return;
     loading.value = true;
 
     const fields = Object.keys(errors) as Array<keyof typeof errors>;
@@ -255,7 +258,7 @@ const handleSubmit = async () => {
 
     try {
         const authentication = await authStore.register(form);
-        await router.replace(authStore.destinationFor(authentication.user, authentication));
+        await router.replace(getAuthDestination(router, route.query.redirect, authentication));
     } catch (error) {
         const parsed = readFormError(error, "Não foi possível criar sua conta.");
         for (const field of fields) errors[field] = parsed.fields[field] ?? "";

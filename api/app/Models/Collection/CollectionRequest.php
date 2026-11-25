@@ -51,7 +51,7 @@ class CollectionRequest extends Model
 
     public function requester() : BelongsTo
     {
-        return $this->belongsTo(User::class, 'requester_user_id');
+        return $this->belongsTo(User::class, 'requester_user_id')->select(['users.id', 'users.name']);
     }
 
     public function history(): HasMany

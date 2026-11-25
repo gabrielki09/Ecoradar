@@ -8,14 +8,30 @@
                 ← Voltar
             </RouterLink>
 
+            <q-select
+                v-if="store.companies.length > 1"
+                :model-value="store.selectedCompanyId"
+                :options="store.companies"
+                option-label="company_name"
+                option-value="id"
+                label="Empresa da coleta"
+                class="my-4 max-w-sm"
+                outlined
+                emit-value
+                map-options
+                @update:model-value="store.selectCompany"
+            />
+
             <div
                 v-if="loading"
                 class="py-12 text-center"
+                role="status"
             >
                 <q-spinner
                     size="36px"
                     color="primary"
                 />
+                <p>Carregando solicitação…</p>
             </div>
             <div
                 v-else-if="error"
@@ -31,7 +47,7 @@
             </div>
 
             <template v-else-if="record">
-                <div class="mt-5 flex items-center justify-between">
+                <div class="mt-5 flex flex-wrap items-center justify-between gap-2">
                     <h1 class="text-3xl font-extrabold text-eco-900">
                         Solicitação #{{ record.id }}
                     </h1>
@@ -42,19 +58,21 @@
 
                 <section class="rounded-2xl border border-line bg-white p-6">
                     <h2 class="text-lg font-bold">
-                        Endereço e itens
+                        Localização e itens
                     </h2>
                     <p>
-                        {{ record.address }}, {{ record.neighborhood }} · CEP {{ formatCep(record.cep) }} ·
-                        Cidade #{{ record.city_id }}
+                        {{ record.neighborhood }} · {{ record.city?.municipio_ibge ?? record.city?.municipio_tom }}{{ record.city?.uf ? ' / ' + record.city.uf : '' }}
+                        <span v-if="record.address && record.cep">
+                            · {{ record.address }} · CEP {{ formatCep(record.cep) }}
+                        </span>
                     </p>
                     <ul v-if="record.items?.length">
                         <li
                             v-for="item in record.items"
                             :key="item.id ?? item.waste_category_id"
                         >
-                            Categoria #{{ item.waste_category_id }} ·
-                            {{ item.approximate_quantity }} · {{ item.description }}
+                            {{ item.waste_category?.name ?? `Categoria #${item.waste_category_id}` }} ·
+                            {{ item.approximate_quantity }}<span v-if="item.description"> · {{ item.description }}</span>
                         </li>
                     </ul>
                     <p
@@ -72,7 +90,7 @@
                     <div
                         v-for="stage in dates"
                         :key="stage.label"
-                        class="flex justify-between border-b border-line py-2"
+                        class="flex flex-wrap justify-between gap-2 border-b border-line py-2"
                     >
                         <span>
                             {{ stage.label }}
@@ -102,10 +120,10 @@
                     retornada para sua conta.
                 </q-banner>
                 <q-banner
-                    v-else-if="record.status === 'open' && origin === 'all' && isProvider"
+                    v-else-if="record.acceptance_block_reason"
                     class="mt-5 rounded-xl bg-eco-100"
                 >
-                    Para verificar se pode aceitar este pedido, consulte a área Aplicáveis.
+                    {{ record.acceptance_block_reason }}
                 </q-banner>
             </template>
         </main>
@@ -136,9 +154,11 @@ const error = ref("");
 let sequence = 0;
 
 const origin = computed<Area>(() =>
-    ["all", "available", "for-me", "mine"].includes(String(route.query.origem))
-        ? (route.query.origem as Area)
-        : "mine",
+    auth.canRequest
+        ? "mine"
+        : ["all", "available", "for-me"].includes(String(route.query.origem))
+            ? (route.query.origem as Area)
+            : "all",
 );
 const id = computed(() => Number(route.params.id));
 const isProvider = computed(() => auth.canProvide);
@@ -147,16 +167,6 @@ const companyReady = computed(
 );
 
 const own = computed(() => record.value?.requester_user_id === auth.user?.id);
-const assigned = computed(
-    () =>
-        !!record.value &&
-        store.assignedIds.includes(record.value.id) &&
-        (auth.user?.profile_type === "company"
-            ? record.value.accepted_company_id === store.selectedCompanyId
-            : auth.user?.profile_type === "collector" &&
-              record.value.accepted_collector_profile_id != null),
-);
-
 const action = computed(() => {
     if (!record.value) {
         return null;
@@ -167,14 +177,13 @@ const action = computed(() => {
         return null;
     }
     if (
-        origin.value === "available" &&
-        store.availableIds.includes(record.value.id) &&
+        record.value.acceptance_block_reason === null &&
         record.value.status === "open"
     )
         return { type: "accept" as const, label: "Aceitar pedido" };
-    if (origin.value === "for-me" && assigned.value && record.value.status === "accepted")
+    if (record.value.assigned_to_provider && record.value.status === "accepted")
         return { type: "collected" as const, label: "Marcar como coletado" };
-    if (origin.value === "for-me" && assigned.value && record.value.status === "collected")
+    if (record.value.assigned_to_provider && record.value.status === "collected")
         return { type: "complete" as const, label: "Concluir coleta" };
     return null;
 });
@@ -208,7 +217,7 @@ async function load() {
     error.value = "";
     record.value = null;
     try {
-        const result = await collectionService.detail(id.value);
+        const result = await collectionService.detail(id.value, store.selectedCompanyId ?? undefined);
         if (current !== sequence) {
             return;
         }

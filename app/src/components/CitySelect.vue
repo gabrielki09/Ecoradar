@@ -2,6 +2,7 @@
     <q-select
         :model-value="modelValue"
         :multiple="multiple"
+        :use-chips="multiple"
         :label="label"
         outlined
         use-input
@@ -10,7 +11,7 @@
         :option-label="cityLabel"
         emit-value
         map-options
-        :display-value="displayValue"
+        :display-value="multiple ? undefined : displayValue"
         :loading="loading"
         :error="Boolean(error)"
         :error-message="error"
@@ -59,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from "vue";
+import { computed, onBeforeUnmount, reactive, ref, watch } from "vue";
 import { api } from "@/boot/axios";
 import type { ApiResponse } from "@/types/api/api.types";
 import type {
@@ -80,7 +81,7 @@ const props = withDefaults(
 defineEmits<{ "update:modelValue": [value: number | number[] | null] }>();
 
 const options = ref<CityOption[]>([]);
-const known = new Map<number, CityOption>();
+const known = reactive(new Map<number, CityOption>());
 const loading = ref(false);
 const loadError = ref(false);
 const page = ref(1);
@@ -107,7 +108,11 @@ const displayValue = computed(() => {
         .join(", ");
 });
 
-function cityLabel(city: CityOption) {
+function cityLabel(city: CityOption | number): string {
+    if (typeof city === "number") {
+        const option = known.get(city);
+        return option ? cityLabel(option) : `Cidade #${city}`;
+    }
     return `${city.municipio_tom || city.municipio_ibge || "Cidade"} / ${city.uf}`;
 }
 
@@ -181,6 +186,24 @@ async function loadNext() {
         }
     }
 }
+
+watch(() => props.modelValue, async value => {
+    const ids = Array.isArray(value) ? value : value == null ? [] : [value];
+    const missing = ids.filter(id => !known.has(id));
+    if (!missing.length) return;
+
+    try {
+        const response = await api.get<ApiResponse<CityIndexData>>("/general/cities", {
+            params: {
+                per_page: 100,
+                filtersV1: [{ field: "id", filterType: "IN", filterValue: missing }],
+            },
+        });
+        response.data.data.cities.data.forEach(city => known.set(city.id, city));
+    } catch {
+        // O seletor poderá carregar os nomes durante a busca.
+    }
+}, { immediate: true });
 
 onBeforeUnmount(() => {
     generation++;

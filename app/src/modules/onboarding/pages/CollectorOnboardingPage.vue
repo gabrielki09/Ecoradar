@@ -39,12 +39,12 @@
                 </p>
                 <q-input
                     v-model="form.service_description"
+                    name="service_description"
                     outlined
                     type="textarea"
                     autogrow
                     maxlength="500"
                     counter
-                    name="service_description"
                     label="Descrição do serviço *"
                     :disable="loading"
                     :error="Boolean(errors.service_description)"
@@ -76,6 +76,7 @@
                     Escolha uma ou mais cidades onde você realiza coletas.
                 </p>
                 <CitySelect
+                    name="cities"
                     v-model="form.cities"
                     multiple
                     label="Cidades atendidas"
@@ -157,9 +158,16 @@
                 </p>
             </section>
 
+            <q-btn
+                v-if="catalogError"
+                flat
+                color="primary"
+                label="Tentar carregar categorias novamente"
+                @click="loadCategories"
+            />
             <button
                 type="submit"
-                :disabled="loading || catalogLoading"
+                :disabled="loading || catalogLoading || !!catalogError"
                 :aria-busy="loading"
                 class="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-eco-600 px-5 text-[15px] font-extrabold text-white shadow-[0_10px_24px_rgba(22,128,91,.2)] transition hover:bg-eco-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eco-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -184,6 +192,7 @@ import { useRouter } from "vue-router";
 import OnboardingShell from "../components/OnboardingShell.vue";
 import { onboardingService } from "../services/onboarding.service";
 import { useAuthStore } from "@/modules/auth/stores/auth.store";
+import { scrollToFirstError } from "@/helpers/pages/scrollToFirstError";
 import { readFormError } from "@/modules/auth/utils/form-errors";
 import { collectorProfileService } from "@/modules/collector-profile/services/collector-profile.service";
 import type { WasteCategoryOption } from "@/modules/collector-profile/types/collector-profile.types";
@@ -192,6 +201,8 @@ import CitySelect from "@/components/CitySelect.vue";
 const authStore = useAuthStore();
 const router = useRouter();
 const loading = ref(false);
+const catalogError = ref(false);
+const fieldOrder = ["service_description", "cities", "waste_category"];
 const catalogLoading = ref(true);
 const feedback = ref("");
 const categories = ref<WasteCategoryOption[]>([]);
@@ -230,7 +241,7 @@ function toggleCategory(id: number) {
 }
 
 async function completeOnboarding() {
-    if (loading.value) {
+    if (loading.value || catalogLoading.value || catalogError.value) {
         return;
     }
     feedback.value = "";
@@ -240,6 +251,7 @@ async function completeOnboarding() {
     errors.cities = form.cities.length ? "" : "Selecione pelo menos uma cidade atendida.";
     errors.waste_category = form.waste_category.length ? "" : "Selecione pelo menos uma categoria.";
     if (errors.service_description || errors.cities || errors.waste_category) {
+        await scrollToFirstError(fieldOrder, errors);
         return;
     }
 
@@ -258,6 +270,16 @@ async function completeOnboarding() {
             await router.replace({ name: "login", query: { redirect: "/onboarding/collector" } });
             return;
         }
+        if (status === 409) {
+            try {
+                if ((await authStore.refreshCurrentUser()).onboarding_completed) {
+                    await router.replace("/area");
+                    return;
+                }
+            } catch {
+                // O formulário permanece disponível se a sessão não pôde ser atualizada.
+            }
+        }
         const parsed = readFormError(error, "Não foi possível ativar o perfil de coletor.");
         errors.service_description = parsed.fields.service_description ?? "";
         errors.cities = parsed.fields.cities ?? parsed.fields["cities.0"] ?? "";
@@ -269,15 +291,20 @@ async function completeOnboarding() {
                 : status === 409
                   ? "Este perfil de coletor já foi ativado."
                   : parsed.message;
+        await scrollToFirstError(fieldOrder, errors);
     } finally {
         loading.value = false;
     }
 }
 
-onMounted(async () => {
+async function loadCategories() {
+    catalogLoading.value = true;
+    catalogError.value = false;
+    feedback.value = "";
     try {
         categories.value = await collectorProfileService.getWasteCategories();
     } catch (error) {
+        catalogError.value = true;
         feedback.value = readFormError(
             error,
             "Não foi possível carregar as categorias de resíduos.",
@@ -285,5 +312,7 @@ onMounted(async () => {
     } finally {
         catalogLoading.value = false;
     }
-});
+}
+
+onMounted(loadCategories);
 </script>

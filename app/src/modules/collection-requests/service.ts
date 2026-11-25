@@ -13,8 +13,10 @@ export const collectionService = {
     if (!result || !Array.isArray(result.data)) throw new Error('A listagem retornou um formato inesperado.');
     return result;
   },
-  async detail(id: number) {
-    const response = await api.get<ApiResponse<{ collection_request: CollectionRequest }>>(`/collection-requests/${id}`);
+  async detail(id: number, companyId?: number) {
+    const response = await api.get<ApiResponse<{ collection_request: CollectionRequest }>>(`/collection-requests/${id}`, {
+      params: { company_id: companyId },
+    });
     const result = response.data.data.collection_request;
     if (!result) throw new Error('Solicitação não encontrada.');
     return result;

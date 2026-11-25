@@ -9,6 +9,7 @@ use App\Repositories\Interface\General\CityInterface;
 class CityEloquent extends BaseEloquent implements CityInterface
 {
     protected array $filterable = [
+        'id',
         'codigo_tom',
         'codigo_ibge',
         'municipio_tom',

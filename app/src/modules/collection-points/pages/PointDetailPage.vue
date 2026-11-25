@@ -9,7 +9,7 @@
             </div>
             <template v-else-if="point">
                 <h1 class="text-3xl font-extrabold text-eco-900">{{ point.name }}</h1>
-                <article class="grid gap-3 rounded-2xl bg-white p-6">
+                <article class="grid gap-3 rounded-2xl bg-white p-6 wrap-break-word">
                     <p>{{ point.address }}, {{ point.neighborhood }} · CEP {{ formatCep(point.cep) }}</p>
                     <p><strong>Orientações:</strong> {{ point.guidelines }}</p>
                     <p><strong>Contato:</strong> {{ point.contact }}</p>
@@ -23,7 +23,7 @@
                         {{ categoryNames[category.waste_category_id] ?? `Categoria #${category.waste_category_id}` }}
                     </p>
                     <div class="flex gap-3">
-                        <RouterLink :to="`/pontos/meus/${point.id}/editar`" class="text-eco-700">Editar</RouterLink>
+                        <RouterLink :to="{ name: 'point-edit', params: { id: point.id }, query: route.query }" class="text-eco-700">Editar</RouterLink>
                         <q-btn flat color="negative" label="Excluir" @click="confirming = true" />
                     </div>
                     <p v-if="actionError" role="alert" class="text-negative">{{ actionError }}</p>
@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { readFormError } from '@/modules/auth/utils/form-errors';
@@ -56,6 +56,10 @@ const route = useRoute();
 const router = useRouter();
 const $q = useQuasar();
 const store = usePointStore();
+const companyId = computed(() => route.query.empresa
+    ? Number(route.query.empresa)
+    : store.selectedCompanyId ?? undefined);
+let sequence = 0;
 const point = ref<CollectionPoint | null>(null);
 const categoryNames = ref<Record<number, string>>({});
 const loading = ref(false);
@@ -65,24 +69,26 @@ const confirming = ref(false);
 const removing = ref(false);
 
 async function load() {
+    const current = ++sequence;
     loading.value = true;
     error.value = '';
     point.value = null;
     try {
-        point.value = await pointService.detail(Number(route.params.id), store.selectedCompanyId ?? undefined);
+        const result = await pointService.detail(Number(route.params.id), companyId.value);
+        if (current === sequence) point.value = result;
     } catch (cause) {
-        error.value = readFormError(cause, 'Ponto não encontrado ou sem acesso.').message;
+        if (current === sequence) error.value = readFormError(cause, 'Ponto não encontrado ou sem acesso.').message;
     } finally {
-        loading.value = false;
+        if (current === sequence) loading.value = false;
     }
 }
 
 async function remove() {
-    if (!point.value) return;
+    if (!point.value || removing.value) return;
     removing.value = true;
     actionError.value = '';
     try {
-        await pointService.remove(point.value.id, store.selectedCompanyId ?? undefined);
+        await pointService.remove(point.value.id, companyId.value);
         store.invalidate();
         $q.notify({ type: 'positive', message: 'Ponto excluído.' });
         await router.replace('/pontos/meus');
@@ -94,9 +100,11 @@ async function remove() {
     }
 }
 
-watch(() => store.selectedCompanyId, () => void load());
+watch([() => route.params.id, companyId], () => {
+    if (route.params.id) void load();
+}, { immediate: true });
+onBeforeUnmount(() => sequence++);
 onMounted(() => {
-    void load();
     void pointService.categories().then(items => {
         categoryNames.value = Object.fromEntries(items.map(item => [item.id, item.name]));
     }).catch(() => {});
