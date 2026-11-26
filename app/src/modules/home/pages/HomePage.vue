@@ -16,8 +16,7 @@
                         </em>
                     </h1>
                     <p>
-                        Encontre pontos de coleta, agende retiradas e acompanhe o impacto positivo
-                        das suas escolhas em Concórdia.
+                        Encontre pontos de coleta, solicite a retirada de resíduos e acompanhe seus pedidos.
                     </p>
                     <div class="hero-actions">
                         <q-btn
@@ -26,30 +25,17 @@
                             class="primary-button hero-button"
                             icon="location_on"
                             label="Encontrar ponto de coleta"
-                            href="#pontos"
+                            :to="{ name: 'home', hash: '#pontos' }"
                         />
                         <q-btn
+                            v-if="!auth.isAuthenticated || auth.canRequest"
                             outline
                             no-caps
                             class="secondary-button hero-button"
                             icon="calendar_month"
-                            label="Agendar coleta"
-                            to="/area/coletas/nova"
+                            label="Solicitar coleta"
+                            :to="{ name: 'collection-create' }"
                         />
-                    </div>
-                    <div class="trust-row">
-                        <span>
-                            <q-icon name="verified" />
-                            Pontos verificados
-                        </span>
-                        <span>
-                            <q-icon name="schedule" />
-                            Rápido e gratuito
-                        </span>
-                        <span>
-                            <q-icon name="favorite" />
-                            Impacto real
-                        </span>
                     </div>
                 </div>
 
@@ -73,17 +59,6 @@
                     </div>
                     <div class="floating-icon floating-icon--bottle">
                         <q-icon name="water_drop" />
-                    </div>
-                    <div class="impact-badge">
-                        <q-icon name="trending_up" />
-                        <div>
-                            <strong>
-                                +138 kg
-                            </strong>
-                            <span>
-                                resíduos destinados
-                            </span>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -152,7 +127,13 @@
                         <h2>Pontos de coleta</h2>
                         <p>Encontre um local para levar seus resíduos.</p>
                     </div>
-                    <a href="#lista-pontos" class="points-list-link">Consultar lista de pontos</a>
+                    <RouterLink
+                        v-if="points.length"
+                        :to="{ name: 'home', hash: '#lista-pontos' }"
+                        class="points-list-link"
+                    >
+                        Consultar lista de pontos
+                    </RouterLink>
                 </div>
                 <div v-if="loading" role="status" class="points-state"><q-spinner color="primary" /> Carregando pontos…</div>
                 <div v-else-if="error" role="alert" class="points-state">
@@ -182,7 +163,7 @@
             </div>
         </section>
 
-        <section class="content-section cta-section">
+        <section v-if="!auth.isAuthenticated" class="content-section cta-section">
             <div class="eco-container">
                 <div class="cta-card">
                     <div class="cta-card__icon"><q-icon name="volunteer_activism" /></div>
@@ -194,8 +175,7 @@
                             Um descarte de cada vez transforma a cidade.
                         </h2>
                         <p>
-                            Crie sua conta para agendar coletas, acompanhar solicitações e
-                            visualizar seu impacto.
+                            Crie sua conta para solicitar coletas e acompanhar seus pedidos.
                         </p>
                     </div>
                     <q-btn
@@ -213,6 +193,7 @@
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from '@/modules/auth/stores/auth.store';
 import { computed, onMounted, ref } from 'vue';
 import CollectionPointCard from "../components/CollectionPointCard.vue";
 import MaterialsGuide from "../components/MaterialsGuide.vue";
@@ -221,6 +202,7 @@ import { howItWorksSteps } from "../data/home.data";
 import { loadPublicPoints } from '../services/public-points.service';
 import type { PublicPoint } from '../types/public-point.types';
 
+const auth = useAuthStore();
 const points = ref<PublicPoint[]>([]);
 const selectedId = ref<number | null>(null);
 const loading = ref(true);

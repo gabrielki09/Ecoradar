@@ -35,6 +35,20 @@
                 ficam indisponíveis até que o vínculo esteja disponível.
             </q-banner>
 
+            <q-select
+                v-if="store.companies.length > 1"
+                :model-value="store.selectedCompanyId"
+                :options="store.companies"
+                option-label="company_name"
+                option-value="id"
+                label="Empresa da coleta"
+                class="my-4 max-w-sm"
+                outlined
+                emit-value
+                map-options
+                @update:model-value="store.selectCompany"
+            />
+
             <div
                 v-if="!companyBlocked"
                 class="mb-5 flex flex-wrap items-end gap-3"
@@ -90,7 +104,30 @@
                 v-else-if="!companyBlocked && !records.length"
                 class="rounded-xl border border-line bg-white p-8 text-center"
             >
-                Nenhuma solicitação encontrada.
+                <p v-if="status">Nenhuma solicitação corresponde ao status selecionado.</p>
+                <p v-else-if="area === 'available'">Ainda não há solicitações abertas compatíveis com suas cidades e categorias.</p>
+                <p v-else>Nenhuma solicitação encontrada.</p>
+                <q-btn
+                    v-if="status"
+                    flat
+                    color="primary"
+                    label="Limpar filtro"
+                    @click="status = null"
+                />
+                <q-btn
+                    v-else-if="area === 'mine'"
+                    flat
+                    color="primary"
+                    label="Criar primeira solicitação"
+                    :to="{ name: 'collection-create' }"
+                />
+                <q-btn
+                    v-else-if="area === 'for-me'"
+                    flat
+                    color="primary"
+                    label="Ver solicitações aplicáveis"
+                    :to="{ name: 'collection-list', params: { area: 'available' } }"
+                />
             </div>
             <div
                 v-else
@@ -111,7 +148,10 @@
                         </q-badge>
                     </div>
                     <p class="mb-0 mt-2 text-sm">
-                        {{ record.address }}, {{ record.neighborhood }} · CEP {{ formatCep(record.cep) }}
+                        {{ record.neighborhood }} · {{ record.city?.municipio_ibge ?? record.city?.municipio_tom }}{{ record.city?.uf ? ' / ' + record.city.uf : '' }}
+                        <span v-if="record.address && record.cep">
+                            · {{ record.address }} · CEP {{ formatCep(record.cep) }}
+                        </span>
                     </p>
                     <small
                         v-if="record.created_at"
@@ -180,7 +220,7 @@ const companyBlocked = computed(
 
 const links = computed(() =>
     Object.entries(areaLabels)
-        .filter(([key]) => auth.canProvide || (key === "mine" && auth.canRequest))
+        .filter(([key]) => key === "mine" ? auth.canRequest : auth.canProvide)
         .map(([key, label]) => ({ area: key as Area, label })),
 );
 
@@ -192,12 +232,6 @@ async function load() {
     const current = ++sequence;
     records.value = [];
     error.value = "";
-    if (area.value === "available") {
-        store.availableIds = [];
-    }
-    if (area.value === "for-me") {
-        store.assignedIds = [];
-    }
     if (companyBlocked.value) {
         loading.value = false;
         return;
@@ -216,12 +250,6 @@ async function load() {
         }
         records.value = result.data;
         lastPage.value = result.last_page;
-        if (area.value === "available") {
-            store.availableIds = result.data.map((item) => item.id);
-        }
-        if (area.value === "for-me") {
-            store.assignedIds = result.data.map((item) => item.id);
-        }
     } catch (cause) {
         if (current === sequence)
             error.value = readFormError(
@@ -235,27 +263,19 @@ async function load() {
     }
 }
 
-watch(area, () => {
-    page.value = 1;
-    if (status.value !== null) {
-        status.value = null;
-    }
-    else void load();
-});
-
-watch(
-    [
-        status,
-        () =>
-            area.value === "available" || area.value === "for-me" ? store.selectedCompanyId : null,
-    ],
-    () => {
-        page.value = 1;
+watch([area, status, page, () => store.selectedCompanyId, () => store.revision],
+    ([currentArea, currentStatus, currentPage, currentCompany], [previousArea, previousStatus, , previousCompany]) => {
+        if (currentArea !== previousArea && currentStatus !== null) {
+            status.value = null;
+            return;
+        }
+        if (currentPage !== 1 && (currentArea !== previousArea || currentStatus !== previousStatus || currentCompany !== previousCompany)) {
+            page.value = 1;
+            return;
+        }
         void load();
     },
 );
-
-watch([page, () => store.revision], () => void load());
 
 onBeforeUnmount(() => {
     sequence++;

@@ -7,7 +7,7 @@
             {{ label }}
         </label>
         <q-input
-            :id="id"
+            :for="id"
             :model-value="modelValue"
             :name="name"
             :type="resolvedType"

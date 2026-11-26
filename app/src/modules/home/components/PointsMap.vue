@@ -1,5 +1,25 @@
 <template>
-    <div ref="container" class="points-map" role="application" aria-label="Mapa dos pontos de coleta" />
+    <div class="min-w-0">
+        <div
+            ref="container"
+            class="points-map"
+            role="application"
+            aria-label="Mapa dos pontos de coleta"
+        />
+        <div
+            v-if="tileFailed"
+            class="points-state mt-3"
+            role="status"
+        >
+            O mapa-base não carregou. Consulte os endereços na lista abaixo.
+            <q-btn
+                flat
+                no-caps
+                label="Tentar carregar o mapa"
+                @click="retryTiles"
+            />
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -14,7 +34,10 @@ import type { PublicPoint } from '../types/public-point.types';
 const props = defineProps<{ points: PublicPoint[]; selectedId: number | null }>();
 const emit = defineEmits<{ select: [id: number] }>();
 const container = ref<HTMLElement | null>(null);
+const tileFailed = ref(false);
 let map: L.Map | undefined;
+let tiles: L.TileLayer | undefined;
+let tileLoaded = false;
 let cluster: L.MarkerClusterGroup | undefined;
 let markerLayer: L.LayerGroup | undefined;
 let frame = 0;
@@ -49,15 +72,29 @@ watch(() => props.selectedId, id => {
     else if (marker) map.panTo(marker.getLatLng());
 });
 
+function retryTiles() {
+    tileFailed.value = false;
+    tiles?.redraw();
+}
+
 onMounted(() => {
     if (!container.value) return;
     const first = props.points[0];
     if (!first || first.latitude === null || first.longitude === null) return;
     map = L.map(container.value, { scrollWheelZoom: false, tapHold: true })
         .setView([first.latitude, first.longitude], 13);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors', maxZoom: 19,
-    }).addTo(map);
+    tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19,
+    });
+    tiles.on('tileload', () => {
+        tileLoaded = true;
+        tileFailed.value = false;
+    });
+    tiles.on('tileerror', () => {
+        if (!tileLoaded) tileFailed.value = true;
+    });
+    tiles.addTo(map);
     if (typeof L.markerClusterGroup === 'function') {
         cluster = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 50 });
         markerLayer = cluster;

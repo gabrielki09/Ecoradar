@@ -37,7 +37,7 @@ class AuthUserService
                 'profile_type',
                 'onboarding_completed_at'
             ]
-        ) ?? throw new AuthenticationException('Credencias incorretas');
+        ) ?? throw new AuthenticationException('E-mail ou senha incorretos.');
     }
 
     private function authenticationPayload(User $user): array
@@ -64,7 +64,7 @@ class AuthUserService
     {
         $user = $this->findByEmail($email);
 
-        if (! Hash::check($password, $user->password) ) throw new AuthenticationException('Credencias incorretas');
+        if (! Hash::check($password, $user->password) ) throw new AuthenticationException('E-mail ou senha incorretos.');
 
         return $this->authenticationPayload($user);
     }

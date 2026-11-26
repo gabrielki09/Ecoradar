@@ -6,7 +6,6 @@
         description="Identifique a organização representada pela sua conta. Seus dados de acesso não precisam ser preenchidos novamente."
     >
         <q-form
-            ref="formRef"
             class="grid gap-5"
             greedy
             @submit="completeOnboarding"
@@ -160,7 +159,6 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
 import axios from "axios";
-import type { QForm } from "quasar";
 
 import { useRouter } from "vue-router";
 import OnboardingShell from "../components/OnboardingShell.vue";
@@ -178,7 +176,6 @@ type CompanyForm = Record<keyof CompanyOnboardingPayload, string>;
 
 const authStore = useAuthStore();
 const router = useRouter();
-const formRef = ref<QForm>();
 const loading = ref(false);
 const formError = ref("");
 const successMessage = ref("");
@@ -240,14 +237,10 @@ function clearErrors() {
 }
 
 async function completeOnboarding() {
+    if (loading.value) return;
     formError.value = "";
     successMessage.value = "";
     clearErrors();
-
-    const valid = await formRef.value?.validate();
-    if (!valid) {
-        return;
-    }
 
     loading.value = true;
     const optional = (value: string) => value.trim() || null;
@@ -256,7 +249,7 @@ async function completeOnboarding() {
         await onboardingService.completeCompany({
             company_name: form.company_name.trim(),
             document: form.document.replace(/\D/g, ""),
-            cep: cepDigits(form.cep),
+            cep: optional(cepDigits(form.cep)),
             responsible: form.responsible.trim(),
             neighborhood: optional(form.neighborhood),
             address: optional(form.address),
@@ -264,7 +257,7 @@ async function completeOnboarding() {
         });
         successMessage.value = "Empresa cadastrada com sucesso. Preparando sua área…";
         await authStore.refreshCurrentUser();
-        await router.replace("/area");
+        await router.replace({ name: "company-profile" });
     } catch (error) {
         const status = axios.isAxiosError(error) ? error.response?.status : undefined;
 
@@ -277,7 +270,7 @@ async function completeOnboarding() {
             try {
                 const user = await authStore.refreshCurrentUser();
                 if (user.onboarding_completed) {
-                    await router.replace("/area");
+                    await router.replace({ name: "company-profile" });
                     return;
                 }
             } catch {
@@ -309,19 +302,20 @@ const handleAutocompleteCNPJ = async (cnpj: string) => {
     )
         return;
 
-    if (cnpj.replace(/\D/g, "").length === 14) {
+    if (cnpj.replace(/\D/g, "").length !== 14) return;
+    try {
         const { data } = await companyLookupService.findCompanyByCnpj(cnpj);
+        if (form.document !== cnpj || loading.value) return;
 
-        form.company_name = data.alias;
-        form.contact_email = data.emails[0]?.address ?? "";
-
-        if (form.cep === "") {
+        form.company_name ||= data.alias || "";
+        form.contact_email ||= data.emails?.[0]?.address ?? "";
+        if (data.address && !form.cep) {
             form.cep = formatCep(data.address.zip);
-            form.address = data.address.street;
-            form.neighborhood = data.address.district;
+            form.address ||= data.address.street ?? "";
+            form.neighborhood ||= data.address.district ?? "";
         }
-
-        return;
+    } catch {
+        // A consulta externa é opcional. Os campos continuam editáveis.
     }
 };
 </script>

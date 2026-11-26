@@ -4,8 +4,9 @@
             <h1 class="text-3xl font-extrabold text-eco-900">{{ mine ? 'Meus pontos de coleta' : 'Pontos de coleta' }}</h1>
             <nav class="mt-4 mb-6 flex flex-wrap gap-3" aria-label="Pontos de coleta">
                 <RouterLink to="/pontos" class="text-eco-700">Todos os pontos</RouterLink>
-                <RouterLink v-if="auth.canProvide" to="/pontos/meus" class="text-eco-700">Meus pontos</RouterLink>
-                <RouterLink v-if="auth.canProvide" to="/pontos/novo" class="text-eco-700">Criar ponto</RouterLink>
+                <RouterLink v-if="canManage" to="/pontos/meus" class="text-eco-700">Meus pontos</RouterLink>
+                <RouterLink v-if="canManage" to="/pontos/novo" class="text-eco-700">Criar ponto</RouterLink>
+                <RouterLink v-if="!mine" to="/#pontos" class="text-eco-700">Ver no mapa</RouterLink>
             </nav>
 
             <q-select
@@ -31,20 +32,40 @@
                 {{ error }}
                 <q-btn flat label="Tentar novamente" @click="load" />
             </div>
-            <p v-else-if="!records.length" class="rounded-xl bg-white p-8 text-center">Nenhum ponto encontrado.</p>
+            <div v-else-if="!records.length" class="rounded-xl bg-white p-8 text-center">
+                <p>{{ mine ? 'Você ainda não tem pontos nesta lista.' : 'Ainda não há pontos cadastrados para consultar.' }}</p>
+                <q-btn v-if="mine" flat color="primary" label="Criar ponto" to="/pontos/novo" />
+            </div>
             <div v-else class="grid gap-3">
                 <article v-for="point in records" :key="point.id" class="rounded-2xl border border-line bg-white p-5">
                     <div class="flex flex-wrap items-center justify-between gap-3">
-                        <div>
+                        <div class="min-w-0 wrap-break-word">
                             <h2 class="m-0 text-lg font-bold text-eco-900">{{ point.name }}</h2>
                             <p class="m-0">{{ point.address }}, {{ point.neighborhood }} · CEP {{ formatCep(point.cep) }}</p>
                             <small>{{ point.deleted_at ? 'Excluído' : point.status }}</small>
                         </div>
                         <div class="flex gap-2">
-                            <RouterLink v-if="mine && !point.deleted_at" :to="`/pontos/meus/${point.id}`" class="text-eco-700">Detalhes</RouterLink>
-                            <q-btn v-if="mine && point.deleted_at" flat color="primary" label="Recuperar" :loading="workingId === point.id" @click="recover(point.id)" />
+                            <RouterLink v-if="mine && !point.deleted_at" :to="{ name: 'point-detail', params: { id: point.id }, query: store.selectedCompanyId ? { empresa: store.selectedCompanyId } : {} }" class="text-eco-700">Detalhes</RouterLink>
+                            <q-btn v-if="mine && point.deleted_at" flat color="primary" label="Recuperar" :loading="workingId === point.id" :disable="workingId !== null" @click="recover(point.id)" />
                         </div>
                     </div>
+                    <q-expansion-item
+                        v-if="!mine"
+                        label="Ver detalhes"
+                        class="mt-2"
+                    >
+                        <div class="grid gap-2 px-4 pb-3 wrap-break-word">
+                            <p class="m-0">{{ point.guidelines }}</p>
+                            <p class="m-0"><strong>Contato</strong> {{ point.contact }}</p>
+                            <p v-if="point.collection_waste_category?.length" class="m-0">
+                                <strong>Materiais</strong>
+                                {{ point.collection_waste_category.map(category => category.waste_category?.name).filter(Boolean).join(', ') }}
+                            </p>
+                            <p v-for="hour in point.opening_hours" :key="hour.opening_day" class="m-0">
+                                {{ dayLabels[hour.opening_day] }} · {{ hour.opens_at.slice(0, 5) }}–{{ hour.closes_at.slice(0, 5) }}
+                            </p>
+                        </div>
+                    </q-expansion-item>
                     <p v-if="actionErrorId === point.id" role="alert" class="text-negative">{{ actionError }}</p>
                 </article>
             </div>
@@ -62,12 +83,14 @@ import { formatCep } from '@/utils/cep';
 import { useAuthStore } from '@/modules/auth/stores/auth.store';
 import { pointService } from '../service';
 import { usePointStore } from '../store';
-import type { CollectionPoint } from '../types';
+import { dayLabels, type CollectionPoint } from '../types';
 
 const route = useRoute();
 const $q = useQuasar();
 const auth = useAuthStore();
 const store = usePointStore();
+const canManage = computed(() => auth.canProvide &&
+    (auth.user?.profile_type === 'collector' || store.companies.length > 0));
 const mine = computed(() => route.name === 'point-mine');
 const blocked = computed(() => mine.value && auth.user?.profile_type === 'company' && !store.selectedCompanyId);
 const companyOptions = computed(() => store.companies.map(company => ({ label: company.company_name, value: company.id })));
@@ -102,6 +125,7 @@ async function load() {
 }
 
 async function recover(id: number) {
+    if (workingId.value !== null) return;
     workingId.value = id;
     actionErrorId.value = null;
     try {
@@ -118,8 +142,11 @@ async function recover(id: number) {
 }
 
 watch([mine, includeTrashed, () => store.selectedCompanyId], () => {
-    page.value = 1;
-    void load();
+    if (page.value === 1) {
+        void load();
+    } else {
+        page.value = 1;
+    }
 });
 watch(page, () => void load());
 onBeforeUnmount(() => sequence++);

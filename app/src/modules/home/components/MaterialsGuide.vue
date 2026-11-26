@@ -9,12 +9,7 @@
                     {{ title }}
                 </h2>
             </div>
-            <slot name="action">
-                <a href="#pontos">
-                    Ver todos os materiais
-                    <q-icon name="arrow_forward" />
-                </a>
-            </slot>
+            <slot name="action" />
         </div>
         <div class="materials-grid">
             <MaterialCard

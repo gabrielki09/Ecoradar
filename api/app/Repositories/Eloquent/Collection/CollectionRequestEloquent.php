@@ -11,6 +11,8 @@ use App\Repositories\Interface\Collection\CollectionRequestInterface;
 
 class CollectionRequestEloquent extends BaseEloquent implements CollectionRequestInterface
 {
+    protected array $withCity = ['city:id,municipio_tom,municipio_ibge,uf'];
+
     protected array $filterable = [
         'requester_user_id',
         'cep',
@@ -26,7 +28,8 @@ class CollectionRequestEloquent extends BaseEloquent implements CollectionReques
 
     protected array $allowedRelationships = [
         'items',
-        'requester'
+        'requester',
+        'city:id,municipio_tom,municipio_ibge,uf'
     ];
 
     protected function modelClass(): string
@@ -34,9 +37,17 @@ class CollectionRequestEloquent extends BaseEloquent implements CollectionReques
         return CollectionRequest::class;
     }
 
+    public function all(array $parameters = [], array $columns = ['*']): \Illuminate\Contracts\Pagination\Paginator
+    {
+        $parameters['relationships'] = [...($parameters['relationships'] ?? []), ...$this->withCity];
+
+        return parent::all($parameters, $columns);
+    }
+
     public function mine(int $requesterId, array $parameters = [])
     {
         $query = $this->model->newQuery()
+            ->with($this->withCity)
             ->where('requester_user_id', $requesterId);
 
         $this->applyRelationships(
@@ -83,7 +94,7 @@ class CollectionRequestEloquent extends BaseEloquent implements CollectionReques
             ->whereDoesntHave('items', function ($query) use ($categoryIds) {
                 $query->whereNotIn('waste_category_id', $categoryIds);
             })
-            ->with('items');
+            ->with(['items', ...$this->withCity]);
 
         $this->applyRelationships(
             $query,
@@ -116,7 +127,7 @@ class CollectionRequestEloquent extends BaseEloquent implements CollectionReques
     public function allForProvider(CollectorProfile|Company $provider, array $parameters = [])
     {
         $query = $this->model->newQuery()
-            ->with('items');
+            ->with(['items', ...$this->withCity]);
 
         if ($provider instanceof CollectorProfile)
         {

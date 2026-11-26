@@ -1,20 +1,17 @@
-import type { ApiResponse } from "@/types/api/api.types";
-import type { AuthResponse } from "../types/auth.types";
+import type { Router } from 'vue-router';
+import type { AuthResponse } from '../types/auth.types';
 
-const getAuthDestination = (data: ApiResponse<AuthResponse>['data']): string =>
-{
-    if (!data.onboarding.required) return '/area';
-
-    switch (data.onboarding.next_step) {
-        case 'collector':
-            return '/onboarding/collector';
-
-        case 'company':
-            return '/onboarding/company';
-
-        default:
-            return '/area';
+export default function getAuthDestination(router: Router, redirect: unknown, authentication: AuthResponse): string {
+    if (authentication.onboarding.required) {
+        return authentication.onboarding.next_step === 'company'
+            ? '/onboarding/company'
+            : '/onboarding/collector';
     }
-};
 
-export default getAuthDestination;
+    if (typeof redirect === 'string' && /^\/(?![\\/])/.test(redirect)) {
+        const target = router.resolve(redirect);
+        if (target.meta.requiresAuth && !target.meta.onboardingStep) return target.fullPath;
+    }
+
+    return '/area';
+}

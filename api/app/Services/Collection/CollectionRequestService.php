@@ -4,7 +4,6 @@ namespace App\Services\Collection;
 
 use App\Enum\CollectionRequest\CollectionRequestStatus;
 use App\Enum\ProfileTypes;
-use App\Exceptions\Collection\CollectionCanceledExcpetion;
 use App\Models\Collection\CollectionRequest;
 use App\Models\Collector\CollectorProfile;
 use App\Models\Company\Company;
@@ -142,7 +141,8 @@ class CollectionRequestService
 
             relationships: [
                 'items',
-                'requester'
+                'city:id,municipio_tom,municipio_ibge,uf',
+                'items.wasteCategory:id,name'
             ]
         );
     }
@@ -164,18 +164,20 @@ class CollectionRequestService
         ];
     }
 
-    private function validateProviderCanAccept(
+    private function acceptanceBlockReason(
         CollectionRequest $request,
         CollectorProfile|Company $provider
-    ): void {
-        if (!$provider->cities()->where('city_id', $request->city_id)->exists()) throw new ConflictHttpException('Este prestador não atende a cidade da solicitação');
+    ): ?string {
+        if (!$provider->cities()->where('city_id', $request->city_id)->exists()) {
+            return 'Este prestador não atende a cidade da solicitação.';
+        }
 
         $requestCategoryIds = $request->items()
             ->pluck('waste_category_id')
             ->unique()
             ->all();
 
-        if ($requestCategoryIds === []) throw new ConflictHttpException('A solicitação não possui itens para coleta.');
+        if ($requestCategoryIds === []) return 'A solicitação não possui itens para coleta.';
 
         $providerCategoryIds = $provider->wasteCategories()
             ->pluck('waste_category_id')
@@ -186,7 +188,23 @@ class CollectionRequestService
             $providerCategoryIds
         );
 
-        if ($unsupportedCategoryIds !== []) throw new ConflictHttpException('Este prestador não atende todas as categorias da solicitação.');
+        return $unsupportedCategoryIds !== []
+            ? 'Este prestador não atende todas as categorias da solicitação.'
+            : null;
+    }
+
+    public function providerActions(CollectionRequest $request, CollectorProfile|Company $provider): array
+    {
+        $assigned = $provider instanceof CollectorProfile
+            ? $request->accepted_collector_profile_id === $provider->id
+            : $request->accepted_company_id === $provider->id;
+
+        return [
+            'assigned_to_provider' => $assigned,
+            'acceptance_block_reason' => $request->status === CollectionRequestStatus::OPEN
+                ? $this->acceptanceBlockReason($request, $provider)
+                : null,
+        ];
     }
 
     public function accept(User $user, array $data)
@@ -203,14 +221,12 @@ class CollectionRequestService
             $request = $this->collectionRequestRepository
                 ->findByUpdate($data['collection_request_id']);
 
-            if ($request->status === CollectionRequestStatus::CANCELLED) throw new CollectionCanceledExcpetion('Este pedido já está cancelado');
+            if ($request->status === CollectionRequestStatus::CANCELLED) throw new ConflictHttpException('Este pedido já está cancelado');
 
             if ($request->status !== CollectionRequestStatus::OPEN) throw new ConflictHttpException('Este pedido não está mais disponível.');
 
-            $this->validateProviderCanAccept(
-                request: $request,
-                provider: $provider
-            );
+            $reason = $this->acceptanceBlockReason($request, $provider);
+            if ($reason !== null) throw new ConflictHttpException($reason);
 
             $oldStatus = $request->status;
             $acceptanceDate = now();
@@ -261,7 +277,7 @@ class CollectionRequestService
 
             if (!$isAssignedProvider) throw new AuthorizationException('Este pedido foi aceito por outro prestador.');
 
-            if ($request->status === CollectionRequestStatus::CANCELLED) throw new CollectionCanceledExcpetion('Este pedido já está cancelado');
+            if ($request->status === CollectionRequestStatus::CANCELLED) throw new ConflictHttpException('Este pedido já está cancelado');
 
             if ($request->status !== CollectionRequestStatus::ACCEPTED) throw new ConflictHttpException('Este pedido não foi aceito e não está disponível para coleta.');
 
@@ -308,7 +324,7 @@ class CollectionRequestService
             $request = $this->collectionRequestRepository
                 ->findByUpdate($data['collection_request_id']);
 
-            if ($request->status === CollectionRequestStatus::CANCELLED) throw new CollectionCanceledExcpetion('Este pedido já está cancelado');
+            if ($request->status === CollectionRequestStatus::CANCELLED) throw new ConflictHttpException('Este pedido já está cancelado');
 
             if ($request->status !== CollectionRequestStatus::COLLECTED) throw new ConflictHttpException('Este pedido não foi aceito e não pode ser concluído.');
 
@@ -360,7 +376,7 @@ class CollectionRequestService
             $request = $this->collectionRequestRepository
                 ->findByUpdate($data['collection_request_id']);
 
-            if ($request->status !== CollectionRequestStatus::OPEN) throw new ConflictHttpException('Somente pedidos abertos podem ser caneclados.');
+            if ($request->status !== CollectionRequestStatus::OPEN) throw new ConflictHttpException('Somente pedidos abertos podem ser cancelados.');
 
             if ($request->requester_user_id !== $user->id) throw new AuthorizationException('Você não pode cancelar este pedido.');
 

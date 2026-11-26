@@ -21,7 +21,7 @@ class CollectionOpeningHourUpdateRequest extends ApiFormRequest
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules(mixed $openingHours = null): array
     {
         $rules = [
             'opening_hours' => ['sometimes', 'array'],
@@ -41,8 +41,6 @@ class CollectionOpeningHourUpdateRequest extends ApiFormRequest
                 'boolean',
             ],
         ];
-
-        $openingHours = $this->input('opening_hours');
 
         if (! is_array($openingHours)) return $rules;
 

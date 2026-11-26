@@ -1,5 +1,4 @@
 import type { RouteRecordRaw } from 'vue-router';
-import { categoryRoutes } from '@/modules/categories/routes';
 
 const routes: RouteRecordRaw[] = [
     {
@@ -11,7 +10,6 @@ const routes: RouteRecordRaw[] = [
                 name: 'home',
                 component: () => import('@/modules/home/pages/HomePage.vue'),
             },
-            ...categoryRoutes
         ],
     },
     {
@@ -49,6 +47,12 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('@/modules/collector-profile/pages/CollectorProfilePage.vue'),
             },
             {
+                path: 'area/perfil-empresa',
+                name: 'company-profile',
+                meta: { pointManagement: true, companyOnly: true },
+                component: () => import('@/modules/collector-profile/pages/CompanyProfilePage.vue'),
+            },
+            {
                 path: 'pontos',
                 name: 'point-list',
                 component: () => import('@/modules/collection-points/pages/PointListPage.vue'),
@@ -66,13 +70,13 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('@/modules/collection-points/pages/PointCreatePage.vue'),
             },
             {
-                path: 'pontos/meus/:id/editar',
+                path: 'pontos/meus/:id(\\d+)/editar',
                 name: 'point-edit',
                 meta: { pointManagement: true },
                 component: () => import('@/modules/collection-points/pages/PointEditPage.vue'),
             },
             {
-                path: 'pontos/meus/:id',
+                path: 'pontos/meus/:id(\\d+)',
                 name: 'point-detail',
                 meta: { pointManagement: true },
                 component: () => import('@/modules/collection-points/pages/PointDetailPage.vue'),
@@ -80,10 +84,10 @@ const routes: RouteRecordRaw[] = [
             { path: 'area/pontos', redirect: { name: 'point-list' } },
             { path: 'area/pontos/meus', redirect: { name: 'point-mine' } },
             { path: 'area/pontos/novo', redirect: { name: 'point-create' } },
-            { path: 'area/pontos/meus/:id/editar', redirect: to => ({ name: 'point-edit', params: to.params }) },
-            { path: 'area/pontos/meus/:id', redirect: to => ({ name: 'point-detail', params: to.params }) },
+            { path: 'area/pontos/meus/:id(\\d+)/editar', redirect: to => ({ name: 'point-edit', params: to.params }) },
+            { path: 'area/pontos/meus/:id(\\d+)', redirect: to => ({ name: 'point-detail', params: to.params }) },
             { path: 'area/coletas/nova', name: 'collection-create', meta: { requesterOnly: true }, component: () => import('@/modules/collection-requests/pages/CollectionCreatePage.vue') },
-            { path: 'area/coletas/detalhe/:id', name: 'collection-detail', component: () => import('@/modules/collection-requests/pages/CollectionDetailPage.vue') },
+            { path: 'area/coletas/detalhe/:id(\\d+)', name: 'collection-detail', component: () => import('@/modules/collection-requests/pages/CollectionDetailPage.vue') },
             { path: 'area/coletas/:area', name: 'collection-list', component: () => import('@/modules/collection-requests/pages/CollectionListPage.vue') },
             {
                 path: 'onboarding/collector',
