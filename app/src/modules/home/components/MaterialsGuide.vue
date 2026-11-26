@@ -3,7 +3,7 @@
         <div class="section-heading section-heading--split">
             <div>
                 <span class="section-kicker">
-                    O que descartar
+                    Descubra
                 </span>
                 <h2 :id="headingId">
                     {{ title }}
@@ -72,7 +72,7 @@ withDefaults(defineProps<{
     title?: string;
     headingId?: string;
 }>(), {
-    title: 'Encontre o destino de cada material',
+    title: 'Guias de descarte',
 });
 </script>
 
