@@ -113,17 +113,31 @@
                         :error="!!errors[`items.${index}.waste_category_id`]"
                         :error-message="errors[`items.${index}.waste_category_id`]"
                     />
-                    <q-input
-                        v-model="item.approximate_quantity"
-                        :name="`items.${index}.approximate_quantity`"
-                        outlined
-                        type="number"
-                        min="0"
-                        step="any"
-                        label="Quantidade aproximada *"
-                        :error="!!errors[`items.${index}.approximate_quantity`]"
-                        :error-message="errors[`items.${index}.approximate_quantity`]"
-                    />
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <q-input
+                            v-model="item.approximate_quantity"
+                            :name="`items.${index}.approximate_quantity`"
+                            outlined
+                            type="number"
+                            min="0"
+                            step="any"
+                            label="Quantidade aproximada *"
+                            :error="!!errors[`items.${index}.approximate_quantity`]"
+                            :error-message="errors[`items.${index}.approximate_quantity`]"
+                        />
+                        <q-select
+                            v-model="item.quantity_unit"
+                            :name="`items.${index}.quantity_unit`"
+                            :options="quantityUnitOptions"
+                            outlined
+                            emit-value
+                            map-options
+                            label="Unidade de medida *"
+                            :disable="sending"
+                            :error="!!errors[`items.${index}.quantity_unit`]"
+                            :error-message="errors[`items.${index}.quantity_unit`]"
+                        />
+                    </div>
                     <q-input
                         v-model="item.description"
                         :name="`items.${index}.description`"
@@ -176,24 +190,28 @@ import { useCepAutocomplete } from "@/composables/useCepAutocomplete";
 import { cepDigits } from "@/utils/cep";
 import { collectionService } from "../service";
 import { useCollectionStore } from "../store";
+import { quantityUnitOptions, type QuantityUnit } from "../types";
 
 const router = useRouter();
 const $q = useQuasar();
 const store = useCollectionStore();
 let nextKey = 1;
+function newItem() {
+    return {
+        key: nextKey++,
+        waste_category_id: null as number | null,
+        approximate_quantity: "",
+        quantity_unit: null as QuantityUnit | null,
+        description: "",
+    };
+}
+
 const form = reactive({
     city_id: null as number | null,
     cep: "",
     neighborhood: "",
     address: "",
-    items: [
-        {
-            key: nextKey++,
-            waste_category_id: null as number | null,
-            approximate_quantity: "",
-            description: "",
-        },
-    ],
+    items: [newItem()],
 });
 const handleAutocompleteCEP = useCepAutocomplete(form);
 const errors = reactive<Record<string, string>>({});
@@ -204,12 +222,7 @@ const catalogError = ref("");
 const categoryOptions = ref<{ label: string; value: number }[]>([]);
 
 function addItem() {
-    form.items.push({
-        key: nextKey++,
-        waste_category_id: null,
-        approximate_quantity: "",
-        description: "",
-    });
+    form.items.push(newItem());
 }
 
 async function loadCategories() {
@@ -253,6 +266,8 @@ function validate() {
         if (!item.approximate_quantity || Number(item.approximate_quantity) <= 0)
             errors[`items.${index}.approximate_quantity`] =
                 "Informe uma quantidade maior que zero.";
+        if (!item.quantity_unit)
+            errors[`items.${index}.quantity_unit`] = "Selecione a unidade de medida do item.";
     });
     return !Object.keys(errors).length;
 }
@@ -274,6 +289,7 @@ async function submit() {
             items: form.items.map((item) => ({
                 waste_category_id: item.waste_category_id!,
                 approximate_quantity: Number(item.approximate_quantity),
+                quantity_unit: item.quantity_unit!,
                 ...(item.description.trim() ? { description: item.description.trim() } : {}),
             })),
         });

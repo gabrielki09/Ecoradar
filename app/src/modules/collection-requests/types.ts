@@ -1,7 +1,25 @@
 import type { CityOption } from '@/modules/collector-profile/types/collector-profile.types';
 
 export type CollectionStatus = 'open' | 'accepted' | 'collected' | 'completed' | 'cancelled';
-export interface CollectionItem { id?: number; waste_category_id: number; approximate_quantity: number | string; description?: string | null; waste_category?: { name: string } }
+export const quantityUnitOptions = [
+  { value: 'UN', label: 'Unidade (UN)', symbol: 'UN' },
+  { value: 'QDE', label: 'Quantidade (Qde)', symbol: 'Qde' },
+  { value: 'L', label: 'Litro (L)', symbol: 'L' },
+  { value: 'ML', label: 'Mililitro (mL)', symbol: 'mL' },
+  { value: 'KG', label: 'Quilograma (kg)', symbol: 'kg' },
+  { value: 'G', label: 'Grama (g)', symbol: 'g' },
+  { value: 'T', label: 'Tonelada (t)', symbol: 't' },
+  { value: 'M3', label: 'Metro cúbico (m³)', symbol: 'm³' },
+] as const;
+export type QuantityUnit = typeof quantityUnitOptions[number]['value'];
+export interface CollectionItem {
+  id?: number;
+  waste_category_id: number;
+  approximate_quantity: number | string;
+  quantity_unit: QuantityUnit | null;
+  description?: string | null;
+  waste_category?: { name: string };
+}
 export interface CollectionRequest {
   id: number; requester_user_id?: number; city_id: number; city?: CityOption; cep?: string; neighborhood: string; address?: string;
   status: CollectionStatus; items?: CollectionItem[]; requester?: { id: number; name: string };

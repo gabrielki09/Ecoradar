@@ -12,7 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'collection_request_id',
     'waste_category_id',
     'description',
-    'approximate_quantity'
+    'approximate_quantity',
+    'quantity_unit',
 ])]
 class CollectionRequestItem extends Model
 {

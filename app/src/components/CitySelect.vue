@@ -21,6 +21,13 @@
         @filter="filterOptions"
         @virtual-scroll="onScroll"
     >
+        <template #no-option>
+            <div class="q-pa-sm text-center text-caption">
+                <q-btn v-if="loadError" flat color="negative" label="Erro ao carregar. Tentar novamente" @click.stop="loadNext" />
+                <span v-else-if="ended">Nenhuma cidade encontrada.</span>
+                <q-spinner v-else color="primary" aria-label="Carregando cidades" />
+            </div>
+        </template>
         <template #before-options>
             <div class="q-px-md q-pt-sm">
                 <q-select
@@ -48,9 +55,6 @@
                     label="Erro ao carregar. Tentar novamente"
                     @click.stop="loadNext"
                 />
-                <span v-else-if="!options.length">
-                    Nenhuma cidade encontrada.
-                </span>
                 <span v-else-if="ended">
                     Fim da lista.
                 </span>

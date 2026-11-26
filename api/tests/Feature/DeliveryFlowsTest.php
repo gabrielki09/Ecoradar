@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enum\Collection\CollectionItemUnit;
 use App\Enum\ProfileTypes;
+use App\Models\Collection\CollectionRequest;
 use App\Models\Company\Company;
 use App\Models\General\City;
 use App\Models\User;
@@ -41,7 +43,7 @@ class DeliveryFlowsTest extends TestCase
             'cep' => '89700000',
             'neighborhood' => 'Centro',
             'address' => 'Rua privada, 10',
-            'items' => [['waste_category_id' => $category->id, 'approximate_quantity' => 1]],
+            'items' => [['waste_category_id' => $category->id, 'approximate_quantity' => 1, 'quantity_unit' => 'UN']],
         ])->assertOk()->json('data.collection_request.id');
 
         Sanctum::actingAs($other);
@@ -62,6 +64,51 @@ class DeliveryFlowsTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.collection_request.assigned_to_provider', true)
             ->assertJsonPath('data.collection_request.address', 'Rua privada, 10');
+    }
+
+    public function test_collection_items_require_a_supported_unit_and_keep_each_selection(): void
+    {
+        $owner = $this->user(ProfileTypes::COMMON, '88888888888');
+        Sanctum::actingAs($owner);
+        $items = [];
+        foreach (CollectionItemUnit::cases() as $unit) {
+            $category = WasteCategory::create(['name' => 'Material '.$unit->value, 'is_system' => true]);
+            $items[] = ['waste_category_id' => $category->id, 'approximate_quantity' => 1.25, 'quantity_unit' => $unit->value];
+        }
+        $url = '/api/v1/collection-requests';
+        $payload = ['city_id' => $this->city()->id, 'cep' => '89700000', 'neighborhood' => 'Centro', 'address' => 'Rua A'];
+        $invalid = $items;
+        unset($invalid[0]['quantity_unit']);
+        $invalid[1]['quantity_unit'] = 'INVÁLIDA';
+        $this->postJson($url, [...$payload, 'items' => $invalid])->assertUnprocessable()
+            ->assertJsonValidationErrors(['items.0.quantity_unit', 'items.1.quantity_unit']);
+        $this->assertDatabaseMissing('collection_requests', ['requester_user_id' => $owner->id]);
+
+        $id = $this->postJson($url, [...$payload, 'items' => $items])->assertOk()->json('data.collection_request.id');
+        $detailItems = $this->getJson("{$url}/{$id}")->assertOk()->json('data.collection_request.items');
+        $byCategory = array_column($detailItems, null, 'waste_category_id');
+        foreach ($items as $item) {
+            $stored = $byCategory[$item['waste_category_id']];
+            $this->assertSame($item['quantity_unit'], $stored['quantity_unit']);
+            $this->assertSame('1.25', $stored['approximate_quantity']);
+        }
+    }
+
+    public function test_legacy_item_keeps_its_quantity_without_inferring_a_unit(): void
+    {
+        $owner = $this->user(ProfileTypes::COMMON, '99999999999');
+        $request = CollectionRequest::create([
+            'requester_user_id' => $owner->id, 'city_id' => $this->city()->id,
+            'cep' => '89700000', 'neighborhood' => 'Centro', 'address' => 'Rua A',
+        ]);
+        $category = WasteCategory::create(['name' => 'Vidro QA', 'is_system' => true]);
+        $request->items()->create(['waste_category_id' => $category->id, 'approximate_quantity' => 2.5]);
+
+        Sanctum::actingAs($owner);
+        $this->getJson("/api/v1/collection-requests/{$request->id}")->assertOk()
+            ->assertJsonPath('data.collection_request.items.0.approximate_quantity', '2.50')
+            ->assertJsonStructure(['data' => ['collection_request' => ['items' => [['quantity_unit']]]]])
+            ->assertJsonPath('data.collection_request.items.0.quantity_unit', null);
     }
 
     public function test_only_the_responsible_company_user_can_change_coverage(): void

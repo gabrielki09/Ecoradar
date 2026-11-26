@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests\Collection;
 
-use App\Support\CollectionAccess;
-
+use App\Enum\Collection\CollectionItemUnit;
 use App\Http\Requests\ApiFormRequest;
+use App\Support\CollectionAccess;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Validation\Rule;
 
 class CollectionRequestStoreRequest extends ApiFormRequest
 {
@@ -83,7 +84,17 @@ class CollectionRequestStoreRequest extends ApiFormRequest
                 'required',
                 'numeric',
                 'gt:0'
-            ]
+            ],
+
+            'items.*.quantity_unit' => ['required', Rule::enum(CollectionItemUnit::class)],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'items.*.quantity_unit.required' => 'Selecione a unidade de medida do item.',
+            'items.*.quantity_unit' => 'Selecione uma unidade de medida da lista.',
         ];
     }
 }

@@ -1,27 +1,29 @@
 <template>
-    <article class="material-card">
-        <div
+    <button type="button" class="material-card" aria-haspopup="dialog" tabindex="0">
+        <span
             class="material-card__icon"
             :style="{ color: material.color, background: material.background }"
+            aria-hidden="true"
         >
             <q-icon
                 :name="material.icon"
                 size="27px"
             />
-        </div>
-        <div>
-            <h3>
+        </span>
+        <span>
+            <strong class="material-card__name">
                 {{ material.name }}
-            </h3>
-            <p>
+            </strong>
+            <span class="material-card__description">
                 {{ material.description }}
-            </p>
-        </div>
+            </span>
+        </span>
         <q-icon
             name="arrow_forward"
             class="material-card__arrow"
+            aria-hidden="true"
         />
-    </article>
+    </button>
 </template>
 
 <script setup lang="ts">
