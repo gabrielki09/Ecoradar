@@ -10,10 +10,10 @@ class ExampleTest extends TestCase
     /**
      * A basic test example.
      */
-    public function test_the_application_returns_a_successful_response(): void
+    public function test_the_api_requires_authentication_for_private_routes(): void
     {
-        $response = $this->get('/');
+        $response = $this->getJson('/api/v1/auth/me');
 
-        $response->assertStatus(200);
+        $response->assertUnauthorized();
     }
 }
