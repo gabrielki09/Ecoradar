@@ -550,6 +550,8 @@ a {
 
 .material-card {
     display: grid;
+    text-align: left;
+    cursor: pointer;
     min-height: 105px;
     align-items: center;
     padding: 19px;
@@ -575,14 +577,20 @@ a {
     border-radius: 14px;
 }
 
-.material-card h3 {
+.material-card:focus-visible {
+    outline: 2px solid var(--eco-600);
+    outline-offset: 3px;
+}
+
+.material-card__name {
+    display: block;
     margin: 0 0 4px;
     color: var(--eco-900);
     font-size: 15px;
 }
 
-.material-card p {
-    margin: 0;
+.material-card__description {
+    display: block;
     color: var(--muted);
     font-size: 12px;
 }

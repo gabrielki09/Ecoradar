@@ -3,7 +3,6 @@ import type { CityOption } from '@/modules/collector-profile/types/collector-pro
 export type CollectionStatus = 'open' | 'accepted' | 'collected' | 'completed' | 'cancelled';
 export const quantityUnitOptions = [
   { value: 'UN', label: 'Unidade (UN)', symbol: 'UN' },
-  { value: 'QDE', label: 'Quantidade (Qde)', symbol: 'Qde' },
   { value: 'L', label: 'Litro (L)', symbol: 'L' },
   { value: 'ML', label: 'Mililitro (mL)', symbol: 'mL' },
   { value: 'KG', label: 'Quilograma (kg)', symbol: 'kg' },

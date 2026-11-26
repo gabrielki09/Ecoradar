@@ -4,6 +4,8 @@ export interface WasteMaterial {
     icon: string;
     color: string;
     background: string;
+    disposalGuide: string;
+    source: { name: string; url: string };
 }
 
 export interface HowItWorksStep {
