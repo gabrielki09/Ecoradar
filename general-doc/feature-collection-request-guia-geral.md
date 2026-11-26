@@ -37,7 +37,9 @@ As listagens retornam um paginador Laravel em `data.collection_requests`, **exce
 
 Envie `page` e `per_page` nas listagens. O filtro de status usa `filtersV1`, por exemplo `filtersV1[0][field]=status`, `filtersV1[0][filterType]=EQUAL` e `filtersV1[0][filterValue]=open`. Os valores de status são `open`, `accepted`, `collected`, `completed` e `cancelled`. O `page` é interpretado pelo paginador do Laravel.
 
-Para criar, envie `city_id`, `cep` com oito dígitos, `neighborhood`, `address` e `items` não vazio. Cada item precisa de `waste_category_id`, `approximate_quantity` maior que zero e pode ter `description`. As ações de prestador recebem `collection_request_id` e, para empresa, `company_id`; o cancelamento recebe `collection_request_id` e `cancellation_reason`.
+Para criar, envie `city_id`, `cep` com oito dígitos, `neighborhood`, `address` e `items` não vazio. Cada item precisa de `waste_category_id`, `approximate_quantity` maior que zero e `quantity_unit`. A descrição é opcional. A API aceita as unidades `UN`, `QDE`, `L`, `ML`, `KG`, `G`, `T` e `M3`. Itens anteriores ao campo retornam `quantity_unit: null`.
+
+As ações de prestador recebem `collection_request_id` e, para empresa, `company_id`. O cancelamento recebe `collection_request_id` e `cancellation_reason`.
 
 ## O que foi implementado no frontend
 

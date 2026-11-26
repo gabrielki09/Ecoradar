@@ -1,6 +1,6 @@
 import { api } from '@/boot/axios';
 import type { ApiResponse } from '@/types/api/api.types';
-import type { Area, CollectionItem, CollectionRequest, CollectionStatus, Page } from './types';
+import type { Area, CollectionItem, CollectionRequest, CollectionStatus, Page, QuantityUnit } from './types';
 
 export const collectionService = {
   async list(area: Area, page: number, perPage: number, status?: CollectionStatus | '', companyId?: number): Promise<Page<CollectionRequest>> {
@@ -21,7 +21,7 @@ export const collectionService = {
     if (!result) throw new Error('Solicitação não encontrada.');
     return result;
   },
-  async create(payload: { city_id: number; cep: string; neighborhood: string; address: string; items: CollectionItem[] }) {
+  async create(payload: { city_id: number; cep: string; neighborhood: string; address: string; items: (CollectionItem & { quantity_unit: QuantityUnit })[] }) {
     const response = await api.post<ApiResponse<{ collection_request: CollectionRequest }>>('/collection-requests', payload);
     return response.data.data.collection_request;
   },
