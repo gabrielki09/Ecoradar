@@ -122,9 +122,11 @@
                     </p>
                 </RouterLink>
 
-                <RouterLink
-                    to="/#materiais"
-                    class="rounded-2xl border border-line bg-white p-6 text-inherit no-underline shadow-sm transition hover:-translate-y-1 hover:shadow-eco focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eco-600"
+                <button
+                    type="button"
+                    aria-haspopup="dialog"
+                    class="cursor-pointer rounded-2xl border border-line bg-white p-6 text-left text-inherit no-underline shadow-sm transition hover:-translate-y-1 hover:shadow-eco focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-eco-600"
+                    @click="isMaterialsGuideOpen = true"
                 >
                     <span
                         class="grid size-11 place-items-center rounded-xl bg-eco-100 text-eco-700"
@@ -140,17 +142,20 @@
                     <p class="m-0 text-sm leading-6 text-muted">
                         Veja quais materiais podem receber uma destinação adequada.
                     </p>
-                </RouterLink>
+                </button>
 
             </section>
         </main>
+        <MaterialsGuideDialog v-model="isMaterialsGuideOpen" />
     </q-page>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useAuthStore } from "@/modules/auth/stores/auth.store";
+import MaterialsGuideDialog from "@/modules/home/components/MaterialsGuideDialog.vue";
 
 const authStore = useAuthStore();
+const isMaterialsGuideOpen = ref(false);
 const firstName = computed(() => authStore.user?.name.trim().split(/\s+/)[0] || "bem-vindo");
 </script>

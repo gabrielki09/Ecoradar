@@ -69,23 +69,7 @@
             class="content-section materials-section"
         >
             <div class="eco-container">
-                <div class="section-heading section-heading--split">
-                    <div>
-                        <span class="section-kicker">
-                            O que descartar
-                        </span>
-                        <h2>
-                            Encontre o destino de cada material
-                        </h2>
-                    </div>
-                </div>
-                <div class="materials-grid">
-                    <MaterialCard
-                        v-for="material in wasteMaterials"
-                        :key="material.name"
-                        :material="material"
-                    />
-                </div>
+                <MaterialsGuide />
             </div>
         </section>
 
@@ -212,9 +196,9 @@
 import { useAuthStore } from '@/modules/auth/stores/auth.store';
 import { computed, onMounted, ref } from 'vue';
 import CollectionPointCard from "../components/CollectionPointCard.vue";
-import MaterialCard from "../components/MaterialCard.vue";
+import MaterialsGuide from "../components/MaterialsGuide.vue";
 import PointsMap from '../components/PointsMap.vue';
-import { howItWorksSteps, wasteMaterials } from "../data/home.data";
+import { howItWorksSteps } from "../data/home.data";
 import { loadPublicPoints } from '../services/public-points.service';
 import type { PublicPoint } from '../types/public-point.types';
 
