@@ -102,7 +102,8 @@ class CollectionRequestService
                     'collection_request_id' => $collectionRequest->id,
                     'waste_category_id' => $item['waste_category_id'],
                     'description' => $item['description'] ?? null,
-                    'approximate_quantity' => $item['approximate_quantity']
+                    'approximate_quantity' => $item['approximate_quantity'],
+                    'quantity_unit' => $item['quantity_unit'],
                 ]);
             }
 

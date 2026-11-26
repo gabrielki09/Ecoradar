@@ -52,7 +52,7 @@ class RewardPointsTest extends TestCase
         Sanctum::actingAs($this->owner);
         $id = $this->postJson(self::REQUESTS, [
             'city_id' => $this->city->id, 'cep' => '89700000', 'neighborhood' => 'Centro', 'address' => 'Rua A',
-            'items' => [['waste_category_id' => $category->id, 'approximate_quantity' => 2]],
+            'items' => [['waste_category_id' => $category->id, 'approximate_quantity' => 2, 'quantity_unit' => 'KG']],
         ])->assertOk()->json('data.collection_request.id');
         $payload = ['collection_request_id' => $id];
         $this->getJson(self::REQUESTS.'/mine')->assertOk();

@@ -72,7 +72,7 @@
                             :key="item.id ?? item.waste_category_id"
                         >
                             {{ item.waste_category?.name ?? `Categoria #${item.waste_category_id}` }} ·
-                            {{ item.approximate_quantity }}<span v-if="item.description"> · {{ item.description }}</span>
+                            {{ formatQuantity(item) }}<span v-if="item.description"> · {{ item.description }}</span>
                         </li>
                     </ul>
                     <p
@@ -142,7 +142,7 @@ import { readFormError } from "@/modules/auth/utils/form-errors";
 import { formatCep } from "@/utils/cep";
 import { collectionService } from "../service";
 import { useCollectionStore } from "../store";
-import { statusLabels, type Area, type CollectionRequest } from "../types";
+import { quantityUnitOptions, statusLabels, type Area, type CollectionItem, type CollectionRequest } from "../types";
 
 const route = useRoute();
 const $q = useQuasar();
@@ -211,6 +211,12 @@ const dates = computed(() =>
 
 function formatDate(value: string) {
     return new Date(value).toLocaleString("pt-BR");
+}
+
+function formatQuantity(item: CollectionItem) {
+    const quantity = Number(item.approximate_quantity).toLocaleString("pt-BR");
+    const unit = quantityUnitOptions.find(option => option.value === item.quantity_unit);
+    return unit ? `${quantity} ${unit.symbol}` : `${quantity} (unidade não informada)`;
 }
 
 async function load() {
