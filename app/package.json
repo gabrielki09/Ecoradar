@@ -1,8 +1,8 @@
 {
-  "name": "app",
+  "name": "EcoRadar",
   "version": "0.0.1",
   "description": "A Quasar Project",
-  "productName": "app",
+  "productName": "EcoRadar",
   "author": "GabrielK09 <gabikochem55@gmail.com>",
   "type": "module",
   "private": true,
