@@ -37,6 +37,8 @@
                 </div>
             </section>
 
+            <RewardBalance v-if="authStore.canRequest || authStore.canProvide" dashboard class="mt-7" />
+
             <section
                 class="mt-7 grid gap-4 md:grid-cols-3"
                 aria-label="Próximos passos"
@@ -154,6 +156,7 @@
 import { computed, ref } from "vue";
 import { useAuthStore } from "@/modules/auth/stores/auth.store";
 import MaterialsGuideDialog from "@/modules/home/components/MaterialsGuideDialog.vue";
+import RewardBalance from "@/modules/rewards/components/RewardBalance.vue";
 
 const authStore = useAuthStore();
 const isMaterialsGuideOpen = ref(false);

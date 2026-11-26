@@ -41,6 +41,11 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('@/modules/account/pages/UserHomePage.vue'),
             },
             {
+                path: 'area/recompensas',
+                name: 'reward-points',
+                component: () => import('@/modules/rewards/pages/RewardPointsPage.vue'),
+            },
+            {
                 path: 'area/perfil-coleta',
                 name: 'collector-profile',
                 meta: { collectorOnly: true },

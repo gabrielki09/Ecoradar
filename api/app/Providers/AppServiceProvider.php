@@ -8,6 +8,7 @@ use App\Repositories\Eloquent\Collection\CollectionPointOpeningHourEloquent;
 use App\Repositories\Eloquent\Collection\CollectionPointWasteCategoryEloquent;
 use App\Repositories\Eloquent\Collection\CollectionRequestEloquent;
 use App\Repositories\Eloquent\Collection\CollectionRequestItemEloquent;
+use App\Repositories\Eloquent\Collection\RewardEntryEloquent;
 use App\Repositories\Eloquent\Collector\CollectorProfileCityEloquent;
 use App\Repositories\Eloquent\Collector\CollectorProfileWasteCategoryEloquent;
 use App\Repositories\Eloquent\CompanyUser\CompanyUserEloquent;
@@ -23,6 +24,7 @@ use App\Repositories\Interface\Collection\CollectionPointOpeningHourInterface;
 use App\Repositories\Interface\Collection\CollectionPointWasteCategoryInterface;
 use App\Repositories\Interface\Collection\CollectionRequestInterface;
 use App\Repositories\Interface\Collection\CollectionRequestItemInterface;
+use App\Repositories\Interface\Collection\RewardEntryInterface;
 use App\Repositories\Interface\Collector\CollectorProfileWasteCategoryInterface;
 use App\Repositories\Interface\CompanyUser\CompanyUserInterface;
 use App\Repositories\Interface\General\CityInterface;
@@ -83,6 +85,8 @@ class AppServiceProvider extends ServiceProvider
             CollectionHistoryInterface::class,
             CollectionHistoryEloquent::class
         );
+
+        $this->app->bind(RewardEntryInterface::class, RewardEntryEloquent::class);
 
         $this->app->bind(
             CollectionPointInterface::class,

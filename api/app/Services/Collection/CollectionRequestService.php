@@ -21,7 +21,8 @@ class CollectionRequestService
     public function __construct(
         protected CollectionRequestInterface $collectionRequestRepository,
         protected CollectionRequestItemInterface $collectionRequestItemRepository,
-        protected CollectionHistoryInterface $collectionHistoryRepository
+        protected CollectionHistoryInterface $collectionHistoryRepository,
+        protected RewardPointService $rewardPoints
     ) {}
 
     private function storeInHistory(
@@ -326,7 +327,9 @@ class CollectionRequestService
 
             if ($request->status === CollectionRequestStatus::CANCELLED) throw new ConflictHttpException('Este pedido já está cancelado');
 
-            if ($request->status !== CollectionRequestStatus::COLLECTED) throw new ConflictHttpException('Este pedido não foi aceito e não pode ser concluído.');
+            if ($request->status === CollectionRequestStatus::COMPLETED) throw new ConflictHttpException('Esta coleta já foi concluída.');
+
+            if ($request->status !== CollectionRequestStatus::COLLECTED) throw new ConflictHttpException('Somente pedidos marcados como coletados podem ser concluídos.');
 
             if (
                 $provider instanceof Company &&
@@ -341,17 +344,10 @@ class CollectionRequestService
             $oldStatus = $request->status;
             $completionDate = now();
 
-            $dataForUpdate = $this->buildCollectionUpdateData(
-                provider: $provider,
-                status: CollectionRequestStatus::COMPLETED
-            );
-
-            $dataForUpdate['completion_date'] = $completionDate;
-
-            $this->collectionRequestRepository->update(
-                $request,
-                $dataForUpdate
-            );
+            $this->collectionRequestRepository->update($request, [
+                'status' => CollectionRequestStatus::COMPLETED,
+                'completion_date' => $completionDate,
+            ]);
 
             $this->storeInHistory(
                 request: $request,
@@ -364,7 +360,9 @@ class CollectionRequestService
                 canceledDate: null
             );
 
-            return $request->refresh();
+            $points = $this->rewardPoints->creditCompletion($request);
+
+            return ['collection_request' => $request->refresh(), 'points_awarded' => $points];
         });
     }
 

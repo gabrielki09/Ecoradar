@@ -72,7 +72,7 @@ export default defineRouter((/* { store, ssrContext } */) => {
         if (area === 'mine' && !authStore.canRequest) return { name: 'user-home' };
         if (area !== 'mine' && !authStore.canProvide) return { name: 'user-home' };
       }
-      if (to.name === 'collection-detail' && !(authStore.canRequest || authStore.canProvide)) return { name: 'user-home' };
+      if ((to.name === 'collection-detail' || to.name === 'reward-points') && !(authStore.canRequest || authStore.canProvide)) return { name: 'user-home' };
     }
   });
 
