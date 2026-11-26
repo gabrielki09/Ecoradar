@@ -30,6 +30,6 @@ export const collectionService = {
     if (companyId) payload.company_id = companyId;
     if (reason !== undefined) payload.cancellation_reason = reason;
     const response = await api.post<ApiResponse<{ collection_request: CollectionRequest }>>(`/collection-requests/${action}`, payload);
-    return response.data.data.collection_request;
+    return response.data;
   },
 };

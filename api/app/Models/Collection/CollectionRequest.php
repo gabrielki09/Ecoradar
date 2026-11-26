@@ -3,6 +3,7 @@
 namespace App\Models\Collection;
 
 use App\Enum\CollectionRequest\CollectionRequestStatus;
+use App\Models\Collector\CollectorProfile;
 use App\Models\General\City;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -47,6 +48,11 @@ class CollectionRequest extends Model
     public function items(): HasMany
     {
         return $this->hasMany(CollectionRequestItem::class);
+    }
+
+    public function acceptedCollectorProfile(): BelongsTo
+    {
+        return $this->belongsTo(CollectorProfile::class, 'accepted_collector_profile_id');
     }
 
     public function requester() : BelongsTo
