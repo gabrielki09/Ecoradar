@@ -2,7 +2,7 @@
     <q-page class="bg-cream px-4 py-8">
         <main class="mx-auto max-w-[850px]">
             <RouterLink
-                :to="`/area/coletas/${origin}`"
+                :to="route.query.origem === 'recompensas' ? { name: 'reward-points' } : `/area/coletas/${origin}`"
                 class="text-eco-700"
             >
                 ← Voltar
@@ -137,6 +137,7 @@ import { useRoute } from "vue-router";
 import { useQuasar } from "quasar";
 import axios from "axios";
 import { useAuthStore } from "@/modules/auth/stores/auth.store";
+import { useRewardStore } from "@/modules/rewards/store";
 import { readFormError } from "@/modules/auth/utils/form-errors";
 import { formatCep } from "@/utils/cep";
 import { collectionService } from "../service";
@@ -147,6 +148,7 @@ const route = useRoute();
 const $q = useQuasar();
 const auth = useAuthStore();
 const store = useCollectionStore();
+const rewards = useRewardStore();
 const record = ref<CollectionRequest | null>(null);
 const loading = ref(false);
 const sending = ref(false);
@@ -276,9 +278,10 @@ async function execute(type: "accept" | "collected" | "complete" | "cancel", rea
         if (current !== sequence) {
             return;
         }
-        record.value = result;
+        record.value = result.data.collection_request;
         store.invalidate();
-        $q.notify({ type: "positive", message: "Solicitação atualizada." });
+        if (type === "complete") void rewards.refreshBalance();
+        $q.notify({ type: "positive", message: result.message });
         await load();
     } catch (cause) {
         if (current !== sequence) {
@@ -287,12 +290,11 @@ async function execute(type: "accept" | "collected" | "complete" | "cancel", rea
         const conflict = axios.isAxiosError(cause) && cause.response?.status === 409;
         $q.notify({
             type: "negative",
-            message: conflict
-                ? "O pedido mudou de estado ou não está mais disponível. Atualizando os dados."
-                : readFormError(cause, "Não foi possível atualizar a solicitação.").message,
+            message: readFormError(cause, "Não foi possível atualizar a solicitação.").message,
         });
         if (conflict) {
             store.invalidate();
+            if (type === "complete") void rewards.refreshBalance();
             await load();
         }
     } finally {

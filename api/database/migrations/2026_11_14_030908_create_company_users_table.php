@@ -24,10 +24,12 @@ return new class extends Migration
 
             $table->enum('role', array_column(RoleUser::cases(), 'value'))->default('member');
 
-            $table->primary([
-                'user_id',
-                'company_id',
-            ]);
+            // SQLite exige que a coluna autoincrementável seja a chave primária.
+            if (Schema::getConnection()->getDriverName() === 'sqlite') {
+                $table->unique(['user_id', 'company_id']);
+            } else {
+                $table->primary(['user_id', 'company_id']);
+            }
 
             $table->timestamps();
         });

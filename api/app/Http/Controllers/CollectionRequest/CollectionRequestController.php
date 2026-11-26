@@ -190,14 +190,12 @@ class CollectionRequestController extends Controller
     public function complete(CompleteRequest $req)
     {
         $this->authorizeProvider($req);
+        $result = $this->collectionRequestService->complete($req->user(), $req->validated());
+        $beneficiary = $req->user()->profile_type === ProfileTypes::COMPANY ? 'A empresa recebeu' : 'Você recebeu';
+
         return apiSuccess(
-            'Coleta concluída com sucesso!',
-            [
-                'collection_request' => $this->collectionRequestService->complete(
-                    user: $req->user(),
-                    data: $req->validated()
-                )
-            ]
+            "Coleta concluída! {$beneficiary} {$result['points_awarded']} pontos de recompensa.",
+            $result
         );
     }
 

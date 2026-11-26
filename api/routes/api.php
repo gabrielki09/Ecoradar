@@ -9,6 +9,8 @@ Route::prefix('v1')->group(function() {
     Route::get('collection-points/public', [\App\Http\Controllers\CollectionPoint\PublicCollectionPointController::class, 'index']);
 
     Route::middleware(['auth:sanctum'])->group(function() {
+        Route::get('reward-points', [\App\Http\Controllers\CollectionRequest\RewardPointController::class, 'show']);
+        Route::get('reward-points/history', [\App\Http\Controllers\CollectionRequest\RewardPointController::class, 'history']);
         require __DIR__."/onboarding/onboarding-routes.php";
         require __DIR__."/wasteCategories/waste-categories.php";
 
