@@ -1,27 +1,72 @@
 <template>
     <q-page class="bg-cream px-4 py-8">
         <main class="mx-auto max-w-[1120px]">
-            <h1 class="text-3xl font-extrabold text-eco-900">{{ mine ? 'Meus pontos de coleta' : 'Pontos de coleta' }}</h1>
-            <nav class="mt-4 mb-6 flex flex-wrap gap-3" aria-label="Pontos de coleta">
-                <RouterLink to="/pontos" class="text-eco-700">Todos os pontos</RouterLink>
-                <RouterLink v-if="canManage" to="/pontos/meus" class="text-eco-700">Meus pontos</RouterLink>
-                <RouterLink v-if="canManage" to="/pontos/novo" class="text-eco-700">Criar ponto</RouterLink>
-                <RouterLink v-if="!mine" to="/#pontos" class="text-eco-700">Ver no mapa</RouterLink>
-            </nav>
+            <header class="point-list-header">
+                <h1 class="point-list-title text-3xl font-extrabold text-eco-900">{{ mine ? 'Meus pontos de coleta' : 'Pontos de coleta' }}</h1>
+                <nav class="point-navigation" aria-label="Pontos de coleta">
+                    <q-btn
+                        to="/pontos"
+                        exact
+                        unelevated
+                        no-caps
+                        text-color="black"
+                        icon="format_list_bulleted"
+                        label="Todos os pontos"
+                        class="point-navigation-button"
+                        :class="{ 'point-navigation-button--active': !mine }"
+                        :aria-current="!mine ? 'page' : undefined"
+                    />
+                    <q-btn
+                        v-if="canManage"
+                        to="/pontos/meus"
+                        exact
+                        unelevated
+                        no-caps
+                        text-color="black"
+                        icon="place"
+                        label="Meus pontos"
+                        class="point-navigation-button"
+                        :class="{ 'point-navigation-button--active': mine }"
+                        :aria-current="mine ? 'page' : undefined"
+                    />
+                    <q-btn
+                        v-if="canManage"
+                        to="/pontos/novo"
+                        unelevated
+                        no-caps
+                        text-color="black"
+                        icon="add_location_alt"
+                        label="Criar ponto"
+                        class="point-navigation-button"
+                    />
+                    <q-btn
+                        v-if="!mine"
+                        to="/#pontos"
+                        unelevated
+                        no-caps
+                        text-color="black"
+                        icon="map"
+                        label="Ver no mapa"
+                        class="point-navigation-button"
+                    />
+                </nav>
+            </header>
 
-            <q-select
-                v-if="mine && auth.user?.profile_type === 'company'"
-                :model-value="store.selectedCompanyId"
-                :options="companyOptions"
-                label="Empresa responsável"
-                outlined
-                emit-value
-                map-options
-                class="mb-4 max-w-sm"
-                @update:model-value="store.selectCompany"
-            />
-            <q-checkbox v-if="mine" v-model="includeTrashed" label="Mostrar pontos excluídos" class="mb-4" />
-            <q-btn flat icon="refresh" label="Atualizar" class="mb-4" @click="load" />
+            <div class="point-list-toolbar">
+                <q-select
+                    v-if="mine && auth.user?.profile_type === 'company'"
+                    :model-value="store.selectedCompanyId"
+                    :options="companyOptions"
+                    label="Empresa responsável"
+                    outlined
+                    emit-value
+                    map-options
+                    class="point-list-company"
+                    @update:model-value="store.selectCompany"
+                />
+                <q-checkbox v-if="mine" v-model="includeTrashed" label="Mostrar pontos excluídos" />
+                <q-btn flat no-caps icon="refresh" label="Atualizar" @click="load" />
+            </div>
 
             <p v-if="blocked" role="alert">Nenhuma empresa com papel responsável está vinculada à sua conta.</p>
             <div v-else-if="loading" role="status" class="py-12 text-center">
@@ -152,3 +197,54 @@ watch(page, () => void load());
 onBeforeUnmount(() => sequence++);
 void load();
 </script>
+
+<style scoped>
+.point-list-header {
+    margin-bottom: 24px;
+}
+
+.point-list-title {
+    margin: 0;
+}
+
+.point-navigation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.point-navigation-button {
+    min-height: 44px;
+    padding: 10px 16px;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.point-navigation-button:hover,
+.point-navigation-button--active {
+    background: var(--eco-50);
+    border-color: var(--eco-600);
+}
+
+.point-navigation-button:focus-visible {
+    outline: 2px solid var(--eco-600);
+    outline-offset: 3px;
+}
+
+.point-list-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.point-list-company {
+    width: 100%;
+    max-width: 320px;
+}
+</style>
