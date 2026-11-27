@@ -8,6 +8,7 @@ use App\Repositories\Eloquent\Collection\CollectionPointOpeningHourEloquent;
 use App\Repositories\Eloquent\Collection\CollectionPointWasteCategoryEloquent;
 use App\Repositories\Eloquent\Collection\CollectionRequestEloquent;
 use App\Repositories\Eloquent\Collection\CollectionRequestItemEloquent;
+use App\Repositories\Eloquent\Collection\CollectionScheduleEloquent;
 use App\Repositories\Eloquent\Collection\RewardEntryEloquent;
 use App\Repositories\Eloquent\Collector\CollectorProfileCityEloquent;
 use App\Repositories\Eloquent\Collector\CollectorProfileWasteCategoryEloquent;
@@ -24,6 +25,7 @@ use App\Repositories\Interface\Collection\CollectionPointOpeningHourInterface;
 use App\Repositories\Interface\Collection\CollectionPointWasteCategoryInterface;
 use App\Repositories\Interface\Collection\CollectionRequestInterface;
 use App\Repositories\Interface\Collection\CollectionRequestItemInterface;
+use App\Repositories\Interface\Collection\CollectionScheduleInterface;
 use App\Repositories\Interface\Collection\RewardEntryInterface;
 use App\Repositories\Interface\Collector\CollectorProfileWasteCategoryInterface;
 use App\Repositories\Interface\CompanyUser\CompanyUserInterface;
@@ -101,6 +103,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             CollectionPointWasteCategoryInterface::class,
             CollectionPointWasteCategoryEloquent::class
+        );
+
+        $this->app->bind(
+            CollectionScheduleInterface::class,
+            CollectionScheduleEloquent::class
         );
 
         $this->app->bind(

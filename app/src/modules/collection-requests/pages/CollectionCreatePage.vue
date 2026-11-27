@@ -65,6 +65,51 @@
                     :error-message="errors.address"
                 />
 
+                <section class="space-y-3">
+                    <h2 class="text-xl font-bold text-eco-900">
+                        Agendamento da coleta
+                    </h2>
+
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        <q-select
+                            v-model="form.scheduled_day"
+                            name="scheduled_day"
+                            label="Dia da semana *"
+                            :options="dayOptions"
+                            outlined
+                            emit-value
+                            map-options
+                            :disable="sending"
+                            :error="!!errors.scheduled_day"
+                            :error-message="errors.scheduled_day"
+                        />
+
+                        <q-input
+                            v-model="form.scheduled_time_start"
+                            name="scheduled_time_start"
+                            label="Horário inicial *"
+                            type="time"
+                            outlined
+                            stack-label
+                            :disable="sending"
+                            :error="!!errors.scheduled_time_start"
+                            :error-message="errors.scheduled_time_start"
+                        />
+
+                        <q-input
+                            v-model="form.scheduled_time_end"
+                            name="scheduled_time_end"
+                            label="Horário final *"
+                            type="time"
+                            outlined
+                            stack-label
+                            :disable="sending"
+                            :error="!!errors.scheduled_time_end"
+                            :error-message="errors.scheduled_time_end"
+                        />
+                    </div>
+                </section>
+
                 <h2 class="text-xl font-bold text-eco-900">
                     Itens
                 </h2>
@@ -185,12 +230,19 @@ import { useQuasar } from "quasar";
 import { scrollToFirstError } from "@/helpers/pages/scrollToFirstError";
 import CitySelect from "@/components/CitySelect.vue";
 import { collectorProfileService } from "@/modules/collector-profile/services/collector-profile.service";
+import { dayLabels } from "@/modules/collection-points/types";
 import { readFormError } from "@/modules/auth/utils/form-errors";
 import { useCepAutocomplete } from "@/composables/useCepAutocomplete";
 import { cepDigits } from "@/utils/cep";
 import { collectionService } from "../service";
 import { useCollectionStore } from "../store";
 import { quantityUnitOptions, type QuantityUnit } from "../types";
+
+const timeFormat = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+const dayOptions = dayLabels.map((label, value) => ({
+    label,
+    value,
+}));
 
 const router = useRouter();
 const $q = useQuasar();
@@ -211,6 +263,9 @@ const form = reactive({
     cep: "",
     neighborhood: "",
     address: "",
+    scheduled_day: null as number | null,
+    scheduled_time_start: "",
+    scheduled_time_end: "",
     items: [newItem()],
 });
 const handleAutocompleteCEP = useCepAutocomplete(form);
@@ -242,6 +297,24 @@ async function loadCategories() {
     }
 }
 
+function validateSchedule() {
+    const { scheduled_day, scheduled_time_start, scheduled_time_end } = form;
+    if (scheduled_day === null || dayLabels[scheduled_day] === undefined) {
+        errors.scheduled_day = "Selecione um dia da semana para a coleta.";
+    }
+
+    const validStart = timeFormat.test(scheduled_time_start);
+    if (!validStart) {
+        errors.scheduled_time_start = "Informe um horário inicial válido.";
+    }
+
+    if (!timeFormat.test(scheduled_time_end)) {
+        errors.scheduled_time_end = "Informe um horário final válido.";
+    } else if (validStart && scheduled_time_end <= scheduled_time_start) {
+        errors.scheduled_time_end = "O horário final deve ser posterior ao inicial.";
+    }
+}
+
 function validate() {
     for (const key of Object.keys(errors)) delete errors[key];
     if (!form.city_id) {
@@ -256,6 +329,9 @@ function validate() {
     if (!form.address.trim()) {
         errors.address = "Informe o endereço.";
     }
+
+    validateSchedule();
+
     const used = new Set<number>();
     form.items.forEach((item, index) => {
         if (!item.waste_category_id)
@@ -275,7 +351,7 @@ function validate() {
 async function submit() {
     if (sending.value || catalogLoading.value || catalogError.value) return;
     message.value = "";
-    if (!validate() || !form.city_id) {
+    if (!validate() || !form.city_id || form.scheduled_day === null) {
         await scrollToFirstError(Object.keys(errors), errors);
         return;
     }
@@ -286,6 +362,9 @@ async function submit() {
             cep: cepDigits(form.cep),
             neighborhood: form.neighborhood.trim(),
             address: form.address.trim(),
+            scheduled_day: form.scheduled_day,
+            scheduled_time_start: form.scheduled_time_start,
+            scheduled_time_end: form.scheduled_time_end,
             items: form.items.map((item) => ({
                 waste_category_id: item.waste_category_id!,
                 approximate_quantity: Number(item.approximate_quantity),
@@ -296,14 +375,16 @@ async function submit() {
         store.invalidate();
         $q.notify({ type: "positive", message: "Solicitação criada." });
         await router.replace(`/area/coletas/detalhe/${result.id}?origem=mine`);
+        return;
     } catch (cause) {
         const parsed = readFormError(cause, "Não foi possível criar a solicitação.");
         Object.assign(errors, parsed.fields);
         message.value = parsed.message;
-        await scrollToFirstError(Object.keys(errors), errors);
     } finally {
         sending.value = false;
     }
+
+    await scrollToFirstError(Object.keys(errors), errors);
 }
 
 onMounted(loadCategories);

@@ -64,4 +64,9 @@ class CollectionRequest extends Model
     {
         return $this->hasMany(CollectionHistory::class, 'id');
     }
+
+    public function hours(): HasOne
+    {
+        return $this->hasOne(CollectionSchedule::class);
+    }
 }

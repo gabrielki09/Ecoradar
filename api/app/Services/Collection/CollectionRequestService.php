@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Repositories\Interface\Collection\CollectionHistoryInterface;
 use App\Repositories\Interface\Collection\CollectionRequestInterface;
 use App\Repositories\Interface\Collection\CollectionRequestItemInterface;
+use App\Repositories\Interface\Collection\CollectionScheduleInterface;
 use Carbon\CarbonInterface;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,7 @@ class CollectionRequestService
         protected CollectionRequestInterface $collectionRequestRepository,
         protected CollectionRequestItemInterface $collectionRequestItemRepository,
         protected CollectionHistoryInterface $collectionHistoryRepository,
+        protected CollectionScheduleInterface $collectionScheduleRepository,
         protected RewardPointService $rewardPoints
     ) {}
 
@@ -107,6 +109,14 @@ class CollectionRequestService
                 ]);
             }
 
+            $this->collectionScheduleRepository->create([
+                'collection_request_id' => $collectionRequest->id,
+                'scheduled_day' => $data['scheduled_day'],
+                'scheduled_time_start' => $data['scheduled_time_start'],
+                'scheduled_time_end' => $data['scheduled_time_end'],
+                'observation' => $data['observation'] ?? null
+            ]);
+
             return $collectionRequest->load('items');
         });
     }
@@ -190,9 +200,23 @@ class CollectionRequestService
             $providerCategoryIds
         );
 
-        return $unsupportedCategoryIds !== []
-            ? 'Este prestador não atende todas as categorias da solicitação.'
-            : null;
+        if ($unsupportedCategoryIds !== []) return 'Este prestador não atende todas as categorias da solicitação.';
+
+
+        $provider->coll
+
+        $requestHours = $request->hours()
+            ->where('scheduled_time_start')
+            ->all();
+
+        $unsupportedHours = array_diff(
+
+        );
+        /*
+        */
+
+
+        return null;
     }
 
     public function providerActions(CollectionRequest $request, CollectorProfile|Company $provider): array

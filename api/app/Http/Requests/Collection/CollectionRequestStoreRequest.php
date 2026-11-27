@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Collection;
 
 use App\Enum\Collection\CollectionItemUnit;
+use App\Enum\Days\WeekDay;
 use App\Http\Requests\ApiFormRequest;
 use App\Support\CollectionAccess;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -86,7 +87,33 @@ class CollectionRequestStoreRequest extends ApiFormRequest
                 'gt:0'
             ],
 
-            'items.*.quantity_unit' => ['required', Rule::enum(CollectionItemUnit::class)],
+            'items.*.quantity_unit' => [
+                'required',
+                Rule::enum(CollectionItemUnit::class)
+            ],
+
+            'observation' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:5000'
+            ],
+
+            'scheduled_day' => [
+                'required',
+                Rule::enum(WeekDay::class)
+            ],
+
+            'scheduled_time_start' => [
+                'required',
+                'date_format:H:i'
+            ],
+
+            'scheduled_time_end' => [
+                'required',
+                'date_format:H:i',
+                'after:scheduled_time_start'
+            ],
         ];
     }
 

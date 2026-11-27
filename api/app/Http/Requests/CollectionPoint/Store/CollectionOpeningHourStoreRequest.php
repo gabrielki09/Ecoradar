@@ -36,7 +36,6 @@ class CollectionOpeningHourStoreRequest extends ApiFormRequest
                 'required',
                 Rule::enum(WeekDay::class),
                 'distinct'
-
             ],
 
             'opening_hours.*.opens_at' => [
